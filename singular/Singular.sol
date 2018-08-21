@@ -96,4 +96,6 @@ interface Singular {
      */
     function getTransferHistory() view external returns (string);
 
+/// TODO: interface for hash locked swapping
+
 }
