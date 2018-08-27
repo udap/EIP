@@ -2,19 +2,31 @@ pragma solidity ^0.4.0;
 
 import "./Proxy.sol";
 import "./BaseData.sol";
+import "./Logic.sol";
 
 //not finish yet, will move Storage level common functions to a global smart contract
 contract Storage is Proxy, BaseData{
     constructor() public{
     }
+    /*constructor(address _addr) public{
+        setLogicAddressAndActivate(bytes32(0x01),_address);
+    }*/
 
     function setLogicAddress(bytes32 _version, address _delegateTo)public {
         setAddress(_version,_delegateTo);
     }
 
-    function setLogicAddressAndActivate(bytes32 _version, address _delegateTo) public {
+    function setLogicAddressAndActivate(bytes32 _version, address _delegateTo, bytes _initData, bool asConstructor) payable public {
         setAddress(_version,_delegateTo);
         setCurrent(_version);
+        if(asConstructor == true ){
+            if(getConstructor()==false){
+                setConstructor();
+            }else{
+                revert("constructor has been called");
+            }
+        }
+        require(address(this).call.value(msg.value)(_initData));
     }
 
 

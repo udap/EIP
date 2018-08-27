@@ -6,7 +6,7 @@ contract BaseData {
 
     bytes32 private constant logicPosition = keccak256(abi.encodePacked(keccak256(abi.encode("logicPosition"))));//keccak twice to avoid hash collision than normal mapping
     bytes32 private constant currentLogicPosition = keccak256(abi.encodePacked(keccak256(abi.encode("currentLogicPosition"))));
-
+    bytes32 private constant constructorPosition = keccak256(abi.encodePacked(keccak256(abi.encode("constructorPosition"))));
 
     function setAddress(bytes32 _version, address _input) internal{
         bytes32 slot = calculateSlot(_version);
@@ -46,6 +46,23 @@ contract BaseData {
     function getCurrent() internal view returns(bytes32){
         bytes32 ret;
         bytes32 slot = currentLogicPosition;
+        assembly {
+            ret := sload(slot)
+        }
+        return ret;
+    }
+
+    function setConstructor() internal {
+        bytes32 slot = constructorPosition;
+        bool b = true;
+        assembly {
+            sstore(slot, b)
+        }
+    }
+
+    function getConstructor() internal view returns(bool){
+        bool ret;
+        bytes32 slot = constructorPosition;
         assembly {
             ret := sload(slot)
         }
