@@ -47,19 +47,34 @@ interface ISingularWallet {
   returns(bool);      ///< true of authorized; false otherwise
 
   /**
-   a callback to notify the both parties in a token transfer that the transaction
-   has been complemented. The parties MUST synchronize the local state to reflect the
+
+   a callback to notify the the wallet that the transaction
+   has been complemented. The parties may synchronize the local state to reflect the
    ownership change.
 
    The function must `revert` with an error message if an exception has happened
 
    */
   function transferred(
-    ISingular token,     ///< the token of interest
+    ISingular token,     ///< the token of convern
     ISingularWallet from, ///< the originating party of the transfer
     ISingularWallet to,   ///< the receiving party
     uint256 when,       ///< when this happens
     string note         ///< additional note
+  )
+  external;
+
+  /**
+
+   a callback to notify the the wallet that the transaction
+   has been rejected. The parties may synchronize the local state to reflect the
+   ownership change.
+
+  */
+
+  function offerRejected(
+    ISingular token,    ///< the token of concern
+    string note         ///< the associated note
   )
   external;
 
