@@ -67,7 +67,7 @@ interface ISingular {
      * @param expiry the deadline for the receiver to the take the ownership
      * @param reason the reason for the transfer
      */
-    function approveReceiver(ISingularWallet to, uint expiry, bytes32 reason) external;
+    function approveReceiver(ISingularWallet to, uint expiry, string reason) external;
 
     /**
      * The approved account takes the ownership of this token. The caller must have
@@ -88,7 +88,7 @@ interface ISingular {
      * first and invoke the "offer" function on the other AssetOwner. Setting the
      * current owner directly is not allowed.
      */
-    function sendTo(ISingularWallet to, bytes32 reason) external;
+    function sendTo(ISingularWallet to, string reason) external;
 
 
     /// ownership history enumeration
