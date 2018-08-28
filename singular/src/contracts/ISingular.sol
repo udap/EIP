@@ -52,6 +52,26 @@ interface ISingular {
     );
 
     /**
+     * get the current owner
+     */
+    function previousOwner()
+    view
+    external
+    returns (
+        ISingularWallet         ///< the owner previous priot to the current owner
+    );
+
+    /**
+     * get the current owner
+     */
+    function nextOwner()
+    view
+    external
+    returns (
+        ISingularWallet         ///< the owner elected
+    );
+
+    /**
 
     a Singular can be associated with an address that describes the type information.
 
@@ -103,10 +123,10 @@ interface ISingular {
      */
     function sendTo(
         ISingularWallet to,         ///< the recipient
-        string note                 ///< additional information
+        string note,                 ///< additional information
+        bool synch                  ///< true if operate in synch mode, false otherwise.
     )
     external;
-
 
 
 }
