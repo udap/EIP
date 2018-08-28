@@ -6,7 +6,7 @@ import "./ISingularWallet.sol";
  * @title Concrete asset token representing a single piece of asset, with
  * support of ownership transfers and transfer history.
  *
- * The owner of this item must be , defined in the ISingularWallet.sol.
+ * The owner of this item must be a ISingularWallet.
  *
  *
  * The sendTo() method basically approves the transition first and notify the other
@@ -29,7 +29,12 @@ interface ISingular {
      * When the current owner has approved someone else as the next owner, subject
      * to acceptance or rejection.
      */
-    event ReceiverApproved(address from, address to, uint expiry, string reason);
+    event ReceiverApproved(
+        address from,           ///< the from party of transaction
+        address to,             ///< the receiver
+        uint expiry,            ///< the time lock. in seconds since the epoch
+        string reason           ///< additional note
+    );
     /**
      * the ownership has been successfully transferred from A to B.
      */
@@ -69,7 +74,7 @@ interface ISingular {
      */
     function approveReceiver(
         ISingularWallet to,     ///< address to be approved as the next owner
-        uint expiry,            ///< the deadline for the receiver to the take the ownership
+        uint256 expiry,         ///< the time lock. in seconds since the epoch
         string reason           ///< the reason for the transfer
     )
     external;
@@ -85,7 +90,7 @@ interface ISingular {
     function accept() external;
 
     /**
-     To reject an offer. Must be called by the approved next owner to reject a previous
+     To reject an offer. It must be called by the approved next owner to reject a previous
      offer. The implementation MUST notify the token owner of the fact by calling
      ISingularWallet::offerRejected.
      */
@@ -96,28 +101,12 @@ interface ISingular {
      * first and invoke the "offer" function on the other AssetOwner. Setting the
      * current owner directly is not allowed.
      */
-    function sendTo(ISingularWallet to, string reason) external;
+    function sendTo(
+        ISingularWallet to,         ///< the recipient
+        string note                 ///< additional information
+    )
+    external;
 
 
-    /// ownership history enumeration
-
-    /**
-     * To get the number of ownership changes of this token.
-     * @return the number of ownership records. The first record is the token genesis
-     * record.
-     */
-    function numOfTransfers() view external returns (uint256);
-    /**
-     * To get a specific transfer record in the format defined by implementation.
-     * @param index the index of the inquired record. It must in the range of
-     * [0, numberOfTransfers())
-     */
-    function getTransferAt(uint256 index) view external returns(string);
-
-    /**
-     * get all the transfer records in a serialized form that is defined by
-     * implementation.
-     */
-    function getTransferHistory() view external returns (string);
 
 }
