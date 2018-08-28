@@ -85,7 +85,7 @@ contract Singular is ISingular, SingularMeta, TransferHistory, Commenting {
         bytes4 sel = bytes4(keccak256("accept(string)"));
         require(
             address(nextOwner) != address(0) && 
-            // nextOwner.isActionAuthorized(msg.sender, this.accept.selector, this)
+            //  nextOwner.isActionAuthorized(msg.sender, this.accept.selector, this)
             nextOwner.isActionAuthorized(msg.sender, sel, this)
         );
         ISingularWallet oldOwner = owner;
@@ -93,8 +93,8 @@ contract Singular is ISingular, SingularMeta, TransferHistory, Commenting {
         reset();
         transferHistory.push(TransferRec(oldOwner, owner, now, _reason));
         uint256 moment = now;
-        oldOwner.transferred(this, oldOwner, owner, moment, _reason);
-        owner.transferred(this, oldOwner, owner, moment, _reason);
+        oldOwner.sent(this, _reason);
+        owner.received(this, _reason);
         emit Transferred(address(oldOwner), address(owner), now, _reason);
 
     }
@@ -130,7 +130,7 @@ contract Singular is ISingular, SingularMeta, TransferHistory, Commenting {
         external 
         {
         this.approveReceiver(_to, now + 60, _reason);
-        _to.offer(this, _reason);
+        to.offer(this, _reason);
         }
     
 
