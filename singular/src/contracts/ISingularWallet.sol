@@ -39,7 +39,7 @@ interface ISingularWallet {
      */
     function isActionAuthorized(
         address caller,     ///< the action invoker
-        bytes4 action,      ///< the action intended, a function selector for example
+        bytes32 action,      ///< the action intended
         ISingular token     ///< of target of the action
     )
     view
