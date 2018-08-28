@@ -56,7 +56,7 @@ interface ISingularWallet {
 //
 //     */
 //    function transferred(
-//        ISingular token, ///< the token of convern
+//        ISingular token, ///< the token of concern
 //        ISingularWallet from, ///< the originating party of the transfer
 //        ISingularWallet to, ///< the receiving party
 //        uint256 when, ///< when this happens
@@ -64,10 +64,45 @@ interface ISingularWallet {
 //    )
 //    external;
 
-    function sent(ISingular token);
-    function received(ISingular token);
+    /**
+    to notify the *sender* that the intended token transfer has completed and the token has been sent
+    */
+    function sent(
+        ISingular token,        ///< the token that has been sent
+        string note             ///< additional info
+    )
+    external;
 
-    function send(ISingularWallet wallet, ISingular, uint256 expiry);
+
+    /**
+    to notify the recipient that the intended token transfer has completed and the token is now owned by
+    the recipient.
+    */
+    function received(
+        ISingular token,        ///< the token that has been sent
+        string note             ///< additional info
+    )
+    external;
+
+    /**
+    to send a token in this wallet to a recipient. The recipient SHOULD respond by calling `ISingular::accept()` or
+    `ISingular::reject()` in the same transaction.
+    */
+    function send(
+        ISingularWallet wallet,     ///< the recipient
+        ISingular token             ///< the token to transfer
+    )
+    external;
+
+    /**
+    to approve a new owner of a token and notify the recipient. The recipient SHOULD accept or reject the offer in
+    a separate transaction. This is of the "offer/accept" two-step pattern.
+    */
+    function sendNotify(
+        ISingularWallet wallet,     ///< the recipient
+        ISingular token             ///< the token to transfer
+    )
+    external;
 
     /**
 
