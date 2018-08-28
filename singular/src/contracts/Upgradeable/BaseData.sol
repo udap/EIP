@@ -1,7 +1,7 @@
 pragma solidity ^0.4.0;
 
 contract BaseData {
-    constructor() public{
+    constructor() payable public{
     }
 
     bytes32 private constant logicPosition = keccak256(abi.encodePacked(keccak256(abi.encode("logicPosition"))));//keccak twice to avoid hash collision than normal mapping
