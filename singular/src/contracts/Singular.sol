@@ -1,101 +1,155 @@
 pragma solidity ^0.4.24;
 
-import "./AssetOwner.sol";
+import "./ISingularWallet.sol";
+import "./SingularMeta.sol";
+import "./TransferHistory.sol";
+import "./ISingular.sol";
+import "./Commenting.sol";
 
-/*
- * @title Concreate asset token representing a single piece of asset, with 
- * suppor of ownership transfers and transfer history.
+/**
+ * @title Concrete asset token representing a single piece of asset, with
+ * support of ownership transfers and transfer history.
+ *
+ * The owner of this item must be an instance of `SingularOwner`
+ *
+ * See the comments in the Singular interface for method documentation.
  * 
- * The owner of this item must be , defined in the AssetOwnerImpl.sol.
  * 
- * Transfer in one step:
- * 
- * The sendTo() method basically approves the transition first and notify the other
- * party via an AssetOwner.offer() call, which in turn evaluate the
- * ownership offer before accept it or reject it. 
- *  
- * Transfer in two steps:
- * 
- * The approveReceiver method is a timelock on the ownership. The 
- * receiver can take the ownership within the valid peroid of time. Before the expiry 
- * time, this token is locked for the receiver exlusively and cannot be locked
- * again for any other receivers. The contract serves as a 
- * multi-sig wallet when used in the two-step pattern.
- * 
- * An operator can be set by the owner on this token to manage token transfers on
- * behalf of the owner. 
- * 
+ * @author Bing Ran<bran@udap.io>
+ *
  */
-interface Singular {
-    /*
-     * When the curent owner has approved someone else as the next owner, subject
-     * to acceptance or rejection. 
-     */
-    event Approved(address from, address to, uint expiry);
-    /*
-     * the ownership has been successfully transfered from A to B.
-     */
-    event Transferred(address from, address to, uint when, bytes32 note);
+contract Singular is ISingular, SingularMeta, TransferHistory, Commenting {
 
-    /*
-     * get the current owner
+    ISingularWallet public owner; /// current owner
+
+    ISingularWallet public nextOwner; /// current owner
+
+    address public creator; /// who creates this token
+
+    uint256 expiry;
+    string reason;
+
+
+
+    constructor(string _name, bytes32 _symbol, string _descr, string _tokenURI)
+    SingularMeta(_name, _symbol, _descr, _tokenURI)
+    public
+    {
+        creator = msg.sender;
+    }
+
+
+    /**
+     * get the current owner as type of SingularOwner
      */
-    function currentOwner() view external returns (AssetOwner);
-    
-    /*
+    function currentOwner() view external returns (ISingularWallet) {
+        return owner;
+    }
+
+    /**
      * There can only be one approved receiver at a given time. This receiver cannot
      * be changed before the expiry time.
-     * Can only be called by the token owner (in the form of OwnerOfSingulars account or 
-     * the naked accoutn address associated with the currentowner) or an approved operator.
-     * @param to address to be approved for the given token ID
-     * @param expiry the dealline for the revceiver to the take the ownership
-     * @param reason the reason for the transfer
+     * Can only be called by the token owner (in the form of SingularOwner account or
+     * the naked account address associated with the currentowner) or an approved operator.
+     * Note: the approved receiver can only accept() or reject() the offer. His power is limited
+     * before he becomes the owner. This is in contract to the the transferFrom() of ERC20 or
+     * ERC721.
+     *
      */
-    function approveReceiver(AssetOwner to, uint expiry, bytes32 reason) external;
+    function approveReceiver(
+        ISingularWallet _to, 
+        uint256 _expiry, 
+        string _reason
+        ) 
+        external
+        NotInTransition 
+    {
+        
+        require(address(_to) != address(0) && owner.isActionAuthorized(msg.sender, this.approveReceiver.selector, this));
+        expiry = _expiry;
+        reason = _reason;
+        nextOwner = _to;
+        emit  ReceiverApproved(address(owner), address(nextOwner), expiry, reason);
+    }
 
-    /*
+    /**
      * The approved account takes the ownership of this token. The caller must have
-     * been set as the next owner of this token previously in a call by the current 
+     * been set as the next owner of this token previously in a call by the current
      * owner to the approve() function. The expiry time must be in the future
-     * as of now. This function MUST call the sent() method on the original owner. 
+     * as of now. This function MUST call the sent() method on the original owner.
+     TODO: evaluate re-entrance attack
      */
-    function accept() external;
-  
-    /*
-     * reject an offer. Must be called by the approved next owner(from the address 
-     * of the OwnerOfSingulars or OwnerOfSingulars.ownerAddress()). 
+    function accept(string _reason) external InTransition {
+        // for unknown reason `this.accept.selector` caused compiling error
+        // let's calculate the selector
+        bytes4 sel = bytes4(keccak256("accept(string)"));
+        require(
+            address(nextOwner) != address(0) && 
+            // nextOwner.isActionAuthorized(msg.sender, this.accept.selector, this)
+            nextOwner.isActionAuthorized(msg.sender, sel, this)
+        );
+        ISingularWallet oldOwner = owner;
+        owner = nextOwner; // the single most important step
+        reset();
+        transferHistory.push(TransferRec(oldOwner, owner, now, _reason));
+        uint256 moment = now;
+        oldOwner.transferred(this, oldOwner, owner, moment, _reason);
+        owner.transferred(this, oldOwner, owner, moment, _reason);
+        emit Transferred(address(oldOwner), address(owner), now, _reason);
+
+    }
+
+    /**
+     * reject an offer. Must be called by the approved next owner(from the address
+     * of the SingularOwner or SingularOwner.ownerAddress()).
      */
-    function reject() external;
-  
-    /*
-     * to send this token syncronously to an AssetOwner. It must call approveReceiver
+    function reject() external {
+        address sender = msg.sender;
+        require(
+            sender == address(nextOwner) ||
+            nextOwner.isActionAuthorized(sender, this.reject.selector, this)
+            );
+        reset();
+    }
+
+    function reset() internal {
+        delete expiry;
+        delete reason;
+        delete nextOwner;
+    }
+
+    /**
+     * to send this token synchronously to an AssetOwner. It must call approveReceiver
      * first and invoke the "offer" function on the other AssetOwner. Setting the
      * current owner directly is not allowed.
-     */ 
-    function sendTo(AssetOwner to, bytes32 reason) external;
-  
-
-/// ownership history enumeration
-
-    /*
-     * To get the number of ownership changes of this token. 
-     * @return the number of ownership records. The first record is the token genesis
-     * record. 
      */
-    function numOfTransfers() view external returns (uint256);
-    /*
-     * To get a specific transfer record in the format defined by implementation.
-     * @param index the inde of the inquired record. It must in the range of 
-     * [0, numberOfTransfers())
-     */
-    function getTransferAt(uint256 index) view external returns(string);
+    function sendTo(
+        ISingularWallet _to, 
+        string _reason
+        ) 
+        external 
+        {
+        this.approveReceiver(_to, now + 60, _reason);
+        _to.offer(this, _reason);
+        }
     
-    /*
-     * get all the transfer records in a serialized form that is defined by 
-     * implementation.
-     */
-    function getTransferHistory() view external returns (string);
 
-/// TODO: interface for hash locked swapping
+
+    /// implement Commenting interface
+    function makeComment(string _comment) public {
+        require(owner.isActionAuthorized(msg.sender, this.makeComment.selector, this));
+        addComment(msg.sender, now, _comment); 
+    }
+
+
+    modifier NotInTransition() {
+        require(now > expiry);
+        _;
+    }
+
+    modifier InTransition() {
+        require(now <= expiry);
+        _;
+    }
 
 }
