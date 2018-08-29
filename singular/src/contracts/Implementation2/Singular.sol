@@ -1,11 +1,10 @@
 pragma solidity ^0.4.24;
 
-import "./ISingularWallet.sol";
-import "./SingularMeta.sol";
-import "./TransferHistory.sol";
-import "./ISingular.sol";
+import "../ISingularWallet.sol";
+import "../ISingular.sol";
 import "./Commenting.sol";
-
+import "./TransferHistory.sol";
+import "./SingularMeta.sol";
 /**
  * @title Concrete asset token representing a single piece of asset, with
  * support of ownership transfers and transfer history.
@@ -115,8 +114,8 @@ contract Singular is ISingular, SingularMeta, TransferHistory, Commenting {
     }
 
     /**
-     * to send this token synchronously to an AssetOwner. It must call approveReceiver
-     * first and invoke the "offer" function on the other AssetOwner. Setting the
+     * to send this token synchronously to a SingularWallet. It must call approveReceiver
+     * first and invoke the "offer" function on the other SingularWallet. Setting the
      * current owner directly is not allowed.
      */
     function sendTo(

@@ -32,13 +32,27 @@ interface ISingular {
     event ReceiverApproved(
         address from,           ///< the from party of transaction
         address to,             ///< the receiver
-        uint expiry,            ///< the time lock. in seconds since the epoch
+        uint256 expiry,            ///< the time lock. in seconds since the epoch
         string reason           ///< additional note
     );
     /**
      * the ownership has been successfully transferred from A to B.
      */
-    event Transferred(address from, address to, uint when, string reason);
+    event Transferred(
+        address from,
+        address to,
+        uint256 when,
+        string reason,
+        string reply
+    );
+
+    event TransferFailed(
+        address from,
+        address to,
+        uint256 when,
+        string reason,
+        string reply
+    );
 
 
     /**
@@ -51,20 +65,21 @@ interface ISingular {
         ISingularWallet         ///< owner is an ISingularWallet
     );
 
+
     /**
-     * get the current owner
+     * get the next owner
      */
-    function previousOwner()
+    function nextOwner()
     view
     external
     returns (
-        ISingularWallet         ///< the owner previous priot to the current owner
+        ISingularWallet         ///< the owner elected
     );
 
     /**
-     * get the current owner
-     */
-    function nextOwner()
+    * get the current owner
+    */
+    function creator()
     view
     external
     returns (
@@ -123,14 +138,15 @@ interface ISingular {
         external;
 
     /**
-     * to send this token synchronously to an AssetOwner. It must call approveReceiver
-     * first and invoke the "offer" function on the other AssetOwner. Setting the
+     * to send this token synchronously to a SingularWallet. It must call approveReceiver
+     * first and invoke the "offer" function on the other SingularWallet. Setting the
      * current owner directly is not allowed.
      */
     function sendTo(
         ISingularWallet to,         ///< the recipient
-        string note,                 ///< additional information
-        bool synch                  ///< true if operate in synch mode, false otherwise.
+        string note,                ///< additional information
+        bool sync,                  ///< true if operate in synch mode, false otherwise.
+        uint256 expiry              ///< the time lock. in seconds since the epoch, for sync mode, expiry will be 1 minute forcefully
     )
     external;
 

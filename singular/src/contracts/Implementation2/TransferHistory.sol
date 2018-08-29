@@ -1,15 +1,10 @@
 pragma solidity ^0.4.24;
 
-import "./ISingularWallet.sol";
+import "../ISingularWallet.sol";
+import "../ISingular.sol";
 
-/**
-ownership history enumeration. 
-
-Another implementation may keep the record on a unique contract account.
-
-@author Bing Ran<bran@udap.io>
-*/
 contract TransferHistory {
+
     struct TransferRec {
         ISingularWallet from;
         ISingularWallet to;
@@ -48,6 +43,6 @@ contract TransferHistory {
      */
     function getTransferHistory() view external returns (string) {
         // TODO: serialize the transferHistory
-          revert("not implemented");
+        revert("not implemented");
     }
 }

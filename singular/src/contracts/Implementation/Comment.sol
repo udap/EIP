@@ -1,0 +1,60 @@
+pragma solidity ^0.4.0;
+import "../IComment.sol";
+
+contract Comment {
+    constructor (){
+
+    }
+
+    struct Comment {
+        address who;
+        uint256 at;
+        string comment;
+    }
+
+    event Commented(
+        address who,
+        uint256 at,
+        string comment
+    );
+
+    Comment[] ownerComment; // might be operators;
+
+    function addComment(address _who, uint256 _when, string _comment) public {
+        ownerComment.push(Comment(_who, _when, _comment));
+        emit Commented(_who, _when, _comment);
+    }
+
+    function numOfComment() external view returns(uint256) {
+        return ownerComment.length;
+    }
+
+    function commentAt(uint256 _index) external view returns(bytes){
+        require(_index < ownerComment.length);
+        return structSerialize(ownerComment[_index]);
+    }
+
+    function allComments() view external returns(bytes) {
+        if(ownerComment.length == uint256(0)){
+            return hex'c0';
+        }
+        return arraySerialize(0,ownerComment.length-1);
+    }
+
+    function structSerialize(Comment storage _input) internal view returns(bytes){
+        return abi.encode(_input.who,_input.at,_input.comment);
+    }
+
+    function arraySerialize(uint256 _start, uint256 _end) internal view returns(bytes){
+        require(_start<=_end && _end < ownerComment.length);
+        bytes[] memory list = new bytes[](_end-_start+1);
+        uint256 k = 0;
+        for(uint256 i = _start; i <= _end; i ++){ //won't overflow
+            bytes memory serialized =structSerialize(ownerComment[i]);
+            bytes memory rlped = RLPEncode.encodeBytes(serialized);
+            list[k] = rlped;
+        }
+        bytes memory ret = RLPEncode.encodeList(list);
+        return ret;
+    }
+}

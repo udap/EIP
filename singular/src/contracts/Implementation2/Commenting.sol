@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 contract Commenting {
-   struct Comment {
+    struct Comment {
         address who;
         uint256 at;
         string comment;

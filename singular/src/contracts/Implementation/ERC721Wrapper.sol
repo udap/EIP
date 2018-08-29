@@ -135,8 +135,8 @@ contract ERC721Singular is Singular {
     }
 
     /*
-     * to send this token synchronously to an AssetOwner. It must call approveReceiver
-     * first and invoke the "offer" function on the other AssetOwner. Setting the
+     * to send this token synchronously to a SingularWallet. It must call approveReceiver
+     * first and invoke the "offer" function on the other SingularWallet. Setting the
      * current owner directly is not allowed.
      */
     function sendTo(OwnerOfSingulars to, bytes32 reason) nonReentrant external {

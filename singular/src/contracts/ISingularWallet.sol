@@ -18,6 +18,38 @@ import "./ISingular.sol";
 
 interface ISingularWallet {
 
+
+    event ApproveSingular(
+        address to,
+        address singular,
+        uint256 when,
+        string reason
+    );
+
+
+    event SingularOffered(
+        address from,
+        address singular,
+        uint256 when,
+        string reason
+    );
+
+
+    event SingularTransferred(
+        address from,
+        address to,
+        uint256 when,
+        string reply
+    );
+
+    event SingularTransferFailed(
+        address from,
+        address to,
+        uint256 when,
+        string reply
+    );
+
+
     /**
      get the owner address of this account
      */
@@ -85,11 +117,25 @@ interface ISingularWallet {
     external;
 
     /**
+
+    a callback to notify the the wallet that the transaction
+    has been rejected. The parties may synchronize the local state to reflect the
+    ownership change.
+    */
+    function offerRejected(
+        ISingular token,    ///< the token of concern
+        string note         ///< the associated note
+    )
+    external;
+
+
+
+    /**
     to send a token in this wallet to a recipient. The recipient SHOULD respond by calling `ISingular::accept()` or
     `ISingular::reject()` in the same transaction.
     */
     function send(
-        ISingularWallet wallet,     ///< the recipient
+        ISingularWallet toWallet,     ///< the recipient
         ISingular token             ///< the token to transfer
     )
     external;
@@ -99,24 +145,12 @@ interface ISingularWallet {
     a separate transaction. This is of the "offer/accept" two-step pattern.
     */
     function sendNotify(
-        ISingularWallet wallet,     ///< the recipient
+        ISingularWallet toWallet,     ///< the recipient
         ISingular token             ///< the token to transfer
     )
     external;
 
-    /**
 
-     a callback to notify the the wallet that the transaction
-     has been rejected. The parties may synchronize the local state to reflect the
-     ownership change.
-
-    */
-
-    function offerRejected(
-        ISingular token,    ///< the token of concern
-        string note         ///< the associated note
-    )
-    external;
 
     /**
      Offers a token that has been assigned to the receiver as the next owner.
@@ -142,6 +176,24 @@ interface ISingularWallet {
     function offerNotify(
         ISingular token, ///< the offered token
         string note         ///< additional information
+    )
+    external;
+
+    /**
+    to agree an offer when offerNotify is called
+    */
+    function agree(
+        ISingular _token,
+        string _reply
+    )
+    external;
+
+    /**
+    to refuse an offer when offerNotify is called
+    */
+    function refuse(
+        ISingular _token,
+        string _reply
     )
     external;
 

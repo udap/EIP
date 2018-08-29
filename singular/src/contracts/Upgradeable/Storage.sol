@@ -2,7 +2,6 @@ pragma solidity ^0.4.0;
 
 import "./Proxy.sol";
 import "./BaseData.sol";
-import "./Logic.sol";
 
 //not finish yet, will move Storage level common functions to a global smart contract
 contract Storage is Proxy, BaseData{

@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "./ISingular.sol";
-import "./SingularMeta.sol";
+import "./ISingularMeta.sol";
 
 /**
  * A contract that binds an address (EOA/SC) to a list of Singular tokens. The
