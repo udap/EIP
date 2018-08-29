@@ -107,14 +107,20 @@ interface ISingular {
      parties of the transaction for them to update the wallet.
 
      */
-    function accept() external;
+    function accept(
+        string note
+        ) 
+        external;
 
     /**
      To reject an offer. It must be called by the approved next owner to reject a previous
      offer. The implementation MUST notify the token owner of the fact by calling
      ISingularWallet::offerRejected.
      */
-    function reject() external;
+    function reject(
+        string note
+        ) 
+        external;
 
     /**
      * to send this token synchronously to an AssetOwner. It must call approveReceiver

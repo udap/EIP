@@ -31,7 +31,7 @@ contract Singular is ISingular, SingularMeta, TransferHistory, Commenting {
 
 
 
-    constructor(string _name, bytes32 _symbol, string _descr, string _tokenURI)
+    constructor(string _name, string _symbol, string _descr, string _tokenURI)
     SingularMeta(_name, _symbol, _descr, _tokenURI)
     public
     {
@@ -65,7 +65,7 @@ contract Singular is ISingular, SingularMeta, TransferHistory, Commenting {
         NotInTransition 
     {
         
-        require(address(_to) != address(0) && owner.isActionAuthorized(msg.sender, this.approveReceiver.selector, this));
+        require(address(_to) != address(0) && owner.isActionAuthorized(msg.sender, "approveReceiver", this));
         expiry = _expiry;
         reason = _reason;
         nextOwner = _to;
@@ -80,22 +80,18 @@ contract Singular is ISingular, SingularMeta, TransferHistory, Commenting {
      TODO: evaluate re-entrance attack
      */
     function accept(string _reason) external InTransition {
-        // for unknown reason `this.accept.selector` caused compiling error
-        // let's calculate the selector
-        bytes4 sel = bytes4(keccak256("accept(string)"));
         require(
             address(nextOwner) != address(0) && 
-            //  nextOwner.isActionAuthorized(msg.sender, this.accept.selector, this)
-            nextOwner.isActionAuthorized(msg.sender, sel, this)
+            nextOwner.isActionAuthorized(msg.sender, "accept", this)
         );
         ISingularWallet oldOwner = owner;
-        owner = nextOwner; // the single most important step
+        owner = nextOwner; // the single most important step!!!
         reset();
-        transferHistory.push(TransferRec(oldOwner, owner, now, _reason));
+        transferHistory.push(TransferRec(oldOwner, owner, now, _reason, this));
         uint256 moment = now;
         oldOwner.sent(this, _reason);
         owner.received(this, _reason);
-        emit Transferred(address(oldOwner), address(owner), now, _reason);
+        emit Transferred(address(oldOwner), address(owner), moment, _reason);
 
     }
 
@@ -107,7 +103,7 @@ contract Singular is ISingular, SingularMeta, TransferHistory, Commenting {
         address sender = msg.sender;
         require(
             sender == address(nextOwner) ||
-            nextOwner.isActionAuthorized(sender, this.reject.selector, this)
+            nextOwner.isActionAuthorized(sender, "reject", this)
             );
         reset();
     }
@@ -130,14 +126,14 @@ contract Singular is ISingular, SingularMeta, TransferHistory, Commenting {
         external 
         {
         this.approveReceiver(_to, now + 60, _reason);
-        to.offer(this, _reason);
+        _to.offer(this, _reason);
         }
     
 
 
     /// implement Commenting interface
     function makeComment(string _comment) public {
-        require(owner.isActionAuthorized(msg.sender, this.makeComment.selector, this));
+        require(owner.isActionAuthorized(msg.sender, "makeComment", this));
         addComment(msg.sender, now, _comment); 
     }
 

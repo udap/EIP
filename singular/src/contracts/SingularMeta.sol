@@ -6,12 +6,12 @@ pragma solidity ^0.4.24;
 contract SingularMeta {
     /// meta
     string theName;
-    bytes32 theSymbol; /// token type information
+    string theSymbol; /// token type information
     string theDescription;
     string theTokenURI;
     address theCreator;
 
-    constructor(string _name, bytes32 _symbol, string _description, string _tokenURI) public {
+    constructor(string _name, string _symbol, string _description, string _tokenURI) public {
         theName = _name;
         theSymbol = _symbol;
         theDescription = _description;
@@ -20,7 +20,7 @@ contract SingularMeta {
     }
 
     function name() external view returns (string) {return theName;}
-    function symbol() external view returns (bytes32) {return theSymbol;}
+    function symbol() external view returns (string) {return theSymbol;}
     function description() external view returns (string){return theDescription;}
     function tokenURI() public view returns (string){return theTokenURI;}
     function creator() public view returns (address){return theCreator;}

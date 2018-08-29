@@ -31,6 +31,17 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
     ISingular[] internal tokens;
     uint256 internal totalTokens;
 
+    /// old verions of authorization is kept due to mapping's technical limitation
+    /// we use the tokenVersion to track the latest set of authorizations
+    mapping(address => uint32) tokenVersion;
+
+    mapping(
+        address => mapping(     // singular contract address
+            uint32 => mapping(      // version of ownership
+                bytes32 => mapping(     // action name
+                    address => bool     //  the visitor, can / cannot
+                    )))) internal operatorApprovals;
+
     address public ownerOfThis;
 
     /**
@@ -45,14 +56,13 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
         ownerOfThis = _owner;
     }
 
-    mapping(address => mapping(bytes4 => mapping(address => bool))) internal operatorApprovals;
 
     /**
      * to find out if an address is an authorized operator for the Singular token's
      * ownership.
      */
-    function isActionAuthorized(address _address, bytes4 _selector, ISingular _singular) view external returns (bool) {
-        return operatorApprovals[_singular][_selector][_address];
+    function isActionAuthorized(address _address, bytes32 _selector, ISingular _singular) view external returns (bool) {
+        return operatorApprovals[_singular][tokenVersion[_singular]][_selector][_address];
     }
 
     /**
@@ -64,10 +74,9 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
         ISingular _singular, 
         bool _ok
         ) 
-        view 
         external
         {
-            operatorApprovals[_singular][_selector][_address] = _ok;
+            operatorApprovals[_singular][tokenVersion[_singular]][_selector][_address] = _ok;
         }
 
     /**
@@ -76,14 +85,16 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
      * the ownership relation with the token.
      */
      
-    function sent(ISingular token, string note) external returns (bool) {
-        // this imple leaves holes in the token array;
+    function sent(ISingular token, string note) external {
+        // this implementation leaves holes in the token array;
         require(token.previousOwner() == this);
+        // TODO: handle the note in a transaction history
         for (uint i = 0; i < tokens.length; i++) {
             if (token == tokens[i]) {
                 delete tokens[i];
                 totalTokens--;
-                operatorApprovals[token] = ;
+                // bump up ownership version in case of later reownning 
+                tokenVersion[token]++;
                 break;
             }
         }   
@@ -94,7 +105,7 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
      * The current owner of the token must be this wallet.
      */
      
-    function received(ISingular token, string note) external returns (bool) {
+    function received(ISingular token, string note) external {
         require(token.currentOwner() == this);
         require(!alreadyOwn(token));
         addToTokenSet(token);
@@ -112,7 +123,6 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
         string note
         ) 
         external 
-        returns (bool) 
         {
             require(okToAccept(token));
             require(!alreadyOwn(token));
@@ -121,14 +131,43 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
             require(token.currentOwner() == this);
             addToTokenSet(token);
         }
-    
+
+    /**
+     to send a token in this wallet to a recipient. The recipient SHOULD respond by calling `ISingular::accept()` or
+     `ISingular::reject()` in the same transaction.
+     */
+    function send(
+        ISingularWallet wallet,     ///< the recipient
+        ISingular token             ///< the token to transfer
+    )
+    ownerOnly
+    external
+    {
+        token.sendTo(wallet, "", true);
+    }
+
+
+    /**
+    to approve a new owner of a token and notify the recipient. The recipient SHOULD accept or reject the offer in
+    a separate transaction. This is of the "offer/accept" two-step pattern.
+    */
+    function sendNotify(
+        ISingularWallet wallet,     ///< the recipient
+        ISingular token             ///< the token to transfer
+    )
+    ownerOnly
+    external
+    {
+        token.sendTo(wallet, "", false);
+    }
+
 
     function okToAccept(ISingular token) internal returns (bool) {
     // TODO: anti-spamming procedures
         return true;
     }
 
-    function alreadyOwn(ISingular token) internal returns (bool){
+    function alreadyOwn(ISingular token) view internal returns (bool){
         for (uint i = 0; i < tokens.length; i++) {
             if (token == tokens[i]) {
                return true;
@@ -142,7 +181,7 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
     */
     function addToTokenSet(ISingular token) internal {
         totalTokens++; // TODO: should check range
-        for (int i = 0; i < tokens.lengthl; i++) {
+        for (uint i = 0; i < tokens.length; i++) {
             if (token == tokens[i]) {
                 revert("duplicated");
             }
@@ -182,23 +221,9 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
         revert("not implemented yet");
     }
 
-
-    /**
-    returns the number of tokens for a specific type. The type information is extracted from `Singular::tokenType()`
-    
-    The value of this function is not doubtful ! 
-    */
-    function numOfTokensOfType(string tokenType) view external returns (uint256) {
-        for (var i = 0; i < tokens.lengthl; i++) {
-            uint256 c = 0;
-            ISingular s = tokens[i];
-            if (address(s) != address(0)) {
-                var symbol = s.symbol();
-                if (symbol == tokenType)
-                c++;
-            }
-        }
-        return c;
+    modifier ownerOnly() {
+        require(msg.sender == ownerOfThis);
+        _;
     }
 }
 
