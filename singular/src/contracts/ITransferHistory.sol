@@ -17,17 +17,17 @@ interface ITransferHistory {
      * @return the number of ownership records. The first record is the token genesis
      * record.
      */
-    function numOfTransfers() view public returns (uint256);
+    function numOfTransfers() view external returns (uint256);
     /**
      * To get a specific transfer record in the format defined by implementation.
      * @param index the inde of the inquired record. It must in the range of
      * [0, numberOfTransfers())
      */
-    function getTransferAt(uint256 index) view public returns(bytes);
+    function getTransferAt(uint256 index) view external returns(bytes);
 
     /**
      * get all the transfer records in a serialized form that is defined by
      * implementation.
      */
-    function getTransferHistory() view public returns (bytes);
+    function getTransferHistory() view external returns (bytes);
 }

@@ -8,7 +8,6 @@ contract SingularMeta is ISingularMeta {
     string theSymbol; /// token type information
     string theDescription;
     string theTokenURI;
-    address theCreator;
 
 
     constructor(string _name, string _symbol, string _description, string _tokenURI) public {
@@ -16,14 +15,12 @@ contract SingularMeta is ISingularMeta {
         theSymbol = _symbol;
         theDescription = _description;
         theTokenURI = _tokenURI;
-        theCreator = msg.sender;
     }
 
     function name() external view returns (string) {return theName;}
     function symbol() external view returns (string) {return theSymbol;}
     function description() external view returns (string){return theDescription;}
     function tokenURI() public view returns (string){return theTokenURI;}
-    function creator() public view returns (address){return theCreator;}
 
     /// end of meta
 

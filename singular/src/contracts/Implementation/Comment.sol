@@ -1,5 +1,5 @@
 pragma solidity ^0.4.0;
-import "../IComment.sol";
+import "../ICommenting.sol";
 
 contract Comment {
     constructor (){

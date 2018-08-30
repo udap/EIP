@@ -4,8 +4,8 @@ import "../ISingular.sol";
 import "../ISingularWallet.sol";
 import "../../node_modules/openzeppelin-solidity/contracts/ReentrancyGuard.sol";
 import "./Comment.sol";
-import "../TransferHistory.sol";
-import "../SingularMeta.sol";
+import "./TransferHistory.sol";
+import "./SingularMeta.sol";
 
 //singular must transfer by its owner(SingularWallet) and between SingularWallets
 contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, ReentrancyGuard {

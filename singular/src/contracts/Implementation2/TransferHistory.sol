@@ -9,7 +9,8 @@ contract TransferHistory {
         ISingularWallet from;
         ISingularWallet to;
         uint256 at;
-        string reason;
+        string senderNote;
+        string receiverNote;
         ISingular token;
     }
 

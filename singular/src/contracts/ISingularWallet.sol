@@ -19,7 +19,7 @@ import "./ISingular.sol";
 interface ISingularWallet {
 
 
-    event ApproveSingular(
+    event SingularReceiverApproved(
         address to,
         address singular,
         uint256 when,
@@ -189,9 +189,9 @@ interface ISingularWallet {
     external;
 
     /**
-    to refuse an offer when offerNotify is called
+    to reject an offer when offerNotify is called
     */
-    function refuse(
+    function reject(
         ISingular _token,
         string _reply
     )

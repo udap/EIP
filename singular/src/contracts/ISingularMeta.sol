@@ -8,8 +8,6 @@ interface ISingularMeta {
     function name() external view returns (string);
     function symbol() external view returns (string);
     function description() external view returns (string);
-    function tokenURI() public view returns (string);
-    function creator() public view returns (address);
-
+    function tokenURI() external view returns (string);
     /// end of meta
 }

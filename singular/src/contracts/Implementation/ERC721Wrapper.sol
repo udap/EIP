@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import "./OwnerOfSingulars.sol";
 import "../node_modules/openzeppelin-solidity/contracts/token/ERC721/ERC721.sol";
-import "../Singular.sol";
+import "./Singular.sol";
 
 /*
  @title A singular that wraps an ERC721 token
@@ -97,7 +97,7 @@ contract ERC721Singular is Singular {
         require(oldOwner == msg.sender || OwnerOfSingulars(oldOwner).isAuthorized(msg.sender, this));
 
         expiry = _expiry;
-        reason = _reason;
+        senderNote = _reason;
         nextOwner = _to;
         // 721 approve almost transfers ownership, which is too strong for Singular
         //contract721.approve(_to, tokenIndex);
@@ -117,7 +117,7 @@ contract ERC721Singular is Singular {
         contract721.transferFrom(this, nextOwner, tokenIndex);
         reset();
 
-        transferHistory.push(TransferRec(oldOwner, msg.sender, now, reason));
+        transferHistory.push(TransferRec(oldOwner, msg.sender, now, senderNote));
         oldOwner.sent(this);
     }
 
@@ -131,7 +131,7 @@ contract ERC721Singular is Singular {
 
     function reset() internal {
         delete expiry;
-        delete reason;
+        delete senderNote;
     }
 
     /*
@@ -140,8 +140,8 @@ contract ERC721Singular is Singular {
      * current owner directly is not allowed.
      */
     function sendTo(OwnerOfSingulars to, bytes32 reason) nonReentrant external {
-        approveReceiver(to, 1 minutes, reason);
-        to.offer(this, reason);
+        approveReceiver(to, 1 minutes, senderNote);
+        to.offer(this, senderNote);
     }
 
 

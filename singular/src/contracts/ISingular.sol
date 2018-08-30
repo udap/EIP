@@ -42,16 +42,16 @@ interface ISingular {
         address from,
         address to,
         uint256 when,
-        string reason,
-        string reply
+        string reason,          ///< offer note
+        string reply            ///< acceptance note
     );
 
     event TransferFailed(
         address from,
         address to,
         uint256 when,
-        string reason,
-        string reply
+        string reason,          ///< offer note
+        string reply            ///< acceptance note
     );
 
 
@@ -65,9 +65,21 @@ interface ISingular {
         ISingularWallet         ///< owner is an ISingularWallet
     );
 
+    /**
+     * get the current owner
+     */
+    function previousOwner()
+    view
+    external
+    returns (
+        ISingularWallet         ///< the onw who owns this previously
+    );
+
 
     /**
-     * get the next owner
+     * get the approved next owner. This is just an timed offer, to be accepted 
+     * or rejected by the intended receiver. 
+     * 
      */
     function nextOwner()
     view
@@ -83,12 +95,12 @@ interface ISingular {
     view
     external
     returns (
-        ISingularWallet         ///< the owner elected
+        address         ///< who has created this
     );
 
     /**
 
-    a Singular can be associated with an address that describes the type information.
+    a Singular that can be associated with an address that describes the type information.
 
     */
     function tokenType()

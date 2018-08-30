@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "./ISingular.sol";
-import "./ISingularMeta.sol";
+import "../ISingular.sol";
+import "./SingularMeta.sol";
 
 /**
  * A contract that binds an address (EOA/SC) to a list of Singular tokens. The
@@ -18,14 +18,8 @@ import "./ISingularMeta.sol";
  */
 contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Singular to make a composite pattern
 
-    constructor(string _name, string _symbol, string _descr, string _tokenURI)
-    SingularMeta(_name, _symbol, _descr, _tokenURI)
-    public
-    {
 
-    }
-
-
+    address theCreator;
 
     /// list as the token set, since mapping does not give the ket set
     ISingular[] internal tokens;
@@ -44,6 +38,15 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
 
     address public ownerOfThis;
 
+    constructor(string _name, string _symbol, string _descr, string _tokenURI)
+    SingularMeta(_name, _symbol, _descr, _tokenURI)
+    public
+    {
+        theCreator = msg.sender;    
+    }
+
+
+    
     /**
      * get the owner address.
      */
@@ -143,7 +146,7 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
     ownerOnly
     external
     {
-        token.sendTo(wallet, "", true);
+        token.sendTo(wallet, "", true, 60);
     }
 
 
@@ -158,7 +161,7 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
     ownerOnly
     external
     {
-        token.sendTo(wallet, "", false);
+        token.sendTo(wallet, "", false, 10);
     }
 
 

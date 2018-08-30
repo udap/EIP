@@ -20,13 +20,15 @@ import "./SingularMeta.sol";
 contract Singular is ISingular, SingularMeta, TransferHistory, Commenting {
 
     ISingularWallet public owner; /// current owner
+    ISingularWallet public nextOwner; /// next owner choice
+    ISingularWallet public ownerPrevious; /// next owner choice
 
-    ISingularWallet public nextOwner; /// current owner
 
-    address public creator; /// who creates this token
+    address internal theCreator; /// who creates this token
 
     uint256 expiry;
-    string reason;
+    string senderNote;
+    string receiverNote;
 
 
 
@@ -34,9 +36,23 @@ contract Singular is ISingular, SingularMeta, TransferHistory, Commenting {
     SingularMeta(_name, _symbol, _descr, _tokenURI)
     public
     {
-        creator = msg.sender;
+        theCreator = msg.sender;
     }
 
+    function creator()
+    view
+    external
+    returns (
+        address         ///< the owner elected
+    ) {
+        return theCreator;
+    }
+    /**
+     * get the current owner as type of SingularOwner
+     */
+    function previousOwner() view external returns (ISingularWallet) {
+        return ownerPrevious;
+    }
 
     /**
      * get the current owner as type of SingularOwner
@@ -66,9 +82,9 @@ contract Singular is ISingular, SingularMeta, TransferHistory, Commenting {
         
         require(address(_to) != address(0) && owner.isActionAuthorized(msg.sender, "approveReceiver", this));
         expiry = _expiry;
-        reason = _reason;
+        senderNote = _reason;
         nextOwner = _to;
-        emit  ReceiverApproved(address(owner), address(nextOwner), expiry, reason);
+        emit  ReceiverApproved(address(owner), address(nextOwner), expiry, senderNote);
     }
 
     /**
@@ -83,14 +99,14 @@ contract Singular is ISingular, SingularMeta, TransferHistory, Commenting {
             address(nextOwner) != address(0) && 
             nextOwner.isActionAuthorized(msg.sender, "accept", this)
         );
-        ISingularWallet oldOwner = owner;
+        ownerPrevious = owner;
         owner = nextOwner; // the single most important step!!!
         reset();
-        transferHistory.push(TransferRec(oldOwner, owner, now, _reason, this));
+        transferHistory.push(TransferRec(ownerPrevious, owner, now, senderNote, _reason, this));
         uint256 moment = now;
-        oldOwner.sent(this, _reason);
+        ownerPrevious.sent(this, _reason);
         owner.received(this, _reason);
-        emit Transferred(address(oldOwner), address(owner), moment, _reason);
+        emit Transferred(address(ownerPrevious), address(owner), moment, senderNote, _reason);
 
     }
 
@@ -109,7 +125,7 @@ contract Singular is ISingular, SingularMeta, TransferHistory, Commenting {
 
     function reset() internal {
         delete expiry;
-        delete reason;
+        delete senderNote;
         delete nextOwner;
     }
 
