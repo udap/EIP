@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "../../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "../../utils/RLPEncode.sol";
+import "../utils/RLPEncode.sol";
 import "../ITransferHistory.sol";
 
 contract TransferHistory is ITransferHistory {
@@ -12,15 +12,15 @@ contract TransferHistory is ITransferHistory {
         ISingularWallet from;
         ISingularWallet to;
         uint256 at;
-        string reason;
-        ISingular token;
+        string senderNote;
+        string receiverNote;
+        ISingular singular;
     }
 
 
     TransferRec[] internal transferHistory;
 
-    constructor(){
-
+    constructor()public{
     }
 
     function numOfTransfers() view public returns (uint256) {
@@ -43,15 +43,19 @@ contract TransferHistory is ITransferHistory {
      * implementation.
      */
     function getTransferHistory() view public returns (bytes) {
-        // TODO: serialize the transferHistory
         if(transferHistory.length == uint256(0)){
             return hex'c0';
         }
         return arraySerialize(0,transferHistory.length -1);
     }
 
+    function addTransferHistory(ISingular _singular, ISingularWallet _from, ISingularWallet _to, uint256 _at, string _senderNote, string _receiverNote) internal{
+        TransferRec memory newOne = TransferRec(_from, _to, _at, _senderNote, _receiverNote, _singular);
+        transferHistory.push(newOne);
+    }
+
     function structSerialize(TransferRec storage _input) internal view returns(bytes){
-        return abi.encode(_input.from,_input.to,_input.at,_input.reason,_input.token);
+        return abi.encode(_input.from,_input.to,_input.at,_input.senderNote,_input.receiverNote,_input.singular);
     }
 
     function arraySerialize(uint256 _start, uint256 _end) internal view returns(bytes){

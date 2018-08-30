@@ -23,7 +23,7 @@ interface ISingularWallet {
         address to,
         address singular,
         uint256 when,
-        string reason
+        string senderNote
     );
 
 
@@ -31,22 +31,24 @@ interface ISingularWallet {
         address from,
         address singular,
         uint256 when,
-        string reason
+        string senderNote
     );
 
 
     event SingularTransferred(
         address from,
         address to,
+        address singular,
         uint256 when,
-        string reply
+        string receiverNote
     );
 
     event SingularTransferFailed(
         address from,
         address to,
+        address singular,
         uint256 when,
-        string reply
+        string receiverNote
     );
 
 

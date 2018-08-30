@@ -1,12 +1,14 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
+
 import "../ICommenting.sol";
+import "../utils/RLPEncode.sol";
 
 contract Comment {
-    constructor (){
+    constructor () public{
 
     }
 
-    struct Comment {
+    struct CommentRec {
         address who;
         uint256 at;
         string comment;
@@ -18,10 +20,10 @@ contract Comment {
         string comment
     );
 
-    Comment[] ownerComment; // might be operators;
+    CommentRec[] ownerComment; // might be operators;
 
     function addComment(address _who, uint256 _when, string _comment) public {
-        ownerComment.push(Comment(_who, _when, _comment));
+        ownerComment.push(CommentRec(_who, _when, _comment));
         emit Commented(_who, _when, _comment);
     }
 
@@ -41,7 +43,7 @@ contract Comment {
         return arraySerialize(0,ownerComment.length-1);
     }
 
-    function structSerialize(Comment storage _input) internal view returns(bytes){
+    function structSerialize(CommentRec storage _input) internal view returns(bytes){
         return abi.encode(_input.who,_input.at,_input.comment);
     }
 

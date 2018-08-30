@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 import "../ISingularMeta.sol";
 
@@ -20,7 +20,7 @@ contract SingularMeta is ISingularMeta {
     function name() external view returns (string) {return theName;}
     function symbol() external view returns (string) {return theSymbol;}
     function description() external view returns (string){return theDescription;}
-    function tokenURI() public view returns (string){return theTokenURI;}
+    function tokenURI() external view returns (string){return theTokenURI;}
 
     /// end of meta
 

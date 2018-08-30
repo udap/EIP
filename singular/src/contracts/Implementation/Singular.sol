@@ -14,9 +14,10 @@ contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, Reent
 
     address internal prototype; // token types, a ref to type information
 
-    ISingularWallet internal owner; // the current owner
-    ISingularWallet internal recipient; // the owner to be offered in an ownership transition
-    ISingularWallet internal creator; // the first owner which is also the creator, unchangeable
+    ISingularWallet internal singularOwner; // the current owner
+    ISingularWallet internal singularRecipient; // the owner to be offered in an ownership transition
+    ISingularWallet internal singularPreviousOwner;  // the previousOwner in transition
+    address internal singularCreator; // the first owner which is also the creator, unchangeable
 
 /*    //is the operator of current singular, only is able to send singular
     address internal operator;*/
@@ -67,62 +68,63 @@ contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, Reent
      * @param _reason the reason for the transfer
      */
 
-    function approveReceiver(address _to, uint256 _expiry, string _reason) notInTransition ownerOnly nonReentrant external {
-        require(_to != owner);
+    function approveReceiver(ISingularWallet _to, uint256 _expiry, string _reason) notInTransition ownerOnly nonReentrant external {
+        require(_to != singularOwner);
         require(_expiry > now);
-        recipient = _to;
+        singularRecipient = _to;
         expiry = _expiry;
         transferReason = _reason;
 
-        emit Approved(owner, _to, _expiry, _reason);
+        emit ReceiverApproved(singularOwner, _to, _expiry, _reason);
 
     }
 
 
-    function sendTo(ISingularWallet _to, string _note, bool _sync, uint256 _expiry ) notInTransition ownerOnly nonReentrant public {
+    function sendTo(ISingularWallet _to, string _senderNote, bool _sync, uint256 _expiry ) notInTransition ownerOnly nonReentrant external {
         // we still use the approve/take two-step pattern
         // which takes place in one transaction;
-        require(_to != owner);
+        require(_to != singularOwner);
+        uint256 tempExpiry = _expiry;
         if(_sync == true){
-            _expiry = now + 1 minutes;
+            tempExpiry = now + 1 minutes;
         }else{
-            require(_expiry > now);
+            require(tempExpiry > now);
         }
-        recipient = _to;
-        transferReason = _note;// TODO: duplicated logic
+        singularRecipient = _to;
+        transferReason = _senderNote;// TODO: duplicated logic
 
-        this.approveReceiver(_to, _expiry, _reason);
+        this.approveReceiver(_to, tempExpiry, _senderNote);
 
         if(_sync == true){
-            _to.offer(this, _note);
+            _to.offer(this, _senderNote);
         }else{
-            _to.offerNotify(this, _note);
+            _to.offerNotify(this, _senderNote);
         }
     }
 
 
-    function accept(string _reply) external inTransition{
-        require(msg.sender == address(recipient), "only approver could accept or reject offer");
-        ISingularWallet prev = owner;
-        owner = msg.sender;
-        delete recipient;
+    function accept(string _receiverNote) external inTransition{
+        require(msg.sender == address(singularRecipient), "only approver could accept or reject offer");
+        singularPreviousOwner = singularOwner;
+        singularOwner = ISingularWallet(msg.sender);
+        delete singularRecipient;
         delete expiry;
 
         //properties are set before invoke callbacks
-        prev.sent(this,_reply);
-        owner.received(this,_reply);
+        singularPreviousOwner.sent(this,_receiverNote);
+        singularOwner.received(this,_receiverNote);
 
-        emit Transferred(prev, owner, now, transferReason,_reply);
+        emit Transferred(singularPreviousOwner, singularOwner, now, transferReason,_receiverNote);
     }
 
-    function reject(string _reply) external inTransition{
-        require(msg.sender == address(recipient), "only approver could accept or reject offer");
-        delete recipient;
+    function reject(string _receiverNote) external inTransition{
+        require(msg.sender == address(singularRecipient), "only approver could accept or reject offer");
+        delete singularRecipient;
         delete expiry;//time out expiry immediately so that you can transfer it fast-fail
 
-        owner.offerRejected(this,_reply);
+        singularOwner.offerRejected(this,_receiverNote);
 
-        emit TransferFailed(owner, recipient, now, transferReason,_reply);
+        emit TransferFailed(singularOwner, singularRecipient, now, transferReason,_receiverNote);
     }
 
 
@@ -145,12 +147,12 @@ contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, Reent
     }
 
     modifier ownerOnly {
-        require(msg.sender == owner);
+        require(msg.sender == address(singularOwner));
         _;
     }
 
     modifier approved() {
-        require(msg.sender == recipient);
+        require(msg.sender == address(singularRecipient));
         _;
     }
 
@@ -161,18 +163,25 @@ contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, Reent
 
 
     function currentOwner() view external returns (ISingularWallet){
-        return owner;
+        return singularOwner;
     }
+    
+    function previousOwner() view external returns (ISingularWallet){
+        return singularPreviousOwner;
+    }
+
 
     function nextOwner() view external returns (ISingularWallet){
-        return recipient;
+        return singularRecipient;
     }
 
-    function tokenType() view external returns(address){
-        return prototype;
-    }
 
     function creator() view external returns(address){
+        return singularCreator;
+    }
+    
+    
+    function tokenType() view external returns(address){
         return prototype;
     }
 }
