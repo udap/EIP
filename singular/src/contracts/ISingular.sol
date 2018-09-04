@@ -15,14 +15,14 @@ import "./ISingularWallet.sol";
  *
  * Transfer in two steps:
  *
- * The approveReceiver method is a timelock on the ownership. The
+ * The approveReceiver method is a timelock(expiry) on the ownership. The
  * receiver can take the ownership within the valid period of time. Before the expiry
  * time, this token is locked for the receiver exclusively and cannot be locked
  * again for any other receivers. The contract serves as a
  * multi-sig wallet when used in the two-step pattern.
  *
  * @author Bing Ran<bran@udap.io>
- *
+ * @author Guxiang Tang<gtang@udap.io>
  */
 interface ISingular {
     /**
@@ -45,7 +45,9 @@ interface ISingular {
         string reason,          ///< offer note
         string reply            ///< acceptance note
     );
-
+    /**
+    * the ownership transition fails from A to B
+    */
     event TransferFailed(
         address from,
         address to,
@@ -162,5 +164,14 @@ interface ISingular {
     )
     external;
 
+    /**
+     * to send this token synchronously to a SingularWallet. It must call approveReceiver
+     * first and invoke the "offer" function on the other SingularWallet. Setting the
+     * current owner directly is not allowed.
+     */
+    function burn(
+        string note                ///< note of burn
+    )
+    external;
 
 }
