@@ -146,7 +146,11 @@ contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, Reent
     }
 
     modifier ownerOnly {
-        require(msg.sender == address(singularOwner));
+        if(AddressUtils.isContract(msg.sender)){
+            require(msg.sender == address(singularOwner));
+        }else{
+            singularOwner.isActionAuthorized(msg.sender,bytes32(0x00),this);
+        }
         _;
     }
 

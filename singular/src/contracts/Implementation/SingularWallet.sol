@@ -21,13 +21,13 @@ contract SingularWalletImpl is ISingularWallet, ReentrancyGuard{
     mapping(address => bool) ownedSingulars;
     uint256 ownedSingularsAmount;
 
-    function isAuthorized(address _person) view external returns(bool){
+    function isAuthorized(address _caller, bytes32 _action,ISingular singular) view external returns(bool){
         if(AddressUtils.isContract(owner)){
             // TODO: serialize the transferHistory
             revert("not implemented");
             //return MultisiWallet(owner).authorize(_person);
         }else{
-            return owner == _person;
+            return owner == _caller;
         }
     }
 
