@@ -21,7 +21,7 @@ contract SingularWalletImpl is ISingularWallet, ReentrancyGuard{
     mapping(address => bool) ownedSingulars;
     uint256 ownedSingularsAmount;
 
-    function isAuthorized(address _caller, bytes32 _action,ISingular singular) view external returns(bool){
+    function isActionAuthorized(address _caller, bytes32 _action,ISingular singular) view external returns(bool){
         if(AddressUtils.isContract(owner)){
             // TODO: serialize the transferHistory
             revert("not implemented");
@@ -128,7 +128,9 @@ contract SingularWalletImpl is ISingularWallet, ReentrancyGuard{
     /**
      get the token at a specific index.
      */
-    function getTokenAt(uint256 idx) view external returns (ISingular);
+    function getTokenAt(uint256 _idx) view external returns (ISingular){
+        revert("implement later");
+    }
 
 
 

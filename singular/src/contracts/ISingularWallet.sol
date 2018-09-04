@@ -126,7 +126,8 @@ interface ISingularWallet {
     */
     function send(
         ISingularWallet toWallet,     ///< the recipient
-        ISingular token             ///< the token to transfer
+        ISingular token,             ///< the token to transfer
+        string _senderNote
     )
     external;
 
@@ -136,7 +137,9 @@ interface ISingularWallet {
     */
     function sendNotify(
         ISingularWallet toWallet,     ///< the recipient
-        ISingular token             ///< the token to transfer
+        ISingular token,             ///< the token to transfer
+        string _senderNote,
+        uint256 _expiry
     )
     external;
 
