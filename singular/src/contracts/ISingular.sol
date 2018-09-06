@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "./ISingularWallet.sol";
 
 /**
- * @title Concrete asset token representing a single piece of asset, with
+ * @title A concrete asset token representing a single item of things, with
  * support of ownership transfers and transfer history.
  *
  * The owner of this item must be a ISingularWallet.
@@ -21,6 +21,8 @@ import "./ISingularWallet.sol";
  * again for any other receivers. The contract serves as a
  * multi-sig wallet when used in the two-step pattern.
  *
+ *
+ * //TODO: evaluating naming options: IItem, etc, for clarity and easiness of reference
  * @author Bing Ran<bran@udap.io>
  *
  */
