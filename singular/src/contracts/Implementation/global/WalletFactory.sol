@@ -4,34 +4,36 @@ import "../../../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.
 import "../../ISingularWallet.sol";
 import "../../Upgradeable/Mini/MiniProxy.sol";
 import "../../Upgradeable/Mini/MiniRegistry.sol";
+import "../SingularWallet.sol";
 
 // MiniProxy1,2,3,4....n  =>  MiniRegistry => WalletLogic
 contract WalletFactory is Ownable{
-    constructor(address _registry) public payable{
+    constructor(MiniRegistry _registry) public payable{
         miniRegistry = _registry;
     }
 
-    address internal miniRegistry;
+    MiniRegistry internal miniRegistry;
 
 /*    //user address => seq => wallet address
     mapping(address => mapping(uint256 => address)) internal registeredWallets;*/
     //wallet address => user address
     mapping(address => address) registeredWallets;
 
-    function setMiniRegistry (address _registry) public onlyOwner{
+    function setMiniRegistry (MiniRegistry _registry) public onlyOwner{
         miniRegistry = _registry;
     }
 
-    function getMiniRegistry () public returns(MiniRegistry){
+    function getMiniRegistry () public view returns(MiniRegistry){
         return miniRegistry;
     }
 
     //please config MiniRegistry  before you create MiniProxy
-    function createWallet(address _to) public returns (ISingularWallet){
-        MiniProxy newWallet = new MiniProxy(miniRegistry);
-        ISingularWallet(newWallet).init(_to);
+    function createWallet(address _to, address _toOperator) onlyOwner public returns (ISingularWallet){
+        MiniProxy newWallet = new MiniProxy(miniRegistry,this);
+        SingularWalletImpl(newWallet).init(_to, _toOperator);
 
         registeredWallets[address(newWallet)]= _to;
+        return  ISingularWallet(newWallet);
     }
 
 }

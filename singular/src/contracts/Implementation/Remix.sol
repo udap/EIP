@@ -6,7 +6,9 @@ import "./SingularMeta.sol";
 import "./SingularWallet.sol";
 import "./TransferHistory.sol";
 import "./LimitedSingularGenerator.sol";
-
+import "./global/GeneratorFactory.sol";
+import "./global/SingularFactory.sol";
+import "./global/WalletFactory.sol";
 /*
  * This contract is a quick build contract.
  *

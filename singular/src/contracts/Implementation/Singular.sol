@@ -7,14 +7,13 @@ import "./Comment.sol";
 import "./TransferHistory.sol";
 import "./SingularMeta.sol";
 import "../../node_modules/openzeppelin-solidity/contracts/AddressUtils.sol";
-import "../utils/Initialized.sol";
 
 /**
 *
 */
 
 //singular must transfer by its owner(SingularWallet) and between SingularWallets
-contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, ReentrancyGuard, Initialized {
+contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, ReentrancyGuard {
 
     address internal prototype; // token types, a ref to type information
 
@@ -43,9 +42,10 @@ contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, Reent
 
     }
 
-    function init (string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest, address _to) SingularMeta( _name,  _symbol,  _description,  _tokenURI, _tokenURIDigest) unconstructed public
+    function init (string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest, address _to, address _singularCreator) unconstructed public
     {
-        singularCreator = msg.sender;
+        SingularMeta.init(_name,  _symbol,  _description,  _tokenURI, _tokenURIDigest);
+        singularCreator = _singularCreator;
         singularOwner = ISingularWallet(_to);
         ISingularWallet(_to).received(this,"new singular created");
         // is msg.sender safe? what if called from another contract?

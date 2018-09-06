@@ -3,15 +3,21 @@ pragma solidity ^0.4.0;
 contract Initialized {
 
     bool Initialized_inited;
-    address Initialized_initializer;
 
-    constructor (address _initializer) public payable{
-        Initialized_initializer = _initializer;
+    bytes32 private constant initPermission = keccak256(abi.encodePacked(keccak256(abi.encode("initPermission"))));
+
+
+    function getInitPermission() internal view returns(address){
+        address ret;
+        bytes32 slot = initPermission;
+        assembly {
+            ret := sload(slot)
+        }
+        return ret;
     }
 
-    modifier unconstructed(address _initializer){
-        require(Initialized_initializer == _initializer);
-        require(Initialized_inited == false);
+    modifier unconstructed(){
+        require(msg.sender == getInitPermission());
         Initialized_inited = true;
         _;
     }

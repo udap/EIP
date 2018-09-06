@@ -1,8 +1,9 @@
 pragma solidity ^0.4.24;
 
 import "../ISingularMeta.sol";
+import "../utils/Initialized.sol";
 
-contract SingularMeta is ISingularMeta {
+contract SingularMeta is ISingularMeta , Initialized{
     /// meta
     string theName;
     string theSymbol; /// token type information
@@ -23,7 +24,7 @@ contract SingularMeta is ISingularMeta {
 
     }
 
-    function init (string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest) public {
+    function init (string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest) unconstructed public {
         theName = _name;
         theSymbol = _symbol;
         theDescription = _description;

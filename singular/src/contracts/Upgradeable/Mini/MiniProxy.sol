@@ -1,11 +1,15 @@
 pragma solidity ^0.4.24;
 
 contract MiniProxy {
-    constructor(address _toRegistry) public payable{
+    constructor(address _toRegistry, address _initPermission) public payable{
         setLogicPosition(_toRegistry);
+        setInitPermission(_initPermission);
     }
 
+    //delegate to somewhere
     bytes32 private constant currentLogicPosition = keccak256(abi.encodePacked(keccak256(abi.encode("currentLogicPosition"))));
+    //who can knock out the init() function
+    bytes32 private constant initPermission = keccak256(abi.encodePacked(keccak256(abi.encode("initPermission"))));
 
     function setLogicPosition(address _toRegistry) internal {
         bytes32 slot = currentLogicPosition;
@@ -21,6 +25,13 @@ contract MiniProxy {
             ret := sload(slot)
         }
         return ret;
+    }
+
+    function setInitPermission(address _initPermission) internal {
+        bytes32 slot = initPermission;
+        assembly {
+            sstore(slot, _initPermission)
+        }
     }
 
     //all other functions goes to here

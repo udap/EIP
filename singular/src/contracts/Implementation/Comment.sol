@@ -2,8 +2,9 @@ pragma solidity ^0.4.24;
 
 import "../ICommenting.sol";
 import "../utils/RLPEncode.sol";
+import "../utils/Initialized.sol";
 
-contract Comment {
+contract Comment is IComment, Initialized{
     constructor () public{
 
     }
@@ -22,7 +23,7 @@ contract Comment {
 
     CommentRec[] ownerComment; // might be operators;
 
-    function addComment(address _who, uint256 _when, string _comment) public {
+    function addComment(address _who, uint256 _when, string _comment) constructed external {
         ownerComment.push(CommentRec(_who, _when, _comment));
         emit Commented(_who, _when, _comment);
     }
