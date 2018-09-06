@@ -90,7 +90,7 @@ interface IUdapp {
     to deposit some money to the app's settlement account with UDAP
     */
     function deposit(
-        /*some kind of denominations*/
+        uint256 amount,         ///< amount of UDAP coin to deposit to app acounnt
         bytes signatures        ///< the required signatures
     )
     external;
@@ -168,6 +168,7 @@ interface IUdapp {
         to mint a Singular token and assign the ownership to a wallet
     */
     function mintTokenFor(
+        address tokenType,
         ISingularMeta meta,     ///< the token info
         ISingularWallet owner,   ///< who should own the newly minted token
         bytes signatures        ///< the required signatures
