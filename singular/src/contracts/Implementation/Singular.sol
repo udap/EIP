@@ -7,13 +7,14 @@ import "./Comment.sol";
 import "./TransferHistory.sol";
 import "./SingularMeta.sol";
 import "../../node_modules/openzeppelin-solidity/contracts/AddressUtils.sol";
+import "../utils/Initialized.sol";
 
 /**
 *
 */
 
 //singular must transfer by its owner(SingularWallet) and between SingularWallets
-contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, ReentrancyGuard {
+contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, ReentrancyGuard, Initialized {
 
     address internal prototype; // token types, a ref to type information
 
@@ -29,7 +30,20 @@ contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, Reent
     uint256 internal expiry; // seconds since epoch time, absolutely. You can't cancel a transition/expiry and it will auto cancel when expiry < now or receiver reject/accept
     string internal transferReason;// transfer message
 
-    constructor(string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest, address _to) SingularMeta( _name,  _symbol,  _description,  _tokenURI, _tokenURIDigest)public
+/*    constructor(string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest, address _to) SingularMeta( _name,  _symbol,  _description,  _tokenURI, _tokenURIDigest)public
+    {
+        singularCreator = msg.sender;
+        singularOwner = ISingularWallet(_to);
+        ISingularWallet(_to).received(this,"new singular created");
+
+        emit Transferred(address(0), _to, now, "created", "created");
+    }*/
+
+    constructor()public payable{
+
+    }
+
+    function init (string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest, address _to) SingularMeta( _name,  _symbol,  _description,  _tokenURI, _tokenURIDigest) unconstructed public
     {
         singularCreator = msg.sender;
         singularOwner = ISingularWallet(_to);
@@ -50,7 +64,7 @@ contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, Reent
      * @param _expiry the dealline for the revceiver to the take the ownership with the preimage
      * @param _senderNote the reason for the transfer
      */
-    function approveReceiver(ISingularWallet _to, uint256 _expiry, string _senderNote) notInTransition ownerOnly /*nonReentrant*/ external {
+    function approveReceiver(ISingularWallet _to, uint256 _expiry, string _senderNote) notInTransition ownerOnly /*nonReentrant*/ constructed external {
         require(_to != singularOwner);
         require(_expiry > now);
         singularRecipient = _to;
@@ -62,7 +76,7 @@ contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, Reent
     }
 
 
-    function sendTo(ISingularWallet _to, string _senderNote, bool _sync, uint256 _expiry ) notInTransition ownerOnly /*nonReentrant*/ external {
+    function sendTo(ISingularWallet _to, string _senderNote, bool _sync, uint256 _expiry ) notInTransition ownerOnly /*nonReentrant*/ constructed external {
         // we still use the approve/take two-step pattern
         // which takes place in one transaction;
         require(_to != singularOwner);
@@ -84,7 +98,7 @@ contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, Reent
         }
     }
 
-    function burn(string _reason) external notInTransition ownerOnly nonReentrant{
+    function burn(string _reason) external notInTransition ownerOnly nonReentrant constructed {
 
         singularPreviousOwner = singularOwner;
         singularOwner = ISingularWallet(0);
@@ -99,7 +113,7 @@ contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, Reent
     //=============================action===============================================
 
     //=============================reaction===============================================
-    function accept(string _receiverNote) external inTransition nonReentrant{
+    function accept(string _receiverNote) external inTransition nonReentrant constructed{
         require(msg.sender == address(singularRecipient), "only approver could accept or reject offer");
         singularPreviousOwner = singularOwner;
         singularOwner = ISingularWallet(msg.sender);
@@ -113,7 +127,7 @@ contract SingularImpl is ISingular,SingularMeta, TransferHistory, Comment, Reent
         emit Transferred(singularPreviousOwner, singularOwner, now, transferReason,_receiverNote);
     }
 
-    function reject(string _receiverNote) external inTransition nonReentrant{
+    function reject(string _receiverNote) external inTransition nonReentrant constructed{
         require(msg.sender == address(singularRecipient), "only approver could accept or reject offer");
         //Note, reset states after calling offerRejected()
         singularOwner.offerRejected(this,_receiverNote);

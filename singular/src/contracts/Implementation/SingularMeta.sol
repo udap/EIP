@@ -11,7 +11,19 @@ contract SingularMeta is ISingularMeta {
     bytes theTokenURIDigest;
 
 
-    constructor(string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest) public {
+    /*constructor(string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest) public {
+        theName = _name;
+        theSymbol = _symbol;
+        theDescription = _description;
+        theTokenURI = _tokenURI;
+        theTokenURIDigest = _tokenURIDigest;
+    }*/
+
+    constructor () public{
+
+    }
+
+    function init (string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest) public {
         theName = _name;
         theSymbol = _symbol;
         theDescription = _description;
