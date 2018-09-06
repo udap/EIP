@@ -3,47 +3,52 @@ pragma solidity ^0.4.0;
 contract BaseData {
     constructor() payable public{
     }
+    /*
+    it likes (pseudo)
+    mapping(bytes32 version => address logicAddress);
+    bytes32 currentVersion;
+    bool constructor;
+    address owner;
+
+    */
 
     bytes32 private constant logicPosition = keccak256(abi.encodePacked(keccak256(abi.encode("logicPosition"))));//keccak twice to avoid hash collision than normal mapping
     bytes32 private constant currentLogicPosition = keccak256(abi.encodePacked(keccak256(abi.encode("currentLogicPosition"))));
     bytes32 private constant constructorPosition = keccak256(abi.encodePacked(keccak256(abi.encode("constructorPosition"))));
+    bytes32 private constant ownerPosition = keccak256(abi.encodePacked(keccak256(abi.encode("ownerPosition"))));
 
-    function setAddress(bytes32 _version, address _input) internal{
-        bytes32 slot = calculateSlot(_version);
+    function setLogic(bytes32 _version, address _input) internal{
+        bytes32 slot = calculateVersionSlot(_version);
         assembly {
             sstore(slot, _input)
         }
     }
 
-    function getAddress(bytes32 _version) internal view returns(address){
+    function getLogic(bytes32 _version) internal view returns(address){
         address ret;
-        bytes32 slot = calculateSlot(_version);
+        bytes32 slot = calculateVersionSlot(_version);
         assembly {
             ret := sload(slot)
         }
         return ret;
     }
 
-    function deleteAddress(bytes32 _version) internal{
-        bytes32 slot = calculateSlot(_version);
+    function deleteLogic(bytes32 _version) internal{
+        bytes32 slot = calculateVersionSlot(_version);
         assembly {
             sstore(slot, 0x0000000000000000000000000000000000000000000000000000000000000000)
         }
     }
 
 
-    function calculateSlot(bytes32 _version) internal pure returns (bytes32){
-        return keccak256(abi.encode(bytes32(_version), logicPosition));
-    }
-
-    function setCurrent(bytes32 _version) internal {
+    function setCurrentVersion(bytes32 _version) internal {
         bytes32 slot = currentLogicPosition;
         assembly {
             sstore(slot, _version)
         }
     }
 
-    function getCurrent() internal view returns(bytes32){
+    function getCurrentVersion() internal view returns(bytes32){
         bytes32 ret;
         bytes32 slot = currentLogicPosition;
         assembly {
@@ -51,6 +56,8 @@ contract BaseData {
         }
         return ret;
     }
+
+
 
     function setConstructor() internal {
         bytes32 slot = constructorPosition;
@@ -67,5 +74,64 @@ contract BaseData {
             ret := sload(slot)
         }
         return ret;
+    }
+
+    function setOwner(address _owner) internal {
+        bytes32 slot = ownerPosition;
+        assembly {
+            sstore(slot, _owner)
+        }
+    }
+
+    function getOwner(address _owner) internal view returns(address){
+        address ret;
+        bytes32 slot = ownerPosition;
+        assembly {
+            ret := sload(slot)
+        }
+        return ret;
+    }
+
+
+//================================================================================
+
+    function calculateVersionSlot(bytes32 _version) internal pure returns (bytes32){
+        return keccak256(abi.encode(bytes32(_version), logicPosition));
+    }
+
+
+
+    function callinit(address _delegateTo, bytes _initCalldata, uint256 option) internal{
+        if(option == uint256(0x00)){
+            return;
+        }
+        else if(option == uint256(0x01)){
+            require(address(this).call.value(msg.value)(_initCalldata));
+            return;
+        }
+        else if(option == uint256(0x02)){
+            if(getConstructor()==false){
+                setConstructor();
+                require(address(this).call.value(msg.value)(_initCalldata));
+                return;
+            }else{
+                return;
+            }
+        }
+        else if(option == uint256(0x03)){
+            if(getConstructor()==false){
+                setConstructor();
+                require(address(this).call.value(msg.value)(_initCalldata));
+                return;
+            }else{
+                revert();
+            }
+        }
+        revert();
+    }
+
+    modifier onlyOwner(){
+        requrie(msg.sender == getOwner());
+        _;
     }
 }

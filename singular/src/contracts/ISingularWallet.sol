@@ -17,8 +17,9 @@ import "./ISingular.sol";
  */
 
 interface ISingularWallet {
-
-
+    /**
+    * event emitted when approve target Singular to some another wallet
+    */
     event SingularReceiverApproved(
         address to,
         address singular,
@@ -26,15 +27,18 @@ interface ISingularWallet {
         string senderNote
     );
 
-
+    /**
+    * event emitted when get offered Singular
+    */
     event SingularOffered(
         address from,
         address singular,
         uint256 when,
         string senderNote
     );
-
-
+    /**
+    * event emitted when target Singular transfer succeeds;
+    */
     event SingularTransferred(
         address from,
         address to,
@@ -42,7 +46,9 @@ interface ISingularWallet {
         uint256 when,
         string receiverNote
     );
-
+    /**
+    * event emitted when target Singular transfer fails;
+    */
     event SingularTransferFailed(
         address from,
         address to,
@@ -79,24 +85,6 @@ interface ISingularWallet {
     view
     external
     returns (bool);      ///< true of authorized; false otherwise
-
-//    /**
-//
-//     a callback to notify the the wallet that the transaction
-//     has been complemented. The parties may synchronize the local state to reflect the
-//     ownership change.
-//
-//     The function must `revert` with an error message if an exception has happened
-//
-//     */
-//    function transferred(
-//        ISingular token, ///< the token of concern
-//        ISingularWallet from, ///< the originating party of the transfer
-//        ISingularWallet to, ///< the receiving party
-//        uint256 when, ///< when this happens
-//        string note         ///< additional note
-//    )
-//    external;
 
     /**
     to notify the *sender* that the intended token transfer has completed and the token has been sent
@@ -138,7 +126,8 @@ interface ISingularWallet {
     */
     function send(
         ISingularWallet toWallet,     ///< the recipient
-        ISingular token             ///< the token to transfer
+        ISingular token,             ///< the token to transfer
+        string _senderNote
     )
     external;
 
@@ -148,7 +137,9 @@ interface ISingularWallet {
     */
     function sendNotify(
         ISingularWallet toWallet,     ///< the recipient
-        ISingular token             ///< the token to transfer
+        ISingular token,             ///< the token to transfer
+        string _senderNote,
+        uint256 _expiry
     )
     external;
 

@@ -4,11 +4,12 @@ import "./ISingularWallet.sol";
 import "./ISingular.sol";
 
 /**
-ownership history enumeration. 
-
-Another implementation may keep the record on a unique contract account.
-
-@author Bing Ran<bran@udap.io>
+* ownership history enumeration.
+*
+* Supplemental implementation may keep the record on a unique contract account.
+*
+* @author Bing Ran<bran@udap.io>
+* @author Guxiang Tang<gtang@udap.io>
 */
 interface ITransferHistory {
 
