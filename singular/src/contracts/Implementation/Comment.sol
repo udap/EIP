@@ -3,8 +3,9 @@ pragma solidity ^0.4.24;
 import "../ICommenting.sol";
 import "../utils/RLPEncode.sol";
 import "../utils/Initialized.sol";
+import "./SingularBase.sol";
 
-contract Comment is IComment, Initialized{
+contract Comment is IComment, Initialized, SingularBase{
     constructor () public{
 
     }
@@ -23,27 +24,33 @@ contract Comment is IComment, Initialized{
 
     CommentRec[] ownerComment; // might be operators;
 
-    function addComment(address _who, uint256 _when, string _comment) constructed external {
+    function init() unconstructed public{
+
+    }
+
+    function addComment(address _who, uint256 _when, string _comment) ownerOnly constructed external {
         ownerComment.push(CommentRec(_who, _when, _comment));
         emit Commented(_who, _when, _comment);
     }
 
-    function numOfComment() external view returns(uint256) {
+    function numOfComment() constructed external view returns(uint256) {
         return ownerComment.length;
     }
 
-    function commentAt(uint256 _index) external view returns(bytes){
+    function commentAt(uint256 _index) constructed external view returns(bytes){
         require(_index < ownerComment.length);
         return structSerialize(ownerComment[_index]);
     }
 
-    function allComments() view external returns(bytes) {
+    function allComments() constructed view external returns(bytes) {
         if(ownerComment.length == uint256(0)){
             return hex'c0';
         }
         return arraySerialize(0,ownerComment.length-1);
     }
 
+
+    //=================internal functions===================
     function structSerialize(CommentRec storage _input) internal view returns(bytes){
         return abi.encode(_input.who,_input.at,_input.comment);
     }

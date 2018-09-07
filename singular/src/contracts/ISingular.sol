@@ -35,7 +35,7 @@ interface ISingular {
         address from,           ///< the from party of transaction
         address to,             ///< the receiver
         uint256 expiry,            ///< the time lock. in seconds since the epoch
-        string reason           ///< additional note
+        string senderNote           ///< additional note
     );
     /**
      * the ownership has been successfully transferred from A to B.
@@ -44,8 +44,8 @@ interface ISingular {
         address from,
         address to,
         uint256 when,
-        string reason,          ///< offer note
-        string reply            ///< acceptance note
+        string senderNote,          ///< offer note
+        string receiverNote            ///< acceptance note
     );
     /**
     * the ownership transition fails from A to B
@@ -54,8 +54,8 @@ interface ISingular {
         address from,
         address to,
         uint256 when,
-        string reason,          ///< offer note
-        string reply            ///< acceptance note
+        string senderNote,          ///< offer note
+        string receiverNote            ///< acceptance note
     );
 
 

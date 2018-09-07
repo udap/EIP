@@ -1,19 +1,19 @@
 pragma solidity ^0.4.24;
 
-import "./Singular.sol";
+import "./SingularBase.sol";
 import "../ISingular.sol";
 import "../../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "../Implementation/SingularWallet.sol";
+import "../Implementation/SingularWalletBase.sol";
 import "./global/SingularFactory.sol";
 
-contract MintableSingularGenerator is SingularWalletImpl {
+contract MintableSingularGenerator is SingularWalletBase {
     SingularFactory internal singularFactory;
 /*    constructor(SingularFactory _singularFactory) public payable{
         singularFactory = _singularFactory;
     }*/
 
     function init(SingularFactory _singularFactory, address _generatorOwner, address _generatorOperator) unconstructed public payable{
-        SingularWalletImpl.init( _generatorOwner,  _generatorOperator);
+        SingularWalletBase.init( _generatorOwner,  _generatorOperator);
         singularFactory = _singularFactory;
     }
     string symbol;

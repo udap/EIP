@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 import "../../../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../../Upgradeable/Mini/MiniRegistry.sol";
@@ -27,7 +27,7 @@ contract SingularFactory is Ownable{
     //please config MiniRegistry  before you create MiniProxy
     function createSingular(string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest, address _to, address _creator) onlyOwner public returns (ISingular){
         MiniProxy newSingular = new MiniProxy(address(miniRegistry),this);
-        SingularImpl(newSingular).init(_name, _symbol, _description, _tokenURI, _tokenURIDigest, _to, _creator);
+        Singular(newSingular).init(_name, _symbol, _description, _tokenURI, _tokenURIDigest, _to, _creator);
 
         registeredSingulars[address(newSingular)]= true;
         return ISingular(newSingular);

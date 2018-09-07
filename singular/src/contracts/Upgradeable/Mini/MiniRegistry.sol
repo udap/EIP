@@ -19,11 +19,9 @@ contract MiniRegistry is Ownable{
     }
 
     function setLogicAddressAndActivate(bytes32 _version, address _delegateTo) onlyOwner payable public {
-        require(_delegateTo != address(0));
-        versions[_version] = _delegateTo;
         require(_delegateTo != address(0x00),"you must register the version and its logic address first");
+        versions[_version] = _delegateTo;
         activatedVersion = _version;
-
     }
 
 

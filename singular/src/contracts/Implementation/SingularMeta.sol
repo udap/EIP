@@ -2,8 +2,9 @@ pragma solidity ^0.4.24;
 
 import "../ISingularMeta.sol";
 import "../utils/Initialized.sol";
+import "./SingularBase.sol";
 
-contract SingularMeta is ISingularMeta , Initialized{
+contract SingularMeta is ISingularMeta , Initialized, SingularBase{
     /// meta
     string theName;
     string theSymbol; /// token type information

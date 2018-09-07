@@ -3,18 +3,19 @@ pragma solidity ^0.4.24;
 import "../../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../utils/RLPEncode.sol";
 import "../ITransferHistory.sol";
+import "./SingularBase.sol";
+import "../utils/Initialized.sol";
 
-contract TransferHistory is ITransferHistory {
+contract TransferHistory is ITransferHistory, Initialized {
 
 
     /// ownership history enumeration
     struct TransferRec {
         ISingularWallet from;
         ISingularWallet to;
-        uint256 at;
+        uint256 when;
         string senderNote;
         string receiverNote;
-        ISingular singular;
     }
 
 
@@ -23,7 +24,11 @@ contract TransferHistory is ITransferHistory {
     constructor()public{
     }
 
-    function numOfTransfers() view public returns (uint256) {
+    function init() unconstructed public{
+
+    }
+
+    function numOfTransfers() constructed view public returns (uint256) {
         return transferHistory.length;
     }
     /**
@@ -31,7 +36,7 @@ contract TransferHistory is ITransferHistory {
      * @param _index the inde of the inquired record. It must in the range of
      * [0, numberOfTransfers())
      */
-    function getTransferAt(uint256 _index) view public returns(bytes) {
+    function getTransferAt(uint256 _index) constructed view public returns(bytes) {
         // need to serialize a records
         // return transferHistory[index];
         require(_index < transferHistory.length);
@@ -42,20 +47,22 @@ contract TransferHistory is ITransferHistory {
      * get all the transfer records in a serialized form that is defined by
      * implementation.
      */
-    function getTransferHistory() view public returns (bytes) {
+    function getTransferHistory() constructed view public returns (bytes) {
         if(transferHistory.length == uint256(0)){
             return hex'c0';
         }
         return arraySerialize(0,transferHistory.length -1);
     }
 
-    function addTransferHistory(ISingular _singular, ISingularWallet _from, ISingularWallet _to, uint256 _at, string _senderNote, string _receiverNote) internal{
-        TransferRec memory newOne = TransferRec(_from, _to, _at, _senderNote, _receiverNote, _singular);
+    //=================internal functions===================
+    function addTransferHistory(ISingularWallet _from, ISingularWallet _to, uint256 _when, string _senderNote, string _receiverNote) internal{
+        TransferRec memory newOne = TransferRec(_from, _to, _when, _senderNote, _receiverNote);
         transferHistory.push(newOne);
     }
 
+    //workaround until AbiEncodingV2 is ready
     function structSerialize(TransferRec storage _input) internal view returns(bytes){
-        return abi.encode(_input.from,_input.to,_input.at,_input.senderNote,_input.receiverNote,_input.singular);
+        return abi.encode(_input.from,_input.to,_input.when,_input.senderNote,_input.receiverNote);
     }
 
     function arraySerialize(uint256 _start, uint256 _end) internal view returns(bytes){

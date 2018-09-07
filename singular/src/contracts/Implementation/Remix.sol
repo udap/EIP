@@ -1,14 +1,15 @@
 pragma solidity ^0.4.24;
 
 import "./Comment.sol";
-import "./Singular.sol";
+import "./SingularBase.sol";
 import "./SingularMeta.sol";
-import "./SingularWallet.sol";
+import "./SingularWalletBase.sol";
 import "./TransferHistory.sol";
 import "./LimitedSingularGenerator.sol";
 import "./global/GeneratorFactory.sol";
 import "./global/SingularFactory.sol";
 import "./global/WalletFactory.sol";
+import "./Singular.sol";
 /*
  * This contract is a quick build contract.
  *

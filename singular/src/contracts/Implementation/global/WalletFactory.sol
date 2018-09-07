@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 import "../../../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../../ISingularWallet.sol";
@@ -28,9 +28,9 @@ contract WalletFactory is Ownable{
     }
 
     //please config MiniRegistry  before you create MiniProxy
-    function createWallet(address _to, address _toOperator) onlyOwner public returns (ISingularWallet){
+    function createWallet(address _to, address _toOperator, string _theName, string _theSymbol, string _theDescription) onlyOwner public returns (ISingularWallet){
         MiniProxy newWallet = new MiniProxy(miniRegistry,this);
-        SingularWalletImpl(newWallet).init(_to, _toOperator);
+        SingularWallet(newWallet).init(_to, _toOperator, _theName, _theSymbol, _theDescription);
 
         registeredWallets[address(newWallet)]= _to;
         return  ISingularWallet(newWallet);
