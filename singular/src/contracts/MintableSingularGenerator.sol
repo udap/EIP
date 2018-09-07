@@ -1,10 +1,10 @@
 pragma solidity ^0.4.24;
 
 import "./SingularBase.sol";
-import "../ISingular.sol";
-import "../../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "../Implementation/SingularWalletBase.sol";
-import "./global/SingularFactory.sol";
+import "./ISingular.sol";
+import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "./SingularWalletBase.sol";
+import "./SingularFactory.sol";
 
 contract MintableSingularGenerator is SingularWalletBase {
     SingularFactory internal singularFactory;

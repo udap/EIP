@@ -83,7 +83,7 @@ contract BaseData {
         }
     }
 
-    function getOwner(address _owner) internal view returns(address){
+    function getOwner() internal view returns(address){
         address ret;
         bytes32 slot = ownerPosition;
         assembly {
@@ -112,7 +112,7 @@ contract BaseData {
         else if(option == uint256(0x02)){
             if(getConstructor()==false){
                 setConstructor();
-                require(address(this).call.value(msg.value)(_initCalldata));
+                require(_delegateTo.call.value(msg.value)(_initCalldata));
                 return;
             }else{
                 return;
@@ -121,7 +121,7 @@ contract BaseData {
         else if(option == uint256(0x03)){
             if(getConstructor()==false){
                 setConstructor();
-                require(address(this).call.value(msg.value)(_initCalldata));
+                require(_delegateTo.call.value(msg.value)(_initCalldata));
                 return;
             }else{
                 revert();
@@ -131,7 +131,7 @@ contract BaseData {
     }
 
     modifier onlyOwner(){
-        requrie(msg.sender == getOwner());
+        require(msg.sender == getOwner());
         _;
     }
 }

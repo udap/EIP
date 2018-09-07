@@ -1,10 +1,10 @@
 pragma solidity ^0.4.24;
 
-import "../../../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "../../Upgradeable/Mini/MiniRegistry.sol";
-import "../../ISingular.sol";
-import "../../Upgradeable/Mini/MiniProxy.sol";
-import "../Singular.sol";
+import "../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./Upgradeable/Mini/MiniRegistry.sol";
+import "./ISingular.sol";
+import "./Upgradeable/Mini/MiniProxy.sol";
+import "./Singular.sol";
 
 contract SingularFactory is Ownable{
     constructor(MiniRegistry _registry) public payable{

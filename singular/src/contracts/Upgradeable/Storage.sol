@@ -32,7 +32,7 @@ contract Storage is Proxy, BaseData{
     function setLogicAddressAndActivate(bytes32 _version, address _delegateTo, bytes _initCalldata, uint256 option) onlyOwner payable public {
         require(_delegateTo != address(0));
         setLogic(_version,_delegateTo);
-        setCurrentLogic(_version);
+        setCurrentVersion(_version);
         callinit(_delegateTo, _initCalldata, option);
     }
 
@@ -40,7 +40,7 @@ contract Storage is Proxy, BaseData{
     function activateLogic(bytes32 _version, bytes _initCalldata, uint256 option) onlyOwner payable public {
         address logic = getLogic(_version);
         require(logic != address(0x00),"you must register the version and its logic address first");
-        setCurrentLogic(_version);
+        setCurrentVersion(_version);
         callinit(logic, _initCalldata, option);
     }
 

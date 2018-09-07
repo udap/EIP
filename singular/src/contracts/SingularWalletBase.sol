@@ -1,11 +1,11 @@
 pragma solidity ^0.4.24;
 
-import "../ISingular.sol";
-import "../ISingularWallet.sol";
-import "../../node_modules/openzeppelin-solidity/contracts/AddressUtils.sol";
-import "../../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "../../node_modules/openzeppelin-solidity/contracts/ReentrancyGuard.sol";
-import "../utils/Initialized.sol";
+import "./ISingular.sol";
+import "./ISingularWallet.sol";
+import "../node_modules/openzeppelin-solidity/contracts/AddressUtils.sol";
+import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "../node_modules/openzeppelin-solidity/contracts/ReentrancyGuard.sol";
+import "./utils/Initialized.sol";
 
 /*
 

@@ -1,10 +1,10 @@
 pragma solidity ^0.4.24;
 
-import "../../../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "../../ISingularWallet.sol";
-import "../../Upgradeable/Mini/MiniProxy.sol";
-import "../../Upgradeable/Mini/MiniRegistry.sol";
-import "../SingularWallet.sol";
+import "../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./ISingularWallet.sol";
+import "./Upgradeable/Mini/MiniProxy.sol";
+import "./Upgradeable/Mini/MiniRegistry.sol";
+import "./SingularWallet.sol";
 
 // MiniProxy1,2,3,4....n  =>  MiniRegistry => WalletLogic
 contract WalletFactory is Ownable{

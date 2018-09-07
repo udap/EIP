@@ -19,7 +19,7 @@ contract ChannelMemeber is SingularWallet, IChannelMember {
     function attachToChannel(
         IStateChannel channel
     )
-    external public {
+    external {
         theChannel = channel;
     }
 }
