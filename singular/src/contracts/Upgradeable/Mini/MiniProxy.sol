@@ -43,7 +43,7 @@ contract MiniProxy {
         address registry = getLogicPosition();
         require(registry != address(0),"you must set delegate first");
 
-        address _delegateTo = MiniRegistry(_delegateTo).currentLogic();
+        address _delegateTo = MiniRegistry(registry).currentLogic();
 
         assembly {
             let ptr := mload(0x40)
