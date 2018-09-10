@@ -1,5 +1,7 @@
 pragma solidity ^0.4.24;
 
+import "./MiniRegistry.sol";
+
 contract MiniProxy {
     constructor(address _toRegistry, address _initPermission) public payable{
         setLogicPosition(_toRegistry);
@@ -38,8 +40,10 @@ contract MiniProxy {
     //public should be safe cause public function copys calldata into memory as 'external' and then jump to its logic like 'internal'
     //fallback function can't be invoked like internal so that public would be OK
     function () payable public {
-        address _delegateTo = getLogicPosition();
-        require(_delegateTo != address(0),"you must set delegate first");
+        address registry = getLogicPosition();
+        require(registry != address(0),"you must set delegate first");
+
+        address _delegateTo = MiniRegistry(_delegateTo).currentLogic();
 
         assembly {
             let ptr := mload(0x40)

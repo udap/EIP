@@ -36,25 +36,8 @@ contract MiniRegistry is Ownable{
         delete versions[_version];
     }
 
-    function currentLogic() onlyOwner public view returns (address){
+    function currentLogic() public view returns (address){
         return versions[activatedVersion];
     }
 
-    //forward all internal tx to the _delegateTo,  the  _delegateTo must do author check
-    function () payable public {
-        address _delegateTo = versions[activatedVersion];
-        require(_delegateTo != address(0),"you must set delegate first");
-
-        assembly {
-            let ptr := mload(0x40)
-            calldatacopy(ptr, 0, calldatasize)
-            let result := delegatecall(gas, _delegateTo, ptr, calldatasize, 0, 0)
-            let size := returndatasize
-            returndatacopy(ptr, 0, size)
-
-            switch result
-            case 0 { revert(ptr, size) }
-            default { return(ptr, size) }
-        }
-    }
 }
