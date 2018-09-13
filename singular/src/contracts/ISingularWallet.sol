@@ -143,7 +143,13 @@ interface ISingularWallet {
     )
     external;
 
-
+    //just offer singular and the sender shall use offline way to inform the receiver
+    function approve(
+        ISingularWallet _to,
+        ISingular _singular,
+        string _senderNote,
+        uint256 _expiry
+    );
 
     /**
      Offers a token that has been assigned to the receiver as the next owner.
