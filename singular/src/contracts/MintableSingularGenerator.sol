@@ -20,7 +20,7 @@ contract MintableSingularGenerator is SingularWalletBase {
     mapping(uint256 => ISingular) registry;
     uint256 total;
 
-    function mint(string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest, address _to) constructed public returns (uint256 singularNo, ISingular created){
+    function mint(string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest, address _to) constructed onlyOwnerOrOperator public returns (uint256 singularNo, ISingular created){
         //created = new SingularImpl(_name, symbol, _description, _tokenURI,_tokenURIDigest, _to);
         singularFactory.createSingular( _name,  _symbol,  _description,  _tokenURI,  _tokenURIDigest,  _to, this);
         singularNo = total;
@@ -29,7 +29,7 @@ contract MintableSingularGenerator is SingularWalletBase {
         return;
     }
 
-    function burn(uint256 _singularNo) constructed public{
+    function burn(uint256 _singularNo) constructed onlyOwnerOrOperator public{
         registry[_singularNo].burn("burn it");
     }
 }

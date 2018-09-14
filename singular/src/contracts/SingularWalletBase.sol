@@ -41,8 +41,17 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
         }
     }
 
+    function isActionAuthorized(address _caller) view external returns(bool){
+        return (walletOwner == _caller || walletOperator == _caller);
+    }
+
+    function setOperator(address _operator) onlyOwnerOrOperator constructed public{
+        walletOperator = _operator;
+    }
+
     //=============================callback===============================================
-    function sent(ISingular _singular, string _receiverNote) ownsSingular(_singular) constructed external{
+    function sent(ISingular _singular, string _receiverNote) /*ownsSingular(_singular)*/ constructed external{
+        require(hasSingular(_singular));
         require( _singular.previousOwner() == this);
         emit SingularTransferred(_singular.previousOwner(),_singular.currentOwner(),_singular,now,_receiverNote);
         singularRemoved(_singular);
@@ -82,20 +91,23 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
 
     //=============================action===============================================
 
-    function send(ISingularWallet _to, ISingular _singular, string _senderNote) onlyOwnerOrOperator ownsSingular(_singular) constructed external{
+    function send(ISingularWallet _to, ISingular _singular, string _senderNote) onlyOwnerOrOperator /*ownsSingular(_singular)*/ constructed external{
+        require(hasSingular(_singular));
         //send contains approve logic so here emit an approve event
         emit SingularReceiverApproved(_to, _singular, now,_senderNote);
         _singular.sendTo(_to, _senderNote, true,0);
     }
 
-    function sendNotify(ISingularWallet _to, ISingular _singular, string _senderNote, uint256 _expiry) onlyOwnerOrOperator ownsSingular(_singular) constructed external{
+    function sendNotify(ISingularWallet _to, ISingular _singular, string _senderNote, uint256 _expiry) onlyOwnerOrOperator /*ownsSingular(_singular)*/ constructed external{
+        require(hasSingular(_singular));
         //send contains approve logic so here emit an approve event
         require(_expiry > now);
         _singular.sendTo(_to, _senderNote, false, _expiry);
     }
 
     //manually approve a singular
-    function approve(ISingularWallet _to, ISingular _singular, string _senderNote, uint256 _expiry ) onlyOwnerOrOperator ownsSingular(_singular) constructed external{
+    function approve(ISingularWallet _to, ISingular _singular, string _senderNote, uint256 _expiry ) onlyOwnerOrOperator /*ownsSingular(_singular)*/ constructed external{
+        require(hasSingular(_singular));
         require(_expiry > now);
         emit SingularReceiverApproved(_to, _singular, now,_senderNote);
         _singular.approveReceiver(_to, _expiry, _senderNote);
@@ -168,10 +180,10 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
     //==============================internal==============================================
 
 
-    modifier ownsSingular(ISingular _singular){
+    /*modifier ownsSingular(ISingular _singular){
         require(hasSingular(_singular));
         _;
-    }
+    }*/
 
     modifier onlyOwnerOrOperator(){
         require(msg.sender == walletOwner || msg.sender == walletOperator);

@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "./Upgradeable/Mini/MiniRegistry.sol";
 import "./LimitedSingularGenerator.sol";
 
-contract GeneratorFactory is Ownable{
+contract GeneratorFactory{
 
     constructor(MiniRegistry _registry) public payable{
         miniRegistry = _registry;
@@ -14,16 +14,16 @@ contract GeneratorFactory is Ownable{
     //generator address => true if published by this factory
     mapping(address => bool) registeredGenerators;
 
-    function setMiniRegistry (MiniRegistry _registry) public onlyOwner{
+/*    function setMiniRegistry (MiniRegistry _registry) public onlyOwner{
         miniRegistry = _registry;
-    }
+    }*/
 
     function getMiniRegistry () public view returns(MiniRegistry){
         return miniRegistry;
     }
 
     //please config MiniRegistry  before you create MiniProxy
-    function createGenerator(SingularFactory _singularFactory, address _generatorOwner, address _generatorOperator, uint256 _limit) onlyOwner public returns (LimitedSingularGenerator){
+    function createGenerator(SingularFactory _singularFactory, address _generatorOwner, address _generatorOperator, uint256 _limit) public returns (LimitedSingularGenerator){
         MiniProxy newSingular = new MiniProxy(address(miniRegistry),this);
         LimitedSingularGenerator(newSingular).init(_singularFactory, _generatorOwner, _generatorOperator, _limit);
 
