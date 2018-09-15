@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import "./ISingular.sol";
 import "./ISingularWallet.sol";
+import "./ITransferrable.sol";
 import "../node_modules/openzeppelin-solidity/contracts/ReentrancyGuard.sol";
 import "../node_modules/openzeppelin-solidity/contracts/AddressUtils.sol";
 import "./TransferHistory.sol";
@@ -11,7 +12,7 @@ import "./TransferHistory.sol";
 */
 
 //singular must transfer by its owner(SingularWallet) and between SingularWallets
-contract SingularBase is ISingular, ReentrancyGuard, TransferHistory {
+contract SingularBase is ISingular, ITransferrable, ReentrancyGuard, TransferHistory {
 
     address internal prototype; // token types, a ref to type information
 
@@ -63,19 +64,40 @@ contract SingularBase is ISingular, ReentrancyGuard, TransferHistory {
      * @param _expiry the dealline for the revceiver to the take the ownership with the preimage
      * @param _senderNote the reason for the transfer
      */
-    function approveReceiver(ISingularWallet _to, uint256 _expiry, string _senderNote) notInTransition ownerOnly /*nonReentrant*/ constructed external {
+    function approveReceiver(
+        ISingularWallet _to, 
+        uint256 _validFrom,
+        uint256 _expiry, 
+        string _senderNote
+        ) 
+        notInTransition 
+        ownerOnly 
+        /*nonReentrant*/ 
+        constructed 
+        external {
         require(_to != singularOwner);
         require(_expiry > now);
         singularRecipient = _to;
         expiry = _expiry;
         transferReason = _senderNote;
 
-        emit ReceiverApproved(singularOwner, _to, _expiry, _senderNote);
+        emit ReceiverApproved(singularOwner, _to, _validFrom, _expiry, _senderNote);
 
     }
 
 
-    function sendTo(ISingularWallet _to, string _senderNote, bool _sync, uint256 _expiry ) notInTransition ownerOnly /*nonReentrant*/ constructed external {
+    function sendTo(
+        ISingularWallet _to, 
+        string _senderNote, 
+        bool _sync, 
+        uint256 _expiry ) 
+    
+        notInTransition 
+        ownerOnly 
+        /*nonReentrant*/ 
+        constructed 
+        external 
+    {
         // we still use the approve/take two-step pattern
         // which takes place in one transaction;
         require(_to != singularOwner);
@@ -88,7 +110,7 @@ contract SingularBase is ISingular, ReentrancyGuard, TransferHistory {
         singularRecipient = _to;
         expiry = tempExpiry;
         transferReason = _senderNote;// TODO: duplicated logic
-        emit ReceiverApproved(singularOwner, _to, _expiry, _senderNote);
+        emit ReceiverApproved(singularOwner, _to, now, _expiry, _senderNote);
 
         if(_sync == true){
             _to.offer(this, _senderNote);
@@ -178,7 +200,7 @@ contract SingularBase is ISingular, ReentrancyGuard, TransferHistory {
     }
 
 
-    function currentOwner() view external returns (ISingularWallet){
+    function owner() view external returns (ISingularWallet){
         return singularOwner;
     }
     

@@ -10,7 +10,9 @@ import "./ISingular.sol";
  * All the tokens MUST have this account as the owner of them. It's up to the implementation
  * to ensure the synchronization.
  *
- *
+  XXX alternative name: ISingularOwner
+
+
  * @author Bing Ran<bran@udap.io>
  * @author Guxiang Tang<gtang@udap.io>
  *
@@ -190,9 +192,30 @@ interface ISingularWallet {
     )
     external;
 
+    //------------- interactions between containers
 
+    /**
+    to create a new ISingularWallet and move the ownership of he elements from this wallet to a new
+    ISingularWallet. The new container's owner is the the owner of this container
+    */
+    function slice(
+        ISingular[] elements    ///< the elements to move slice off from this container.
+    )
+    external
+    returns(
+        ISingularWallet         ///< the new ISingularWallet instance owning the elements
+    );
 
-    // asset enumeration
+    /**
+    to dump all the elements of the specified wallet to this container. The incoming container's owner
+    must be the same as this container.
+    */
+    function join(
+        ISingularWallet container   ///< the source container which must be owned by the same owner as this.
+    )
+    external;
+
+    //-------------- asset enumeration
 
 
     /**
