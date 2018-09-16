@@ -37,7 +37,8 @@ contract MiniProxy {
     }
 
     //all other functions goes to here
-    //public should be safe cause public function copys calldata into memory as 'external' and then jump to its logic like 'internal'
+    //public should be safe cause public function copys calldata into memory 
+    //as 'external' and then jump to its logic like 'internal'
     //fallback function can't be invoked like internal so that public would be OK
     function () payable public {
         address registry = getLogicPosition();

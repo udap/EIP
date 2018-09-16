@@ -24,6 +24,8 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
 
 
     address internal theCreator; /// who creates this token
+    address tokenTypeAddr;
+    
     uint256 whenCreated;
     uint256 validFrom;
     uint256 validTill;
@@ -38,6 +40,7 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
         string _descr, 
         string _tokenURI, 
         bytes32 _tokenURIHash,
+        address _tokenType,
         ISingularWallet _wallet)
     SingularMeta(_name, _symbol, _descr, _tokenURI, _tokenURIHash)
     public
@@ -45,6 +48,7 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
         theCreator = msg.sender;
         currentOwner = _wallet;
         whenCreated = now;
+        tokenTypeAddr = _tokenType;
     }
 
     function creator()
@@ -54,6 +58,15 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
         address         ///< the owner elected
     ) {
         return theCreator;
+    }
+    
+    function tokenType()
+    view
+    external
+    returns(
+        address                 ///< address that describes the type of the token.
+    ){
+        return tokenTypeAddr;
     }
     
     function creationTime() public view returns(uint256) {
@@ -91,10 +104,11 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
         string _reason
         ) 
         external
-        NotInTransition 
+        permitted(msg.sender, "approveReceiver")
+        notInTransition 
     {
         
-        require(address(_to) != address(0) && currentOwner.isActionAuthorized(msg.sender, "approveReceiver", this));
+        require(address(_to) != address(0), "cannot send to null address");
         validFrom = _validFrom;
         validTill = _validTill;
         senderNote = _reason;
@@ -109,11 +123,11 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
      * as of now. This function MUST call the sent() method on the original owner.
      TODO: evaluate re-entrance attack
      */
-    function accept(string _reason) external InTransition {
-        require(
-            address(nextOwner) != address(0) && 
-            nextOwner.isActionAuthorized(msg.sender, "accept", this)
-        );
+    function accept(string _reason) 
+    external 
+    inTransition 
+    permitted(msg.sender, "accept")
+    {
         ownerPrevious = currentOwner;
         currentOwner = nextOwner; // the single most important step!!!
         reset();
@@ -129,12 +143,10 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
      * reject an offer. Must be called by the approved next owner(from the address
      * of the SingularOwner or SingularOwner.ownerAddress()).
      */
-    function reject(string note) external {
-        address sender = msg.sender;
-        require(
-            sender == address(nextOwner) ||
-            nextOwner.isActionAuthorized(sender, "reject", this)
-            );
+    function reject(string note) 
+    external 
+    permitted(msg.sender, "reject")
+    {
         receiverNote = note;
         reset();
     }
@@ -158,21 +170,31 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
         external 
         {
             uint t = now;
-        this.approveReceiver(_to, t, t + 60 seconds, _reason);
-        _to.offer(this, _reason);
+            this.approveReceiver(_to, t, t + 60 seconds, _reason);
+            _to.offer(this, _reason);
         }
     
 
-    modifier NotInTransition() {
+    modifier notInTransition() {
         require(now > validTill, "this singular is in ownership transition");
         _;
     }
 
-    modifier InTransition() {
+    modifier inTransition() {
         uint256 t = now;
         require(t >= validFrom && t <= validTill, 
         "not in valid ownership transition time window.");
         _;
     }
 
+   modifier ownerOnly() {
+        require(msg.sender == address(currentOwner), "only owner can do this action");
+        _;
+    }
+
+    modifier permitted(address caller, bytes32 action) {
+        require(currentOwner.isActionAuthorized(caller, action, this), 
+        "action not authorized");
+        _;
+    }
 }
