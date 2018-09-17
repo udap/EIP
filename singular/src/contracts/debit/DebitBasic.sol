@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import './IDebit.sol';
-import './SimpleSingular.sol';
+import '../SimpleSingular.sol';
 import './DebitFactory.sol';
 
 
@@ -10,7 +10,7 @@ contract DebitBasic is IDebit, SimpleSingular{
     uint256 faceValue;
     DebitBasic public whoCanDeposit;
     DebitBasic public whoCanDeduct;
-    
+    uint256 deductionLimit;
     
     // XXX: fill up parent constructor
     constructor(
@@ -35,8 +35,9 @@ contract DebitBasic is IDebit, SimpleSingular{
         whoCanDeposit = who;
     }
     
-    function allowDeduct(DebitBasic who) ownerOnly external {
+    function allowDeduct(DebitBasic who, uint256 howMuch) ownerOnly external {
         whoCanDeduct = who;
+        deductionLimit = howMuch;
     }
     
     /**
@@ -56,6 +57,8 @@ contract DebitBasic is IDebit, SimpleSingular{
      * To transfer some tokens to another coin of the same ERC20 type.
      * The owner of the coin can be different. 
      * 
+     * The function is for the owner of this account.
+     * 
      * Must be carefully designed to ensure proper permission. 
      * 
      * The caller MUST have granted this the permissoin to make the deposit
@@ -69,37 +72,44 @@ contract DebitBasic is IDebit, SimpleSingular{
     )
     public
     sameTokenType(another)
-    permitted(msg.sender, "transfer")       
+    permitted(msg.sender, "transfer", currentOwner)       
     {
         DebitBasic another = DebitBasic(coin);
         require(another.whoCanDeposit() == this, "this is not allowed to put money in the arg");
         require(faceValue >= amount, "out of faceValue");
+        // allow receiver to deduct from this
         whoCanDeduct = another;
+        deductionLimit = amount;
         uint256 c = another.denomination();
         // faceValue -= amount;
         another.depositAndDeductBack(amount);
         require(another.denomination() == c + amount, "an overflow may have happened");
         delete whoCanDeduct; // double check
+        delete deductionLimit;
     }
     
     /**
-     * this method realize atomic balance transfer between two accounts.
-     * Theamount credited to this account is drawn from the caller's account. 
+     * This method realize atomic balance transfer between two accounts.
+     * The amount credited to this account is drawn from the caller's account. 
      * 
      * The caller MUST have been granted to the permissoin to make the deposit and
      * the caller MUST grant this account the permissoin to deduct its balance. 
+     * 
+     * This function is designed to be called between two accounts as part of transfer.
+     * It cannot be called directly by owners of of any debbit account. 
      * 
      * XXX the scheme here is delicate and requires extensive tests.
      */
     function depositAndDeductBack(uint256 amount ) 
     public 
-    balanced(this, whoCanDeposit)
+    mutuallyAgreed(DebitBasic(msg.sender), this)
+    balanced(this, whoCanDeposit) // accounting MUST be balanced
     {
-        require(msg.sender == address(whoCanDeposit), "sender is not allowed to deposit");
         uint c = faceValue;
         faceValue += amount;
         require(faceValue >= c, "an overflow may have happened");
         
+        // noted that the caller == whoCanDeposit
         c = whoCanDeposit.denomination(); // take a snopshot of the balance before deduction.
         whoCanDeposit.deduct(amount);
         require(whoCanDeposit.denomination() == c - amount, "deduction did not happen");
@@ -111,13 +121,22 @@ contract DebitBasic is IDebit, SimpleSingular{
      * gone. It must be used together with another deposit on the counterparty
      * to balance the accounting.
      * 
+     * This function is designed to be called between two accounts as part of transfer.
+     * It cannot be called directly by owners of of any debbit account. 
+
      * The message sender must be set up properly to use this method. 
      */
-    function deduct(uint256 amount ) public {
+    function deduct(uint256 amount ) 
+    
+    public
+    {
         require(msg.sender == address(whoCanDeduct), "sender is not allowed to deduct");
+        require(deductionLimit >= amount, "deduction exceeds the limit");
         require(faceValue >= amount, "out of faceValue");
+        
         faceValue -= amount;
         delete whoCanDeduct;
+        delete deductionLimit;
     }
     
     
@@ -125,13 +144,16 @@ contract DebitBasic is IDebit, SimpleSingular{
     /**
      * To dump the all the coin value from the argument to this coin container.
      * The owners must be the same and the coin types must be the same.
+     * 
+     * An external API for account owners.
      */
     function merge(
         IDebit coin     ///< the coin must allow this account to deduct all denomination
     )
     public
     sameTokenType(coin)
-    sameOwner(coin)  
+    sameOwner(coin)
+    permitted(msg.sender, "merge", currentOwner) 
     balanced(this, coin)
     returns(
         uint256 updatedfaceValue
@@ -144,28 +166,28 @@ contract DebitBasic is IDebit, SimpleSingular{
         return faceValue;
     }
     
-    /**
-     * this creates a new Debit of the same type and allocate some value to it from this
-     * coin.
-     */
-    function split(
-        uint256 amount      ///< the value in the new coin
-    ) 
-    public
-    returns(
-        IDebit          ///< the spawned child coin
-    )
-    {
-        require(this.denomination() >= amount, "not enough faceValue");
-        ISingularWallet wal = currentOwner;
-        require(msg.sender == address(wal), "the message sender was not the owner");
-        DebitBasic newCoin = DebitFactory.newDebitBasic("unknown", tokenTypeAddr, wal);
-        newCoin.allowDeposit(this); // this won't work due to lack of permission
-        whoCanDeduct = newCoin;
-        newCoin.depositAndDeductBack(amount);
-        return newCoin;
-    }
-    
+//    /**
+//     * this creates a new Debit of the same type and allocate some value to it from this
+//     * coin.
+//     */
+//    function split(
+//        uint256 amount      ///< the value in the new coin
+//    )
+//    public
+//    permitted(msg.sender, "split", currentOwner)
+//    returns(
+//        IDebit          ///< the spawned child coin
+//    )
+//    {
+//        require(this.denomination() >= amount, "not enough faceValue");
+//        ISingularWallet wal = currentOwner;
+//        DebitBasic newCoin = DebitFactory.newDebitBasic("DebitBasic", tokenTypeAddr, wal);
+//        newCoin.allowDeposit(this);
+//        whoCanDeduct = newCoin;
+//        newCoin.depositAndDeductBack(amount);
+//        return this;
+//    }
+//
     modifier sameTokenType(ISingular t) {
         require(t.tokenType() == this.tokenType(), "The currency types are different");
         _;
@@ -182,5 +204,17 @@ contract DebitBasic is IDebit, SimpleSingular{
         uint256 postTxBalance = a.denomination() + b.denomination();
         require(preTxBalance == postTxBalance, "debit accounts not balanced after tx");
     }
+    
+    modifier mutuallyAgreed(
+        DebitBasic from, 
+        DebitBasic to 
+        )
+        {
+            require(from.whoCanDeduct() == to, 
+            "the receiver has not been granted permission to deduct from sender");
+            require(to.whoCanDeposit() == from, 
+            "the sender has not been granted permission to deposit to the receiver");
+            _;
+        }
 
 }

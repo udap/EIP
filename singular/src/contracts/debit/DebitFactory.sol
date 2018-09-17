@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "./ISingularWallet.sol";
+import "../ISingularWallet.sol";
 import './DebitBasic.sol';
 
 library DebitFactory{

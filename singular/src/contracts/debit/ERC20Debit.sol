@@ -1,11 +1,10 @@
 pragma solidity ^0.4.24;
 
 import "./IDebit.sol";
-import "./SimpleSingular.sol";
-import "./ERC20Interface.sol";
-import "./ERC20DebitFactory.sol";
-import "./ISingularWallet.sol";
-import "./ISingular.sol";
+import "../SimpleSingular.sol";
+import "./ERC20WithFactory.sol";
+import "../ISingularWallet.sol";
+import "../ISingular.sol";
 
 
 
@@ -17,16 +16,10 @@ import "./ISingular.sol";
  */
 contract ERC20Debit is IDebit, SimpleSingular {
     /// the underlying erc20 type
-    ERC20Interface _erc20;
-    
-    uint256 faceValue;
-    ERC20Debit public whoCanWithdraw;
-    ERC20Debit public whoCanDeposit;
+    ERC20WithFactory _erc20;
 
-    
-    // XXX: fill up parent constructor
     constructor(
-        ERC20Interface addr,
+        ERC20WithFactory addr,
         ISingularWallet wal
     ) 
     SimpleSingular(
@@ -64,6 +57,7 @@ contract ERC20Debit is IDebit, SimpleSingular {
         uint256 amount          ///< how many units of tokens to transfer
     )
     sameTokenType(another)
+    ownerOnly
     public
     {
         _erc20.transfer(address(another), amount);
@@ -74,7 +68,9 @@ contract ERC20Debit is IDebit, SimpleSingular {
      * To dump the all the coin value from the argument to this coin container.
      * The owners must be the same and the coin types must be the same.
      */
-    function merge(IDebit coin)
+    function merge(
+        IDebit coin
+    )
     public
     sameTokenType(coin)
     sameOwner(coin)
@@ -82,30 +78,10 @@ contract ERC20Debit is IDebit, SimpleSingular {
         uint256 updatedfaceValue
     )
     {
-        this.deposit(ERC20Debit(coin), coin.denomination());
+        coin.transfer(this, coin.denomination());
         return denomination();
     }
-    
-       // will this work?
-    function deposit(ERC20Debit from, uint256 amount ) public {
-        require(msg.sender == address(whoCanDeposit), "sender is not allowed to deposit");
-        require(msg.sender == address(from), "sender must be the source account");
-        uint d = from.denomination();
-        from.deduct(this, amount);
-        require(from.denomination() == d - amount, "number does not add up in withdraw");
-        uint c = faceValue;
-        faceValue += amount;
-        require(faceValue >= c, "an overflow may have happened");
-    }
-    
-    function deduct(ERC20Debit from, uint256 amount ) public {
-        require(msg.sender == address(whoCanWithdraw), "sender is not allowed to withdraw");
-        require(msg.sender == address(from), "sender must be the source account");
-        require(faceValue >= amount, "out of faceValue");
-        faceValue -= amount;
-    }
-    
-    
+
     /**
      * the create a new ERC20Debit of the same type and allocate some value to it from this
      * coin.
@@ -121,18 +97,18 @@ contract ERC20Debit is IDebit, SimpleSingular {
         require(this.denomination() >= amount, "not enough balance");
         ISingularWallet wal = currentOwner;
         require(msg.sender == address(wal), "the message sender was not the owner");
-        ERC20Debit newCoin = ERC20DebitFactory.newERC20Debit(_erc20, wal);
-        _erc20.transfer(newCoin, amount);
+//        ERC20Debit newCoin = ERC20DebitFactory.newERC20Debit(_erc20, wal);
+        IDebit newCoin = _erc20.split(this, amount);
         return newCoin;
     }
     
-      modifier sameTokenType(ISingular t) {
+    modifier sameTokenType(ISingular t) {
         require(t.tokenType() == this.tokenType(), "The currency types are different");
         _;
     }
 
     modifier sameOwner(ISingular t) {
-        require(t.owner() == this.owner(), "The debit owners are different");
+        require(t.owner() == currentOwner, "The debit owners are different");
         _;
     }
 }

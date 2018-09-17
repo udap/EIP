@@ -104,7 +104,7 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
         string _reason
         ) 
         external
-        permitted(msg.sender, "approveReceiver")
+        permitted(msg.sender, "approveReceiver", currentOwner)
         notInTransition 
     {
         
@@ -126,7 +126,7 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
     function accept(string _reason) 
     external 
     inTransition 
-    permitted(msg.sender, "accept")
+    permitted(msg.sender, "accept", nextOwner)
     {
         ownerPrevious = currentOwner;
         currentOwner = nextOwner; // the single most important step!!!
@@ -145,7 +145,7 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
      */
     function reject(string note) 
     external 
-    permitted(msg.sender, "reject")
+    permitted(msg.sender, "reject", nextOwner)
     {
         receiverNote = note;
         reset();
@@ -187,13 +187,19 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
         _;
     }
 
-   modifier ownerOnly() {
+    modifier ownerOnly() {
         require(msg.sender == address(currentOwner), "only owner can do this action");
         _;
     }
 
-    modifier permitted(address caller, bytes32 action) {
-        require(currentOwner.isActionAuthorized(caller, action, this), 
+    modifier permitted(
+        address caller, 
+        bytes32 action, 
+        ISingularWallet authenticator
+    ) {
+        require(
+            address(authenticator) == caller || 
+            authenticator.isActionAuthorized(caller, action, this), 
         "action not authorized");
         _;
     }
