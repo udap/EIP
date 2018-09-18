@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "../ISingular.sol";
-import "../ITradable.sol";
+//import "../ISingular.sol";
+//import "../ITradable.sol";
 
 
 /**

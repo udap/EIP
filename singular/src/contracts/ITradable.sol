@@ -106,6 +106,10 @@ contract ITradable is ITransferrable {
 
     Note: no change is returned! For the buyer's best interest, he/she will create a debitcard with
     the exact amount before making the purchase.
+
+    Note: the debit has to be ERC20Debit, which is not ideal. Cannot use IDebit, or will see Error: Definition of base
+    has to precede definition of derived contract
+
      */
     function buy(
         ERC20Debit debitcard   ///< the money. The denomination MUST be >= offer price.

@@ -8,7 +8,13 @@ import "./debit/IDebit.sol";
 import "./debit/ERC20Debit.sol";
 
 
+/**
 
+@author bing ran<bran@udap.io>
+
+XXX  should really inherit from ITradable. But it would cause Error: Definition of base has to
+precede definition of derived contract.
+*/
 contract Tradable is Transferable {
 
     struct SellOffer {
