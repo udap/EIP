@@ -13,14 +13,22 @@ contract SimpleERC20Gen is ERC20WithFactory {
 
     uint256 internal totalSupply_;
 
-    string public name;
-    string public symbol;
+    string  name_;
+    string  symbol_;
 
     constructor(string _name, string _symbol, uint _totalSupply) {
-        name = _name;
-        symbol = _symbol;
+        name_ = _name;
+        symbol_ = _symbol;
         totalSupply_ = _totalSupply;
     }
+
+    function name() public view returns (string) {
+        return name_;
+    }
+    function symbol() public view returns (string) {
+        return symbol_;
+    }
+
 
     /**
     * @dev Total number of tokens in existence
@@ -60,7 +68,7 @@ contract SimpleERC20Gen is ERC20WithFactory {
     */
     function newDebit(
         ISingularWallet wallet,      ///< the owner of the new debit
-        int256 denomination
+        uint256 denomination
     )
     public
     returns(
@@ -68,25 +76,26 @@ contract SimpleERC20Gen is ERC20WithFactory {
     )
     {
         IDebit debit = new ERC20Debit(this, wallet);
-        transfer(debit, denomination);
+        if (denomination > 0)
+            transfer(debit, denomination);
         return debit;
     }
 
-    function split(
-        IDebit acct,
-        uint amount
-    )
-    public
-    returns(
-        IDebit
-    )
-    {
-        require(msg.sender == address(acct) ||
-        msg.sender == address(acct.owner()), 
-        "sender is not the owner");
-        IDebit to = new ERC20Debit(this, acct.owner());
-        transfer(to, amount);
-        return to;
-    }
+//    function split(
+//        IDebit acct,
+//        uint amount
+//    )
+//    public
+//    returns(
+//        IDebit
+//    )
+//    {
+//        require(msg.sender == address(acct) ||
+//        msg.sender == address(acct.owner()),
+//        "sender is not the owner");
+//        IDebit to = new ERC20Debit(this, acct.owner());
+//        transfer(to, amount);
+//        return to;
+//    }
 
 }

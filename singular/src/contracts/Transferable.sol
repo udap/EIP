@@ -2,8 +2,9 @@ pragma solidity ^0.4.24;
 
 import "./ISingularWallet.sol";
 import "./ISingular.sol";
-import "./ITransferrable.sol";
 import "./SingularMeta.sol";
+import "./ITransferrable.sol";
+
 /**
  * @title Concrete asset token representing a single piece of asset, with
  * support of ownership transfers and transfer history.
@@ -11,37 +12,46 @@ import "./SingularMeta.sol";
  * The owner of this item must be an instance of `SingularOwner`
  *
  * See the comments in the Singular interface for method documentation.
- * 
- * 
+ *
+ *
  * @author Bing Ran<bran@udap.io>
  *
  */
-contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
+contract Transferable is SingularMeta, ITransferrable {
 
     ISingularWallet currentOwner; /// current owner
-    ISingularWallet nextOwner; /// next owner choice
     ISingularWallet ownerPrevious; /// next owner choice
 
 
     address internal theCreator; /// who creates this token
-    address tokenTypeAddr;
-    
     uint256 whenCreated;
-    uint256 validFrom;
-    uint256 validTill;
-    string senderNote;
+
+    address tokenTypeAddr;
+
+    // should use a struct like `TransferOffer`
+
+    struct TransferOffer {
+        ISingularWallet nextOwner; /// next owner choice
+        uint256 validFrom;
+        uint256 validTill;
+        string senderNote;
+    }
+
+    TransferOffer public transferOffer;
+
     string receiverNote;
 
 
 
     constructor(
-        string _name, 
-        string _symbol, 
-        string _descr, 
-        string _tokenURI, 
+        string _name,
+        string _symbol,
+        string _descr,
+        string _tokenURI,
         bytes32 _tokenURIHash,
         address _tokenType,
-        ISingularWallet _wallet)
+        ISingularWallet _wallet
+    )
     SingularMeta(_name, _symbol, _descr, _tokenURI, _tokenURIHash)
     public
     {
@@ -59,7 +69,7 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
     ) {
         return theCreator;
     }
-    
+
     function tokenType()
     view
     external
@@ -68,16 +78,20 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
     ){
         return tokenTypeAddr;
     }
-    
+
     function creationTime() public view returns(uint256) {
         return whenCreated;
     }
-    
+
     /**
      * get the current owner as type of SingularOwner
      */
     function previousOwner() view external returns (ISingularWallet) {
         return ownerPrevious;
+    }
+
+    function nextOwner() view external returns (ISingularWallet){
+        return transferOffer.nextOwner;
     }
 
     /**
@@ -86,6 +100,7 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
     function owner() view external returns (ISingularWallet) {
         return currentOwner;
     }
+
 
     /**
      * There can only be one approved receiver at a given time. This receiver cannot
@@ -98,22 +113,27 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
      *
      */
     function approveReceiver(
-        ISingularWallet _to, 
-        uint256 _validFrom, 
-        uint256 _validTill, 
+        ISingularWallet _to,
+        uint256 _validFrom,
+        uint256 _validTill,
         string _reason
-        ) 
-        external
-        permitted(msg.sender, "approveReceiver", currentOwner)
-        notInTransition 
+    )
+    external
+    permitted(msg.sender, "approveReceiver", currentOwner)
+    notInTransition
     {
-        
+
         require(address(_to) != address(0), "cannot send to null address");
-        validFrom = _validFrom;
-        validTill = _validTill;
-        senderNote = _reason;
-        nextOwner = _to;
-        emit  ReceiverApproved(address(currentOwner), address(nextOwner), _validFrom, _validTill, senderNote);
+        require(_validTill > now && _validTill > _validFrom, "expiry must be later than now and from");
+
+        transferOffer.validFrom = _validFrom;
+        transferOffer.validTill = _validTill;
+        transferOffer.senderNote = _reason;
+        transferOffer.nextOwner = _to;
+
+        emit  ReceiverApproved(address(currentOwner), address(transferOffer.nextOwner),
+            _validFrom, _validTill, transferOffer.senderNote);
+
     }
 
     /**
@@ -123,19 +143,23 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
      * as of now. This function MUST call the sent() method on the original owner.
      TODO: evaluate re-entrance attack
      */
-    function accept(string _reason) 
-    external 
-    inTransition 
-    permitted(msg.sender, "accept", nextOwner)
+    function acceptTransfer(
+        string _reason
+    )
+    external
+    inTransition
+    permitted(msg.sender, "accept", transferOffer.nextOwner)
     {
         ownerPrevious = currentOwner;
-        currentOwner = nextOwner; // the single most important step!!!
+        currentOwner = transferOffer.nextOwner; // the single most important step!!!
         reset();
         // transferHistory.push(TransferRec(ownerPrevious, owner, now, senderNote, _reason, this));
         uint256 moment = now;
         ownerPrevious.sent(this, _reason);
         currentOwner.received(this, _reason);
-        emit Transferred(address(ownerPrevious), address(currentOwner), moment, senderNote, _reason);
+
+        emit Transferred(address(ownerPrevious), address(currentOwner), moment,
+            transferOffer.senderNote, _reason);
 
     }
 
@@ -143,19 +167,16 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
      * reject an offer. Must be called by the approved next owner(from the address
      * of the SingularOwner or SingularOwner.ownerAddress()).
      */
-    function reject(string note) 
-    external 
-    permitted(msg.sender, "reject", nextOwner)
+    function rejectTransfer(string note)
+    external
+    permitted(msg.sender, "reject", transferOffer.nextOwner)
     {
         receiverNote = note;
         reset();
     }
 
     function reset() internal {
-        delete validFrom;
-        delete validTill;
-        delete senderNote;
-        delete nextOwner;
+        delete transferOffer;
     }
 
     /**
@@ -164,27 +185,47 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
      * current owner directly is not allowed.
      */
     function sendTo(
-        ISingularWallet _to, 
+        ISingularWallet _to,
         string _reason
-        ) 
-        external 
-        {
-            uint t = now;
-            this.approveReceiver(_to, t, t + 60 seconds, _reason);
-            _to.offer(this, _reason);
-        }
-    
+    )
+    external
+    {
+
+        uint t = now;
+        this.approveReceiver(_to, t, t + 1 minutes, _reason);
+        _to.offer(this, _reason);
+
+    }
+
+    function sendToAsync(
+        ISingularWallet _to,
+        string _reason,
+        uint256 _expiry
+    )
+    external
+    {
+
+        this.approveReceiver(_to, now, _expiry, _reason);
+        _to.offerNotify(this, _reason);
+    }
+
+
+    /***************************** modifiers **************************/
 
     modifier notInTransition() {
-        require(now > validTill, "this singular is in ownership transition");
+        require(now > transferOffer.validTill, "this singular is in ownership transition");
         _;
     }
 
     modifier inTransition() {
-        uint256 t = now;
-        require(t >= validFrom && t <= validTill, 
-        "not in valid ownership transition time window.");
+        require(inTransfer(),
+            "not in valid ownership transition time window.");
         _;
+    }
+
+    function inTransfer() view public returns (bool) {
+        uint256 t = now;
+        return t >= transferOffer.validFrom && t <= transferOffer.validTill;
     }
 
     modifier ownerOnly() {
@@ -193,14 +234,14 @@ contract SimpleSingular is ISingular, SingularMeta, ITransferrable {
     }
 
     modifier permitted(
-        address caller, 
-        bytes32 action, 
+        address caller,
+        bytes32 action,
         ISingularWallet authenticator
     ) {
         require(
-            address(authenticator) == caller || 
-            authenticator.isActionAuthorized(caller, action, this), 
-        "action not authorized");
+            address(authenticator) == caller ||
+        authenticator.isActionAuthorized(caller, action, this),
+            "action not authorized");
         _;
     }
 }

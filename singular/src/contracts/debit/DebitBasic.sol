@@ -1,16 +1,25 @@
 pragma solidity ^0.4.24;
 
+import '../Transferable.sol';
 import './IDebit.sol';
-import '../SimpleSingular.sol';
-import './DebitFactory.sol';
+// import './DebitFactory.sol';
+
+/**
+
+The ides is to create an autonomous money sum that can be used in trading.
 
 
-contract DebitBasic is IDebit, SimpleSingular{
+todo: needs to work with some kind of issuer.
+
+@author Bing Ran<bran@udap.io>
+*/
+contract DebitBasic is IDebit, Transferable {
 
     uint256 faceValue;
     DebitBasic public whoCanDeposit;
     DebitBasic public whoCanDeduct;
     uint256 deductionLimit;
+    address currencyType_;
     
     // XXX: fill up parent constructor
     constructor(
@@ -18,7 +27,7 @@ contract DebitBasic is IDebit, SimpleSingular{
         address _currencyType,           ///< currency type
         ISingularWallet _wal     ///< owner
     ) 
-    SimpleSingular(
+    Transferable (
         "DebitBasic", 
         _symbol, 
         "DebitBasic", 
@@ -30,12 +39,25 @@ contract DebitBasic is IDebit, SimpleSingular{
     public
     {
     }
-    
-    function allowDeposit(DebitBasic who) ownerOnly external {
+
+    function currencyType()
+    public view
+    returns(
+        address
+    ){
+        return currencyType_;
+    }
+
+
+    function allowDeposit(DebitBasic who) 
+    ownerOnly 
+    external {
         whoCanDeposit = who;
     }
     
-    function allowDeduct(DebitBasic who, uint256 howMuch) ownerOnly external {
+    function allowDeduct(DebitBasic who, uint256 howMuch) 
+    ownerOnly 
+    external {
         whoCanDeduct = who;
         deductionLimit = howMuch;
     }
@@ -165,8 +187,19 @@ contract DebitBasic is IDebit, SimpleSingular{
         other.deduct(amount);
         return faceValue;
     }
-    
-//    /**
+
+    function split(
+        uint256 amount      ///< the value in the new coin
+    )
+    public
+    returns(
+        IDebit          ///< the spawned child account
+    ) {
+        revert("not implemented");
+    }
+
+
+    //    /**
 //     * this creates a new Debit of the same type and allocate some value to it from this
 //     * coin.
 //     */
@@ -188,13 +221,13 @@ contract DebitBasic is IDebit, SimpleSingular{
 //        return this;
 //    }
 //
-    modifier sameTokenType(ISingular t) {
-        require(t.tokenType() == this.tokenType(), "The currency types are different");
+    modifier sameTokenType(IDebit t) {
+        require(ISingular(t).tokenType() == this.tokenType(), "The currency types are different");
         _;
     }
 
-    modifier sameOwner(ISingular t) {
-        require(t.owner() == this.owner(), "The debit owners are different");
+    modifier sameOwner(IDebit t) {
+        require(ISingular(t).owner() == this.owner(), "The debit owners are different");
         _;
     }
     

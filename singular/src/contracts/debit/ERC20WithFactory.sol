@@ -15,28 +15,28 @@ contract ERC20WithFactory {
 
 
     /**
-    to create a debit account held by the wallet
+    to create a debit account held by the wallet with some cash in it, from the caller's holdings
     */
     function newDebit(
         ISingularWallet wallet,      ///< the owner of the new debit
-        int256 denomination             ///< how much to put in the debit card
+        uint256 denomination             ///< how much to put in the debit card
     )
     public
     returns(
         IDebit debit
     );
 
-    /**
-     * create a debit account from some balance of the message caller
-     */
-    function split(
-        IDebit acct,
-        uint amount
-    )
-    public
-    returns(
-        IDebit
-    );
+//    /**
+//     * create a debit account from some balance of the message caller
+//     */
+//    function split(
+//        IDebit acct,
+//        uint amount
+//    )
+//    public
+//    returns(
+//        IDebit
+//    );
 
 
     /////

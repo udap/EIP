@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "../ISingularWallet.sol";
 import "../ISingular.sol";
 
-contract TransferHistory {
+contract AltTransferHistory {
 
     struct TransferRec {
         ISingularWallet from;

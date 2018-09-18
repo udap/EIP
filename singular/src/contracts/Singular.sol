@@ -10,10 +10,20 @@ contract Singular is SingularBase, SingularMeta, Comment{
 
     }
 
-    function init (string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest, address _to, address _singularCreator) unconstructed public
+    function init (
+        string _name,
+        string _symbol,
+        string _description,
+        string _tokenURI,
+        bytes32 _tokenURIDigest,
+        address _wallet,
+        address _singularCreator
+    )
+    unconstructed
+    public
     {
         SingularMeta.init(_name,  _symbol,  _description,  _tokenURI, _tokenURIDigest);
         Comment.init();
-        SingularBase.init(_to, _singularCreator);
+        SingularBase.init(_wallet, _singularCreator);
     }
 }

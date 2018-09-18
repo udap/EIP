@@ -1,10 +1,10 @@
 pragma solidity ^0.4.24;
 
 import "./IDebit.sol";
-import "../SimpleSingular.sol";
 import "./ERC20WithFactory.sol";
 import "../ISingularWallet.sol";
 import "../ISingular.sol";
+import "../Tradable.sol";
 
 
 
@@ -14,29 +14,39 @@ import "../ISingular.sol";
  * The value is the denomination of the coin.
  * 
  */
-contract ERC20Debit is IDebit, SimpleSingular {
+contract ERC20Debit is IDebit, Tradable {
     /// the underlying erc20 type
     ERC20WithFactory _erc20;
 
     constructor(
         ERC20WithFactory addr,
         ISingularWallet wal
-    ) 
-    SimpleSingular(
+    )
+    Tradable(
         addr.name(),
         addr.symbol(),
         "ERC20Debit contract",
         "",
         0,
         addr,
-        wal)
+        wal
+    )
     public
     {
         _erc20 = addr;
     }
-    
+
+
+    function currencyType()
+    public view
+    returns(
+        address
+    ){
+        return _erc20;
+    }
+
     /**
-     * the net value of this coin container.
+     * the net value of this debit container.
      */
     function denomination()
     public view
@@ -97,18 +107,17 @@ contract ERC20Debit is IDebit, SimpleSingular {
         require(this.denomination() >= amount, "not enough balance");
         ISingularWallet wal = currentOwner;
         require(msg.sender == address(wal), "the message sender was not the owner");
-//        ERC20Debit newCoin = ERC20DebitFactory.newERC20Debit(_erc20, wal);
-        IDebit newCoin = _erc20.split(this, amount);
+        IDebit newCoin = _erc20.newDebit(wal, amount);
         return newCoin;
     }
     
-    modifier sameTokenType(ISingular t) {
-        require(t.tokenType() == this.tokenType(), "The currency types are different");
+    modifier sameTokenType(IDebit t) {
+        require(ISingular(t).tokenType() == this.tokenType(), "The currency types are different");
         _;
     }
 
-    modifier sameOwner(ISingular t) {
-        require(t.owner() == currentOwner, "The debit owners are different");
+    modifier sameOwner(IDebit t) {
+        require(ISingular(t).owner() == currentOwner, "The debit owners are different");
         _;
     }
 }

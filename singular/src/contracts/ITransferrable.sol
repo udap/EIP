@@ -1,5 +1,6 @@
 pragma solidity ^0.4.24;
 
+import "./ISingular.sol";
 import "./ISingularWallet.sol";
 
 /**
@@ -20,11 +21,10 @@ import "./ISingularWallet.sol";
  * multi-sig wallet when used in the two-step pattern.
  *
  *
- * //TODO: evaluating naming options: IItem, etc, for clarity and easiness of reference
  * @author Bing Ran<bran@udap.io>
  * @author Guxiang Tang<gtang@udap.io>
  */
-interface ITransferrable {
+contract ITransferrable is ISingular{
     /**
      * When the current owner has approved someone else as the next owner, subject
      * to acceptance or rejection.
@@ -58,6 +58,7 @@ interface ITransferrable {
     );
 
 
+
     /**
 
       There can only be one approved receiver at a given time. This receiver cannot
@@ -83,7 +84,7 @@ interface ITransferrable {
      parties of the transaction for them to update the wallet.
 
      */
-    function accept(
+    function acceptTransfer(
         string note
         ) 
         external;
@@ -93,7 +94,7 @@ interface ITransferrable {
      offer. The implementation MUST notify the token owner of the fact by calling
      ISingularWallet::offerRejected.
      */
-    function reject(
+    function rejectTransfer(
         string note
         ) 
         external;
@@ -105,11 +106,17 @@ interface ITransferrable {
      */
     function sendTo(
         ISingularWallet to,         ///< the recipient
-        string note                ///< additional information
-        // bool sync,                  ///< true if operate in synch mode, false otherwise.
-        // uint256 expiry              ///< the time lock. in seconds since the epoch, for sync mode,
-        //                             ///< expiry will be 1 minute forcefully
+        string note                 ///< additional information
     )
     external;
 
+    /**
+    to make an transfer approval and notify the other party
+    */
+    function sendToAsync(
+        ISingularWallet to,
+        string note,
+        uint256 expiry
+    )
+    external;
 }

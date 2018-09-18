@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./utils/Ownable.sol";
 import "./Upgradeable/Mini/MiniRegistry.sol";
 import "./ISingular.sol";
 import "./Upgradeable/Mini/MiniProxy.sol";
@@ -35,8 +35,8 @@ contract SingularFactory is Ownable{ // bran: why Ownable? Can we use ISingular 
         string _symbol, 
         string _description, 
         string _tokenURI, 
-        bytes _tokenURIDigest, 
-        address _to, 
+        bytes32 _tokenURIDigest,
+        address _wallet,
         address _creator
         ) 
         onlyOwner 
@@ -45,8 +45,13 @@ contract SingularFactory is Ownable{ // bran: why Ownable? Can we use ISingular 
     {
         MiniProxy newSingular = new MiniProxy(address(miniRegistry),this);
         Singular(newSingular).init(
-            _name, _symbol, _description, 
-            _tokenURI, _tokenURIDigest, _to, _creator
+            _name,
+            _symbol,
+            _description,
+            _tokenURI,
+            _tokenURIDigest,
+            _wallet,
+            _creator
         );
 
         registeredSingulars[address(newSingular)]= true;

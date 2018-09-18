@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "../ISingular.sol";
+import "../ITradable.sol";
 
 
 /**
@@ -17,7 +18,14 @@ IDebit makes some fungible tokens a single unit of value that can participate in
 @author Bing Ran<bran@udap.io>
 
 */
-contract IDebit is ISingular{
+contract IDebit/* is ISingular*/{
+
+
+    function currencyType()
+    public view
+    returns(
+        address debitType
+    );
 
     /**
      * the net value of this container.

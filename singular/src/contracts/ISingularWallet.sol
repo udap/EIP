@@ -1,5 +1,6 @@
 pragma solidity ^0.4.24;
 
+import "./ITransferrable.sol";
 import "./ISingular.sol";
 
 /**
@@ -92,7 +93,7 @@ interface ISingularWallet {
     to notify the *sender* that the intended token transfer has completed and the token has been sent
     */
     function sent(
-        ISingular token,        ///< the token that has been sent
+        ITransferrable token,        ///< the token that has been sent
         string note             ///< additional info
     )
     external;
@@ -103,7 +104,7 @@ interface ISingularWallet {
     the recipient.
     */
     function received(
-        ISingular token,        ///< the token that has been sent
+        ITransferrable token,        ///< the token that has been sent
         string note             ///< additional info
     )
     external;
@@ -115,7 +116,7 @@ interface ISingularWallet {
     ownership change.
     */
     function offerRejected(
-        ISingular token,    ///< the token of concern
+        ITransferrable token,    ///< the token of concern
         string note         ///< the associated note
     )
     external;
@@ -128,7 +129,7 @@ interface ISingularWallet {
     */
     function send(
         ISingularWallet toWallet,     ///< the recipient
-        ISingular token,             ///< the token to transfer
+        ITransferrable token,             ///< the token to transfer
         string _senderNote
     )
     external;
@@ -139,7 +140,7 @@ interface ISingularWallet {
     */
     function sendNotify(
         ISingularWallet toWallet,     ///< the recipient
-        ISingular token,             ///< the token to transfer
+        ITransferrable token,             ///< the token to transfer
         string _senderNote,
         uint256 _expiry
     )
@@ -154,11 +155,9 @@ interface ISingularWallet {
      or take a note and return, followed by an asynchronous call to `accept/reject
      at a later time`.
 
-     The function must `revert` with an error message if an exception has happened
-
      */
     function offer(
-        ISingular token, ///< the offered token
+        ITransferrable token, ///< the offered token
         string note         ///< additional information
     )
     external;
@@ -169,7 +168,7 @@ interface ISingularWallet {
     separate transaction.
     */
     function offerNotify(
-        ISingular token, ///< the offered token
+        ITransferrable token, ///< the offered token
         string note         ///< additional information
     )
     external;
@@ -177,8 +176,8 @@ interface ISingularWallet {
     /**
     to agree an offer when offerNotify is called
     */
-    function agree(
-        ISingular _token,
+    function agreeTransfer(
+        ITransferrable _token,
         string _reply
     )
     external;
@@ -186,8 +185,8 @@ interface ISingularWallet {
     /**
     to reject an offer when offerNotify is called
     */
-    function reject(
-        ISingular _token,
+    function rejectTransfer(
+        ITransferrable _token,
         string _reply
     )
     external;

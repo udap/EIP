@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "./ISingularWallet.sol";
 
 /**
- * @title A concrete asset token representing a single item of things. It should 
+ * @title A concrete asset token representing a single item of things. It should
  * be used together with ISingularMeta to fully specified the information about 
  * this item.
  *
@@ -24,6 +24,21 @@ interface ISingular {
         ISingularWallet         ///< owner is an ISingularWallet
     );
 
+    // should really be in transferable
+
+    function previousOwner()
+    view
+    external
+    returns (
+        ISingularWallet
+    );
+
+    function nextOwner()
+    view
+    external
+    returns (
+        ISingularWallet
+    );
 
     /**
     * get the creator

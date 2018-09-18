@@ -1,18 +1,18 @@
 pragma solidity ^0.4.24;
 
-import "./ISingular.sol";
-import "./ISingularWallet.sol";
 import "./ITransferrable.sol";
-import "../node_modules/openzeppelin-solidity/contracts/ReentrancyGuard.sol";
-import "../node_modules/openzeppelin-solidity/contracts/AddressUtils.sol";
+import "./ISingularWallet.sol";
+import "./utils/ReentrancyGuard.sol";
+import "./utils/AddressUtils.sol";
 import "./TransferHistory.sol";
-
+import "./IBurnable.sol";
+//import "./Transferable.sol";
 /**
 *
 */
 
 //singular must transfer by its owner(SingularWallet) and between SingularWallets
-contract SingularBase is ISingular, ITransferrable, ReentrancyGuard, TransferHistory {
+contract SingularBase is  ITransferrable, ReentrancyGuard, TransferHistory, IBurnable {
 
     address internal prototype; // token types, a ref to type information
 
@@ -41,17 +41,22 @@ contract SingularBase is ISingular, ITransferrable, ReentrancyGuard, TransferHis
 
     }
 
-    function init (address _to, address _singularCreator) unconstructed public
+    function init (
+        address _wallet,
+        address _singularCreator
+    )
+    unconstructed
+    public
     {
         TransferHistory.init();
         singularCreator = _singularCreator;
-        singularOwner = ISingularWallet(_to);
-        ISingularWallet(_to).received(this,"new singular created");
+        singularOwner = ISingularWallet(_wallet);
+        ISingularWallet(_wallet).received(this,"new singular created");
         // is msg.sender safe? what if called from another contract?
         // should use tx.origin instead?
 
         //recordTransfer(0x0, msg.sender, now, "created");
-        emitTransferredAndAddTransferHistory(ISingularWallet(0), ISingularWallet(_to), now, "created", "created");
+        emitTransferredAndAddTransferHistory(ISingularWallet(0), ISingularWallet(_wallet), now, "created", "created");
 
     }
 
@@ -69,12 +74,12 @@ contract SingularBase is ISingular, ITransferrable, ReentrancyGuard, TransferHis
         uint256 _validFrom,
         uint256 _expiry, 
         string _senderNote
-        ) 
-        notInTransition 
-        ownerOnly 
-        /*nonReentrant*/ 
-        constructed 
-        external {
+    )
+    notInTransition
+    ownerOnly
+    /*nonReentrant*/
+    constructed
+    external {
         require(_to != singularOwner);
         require(_expiry > now);
         singularRecipient = _to;
@@ -82,44 +87,74 @@ contract SingularBase is ISingular, ITransferrable, ReentrancyGuard, TransferHis
         transferReason = _senderNote;
 
         emit ReceiverApproved(singularOwner, _to, _validFrom, _expiry, _senderNote);
-
     }
-
 
     function sendTo(
-        ISingularWallet _to, 
-        string _senderNote, 
-        bool _sync, 
-        uint256 _expiry ) 
-    
-        notInTransition 
-        ownerOnly 
-        /*nonReentrant*/ 
-        constructed 
-        external 
+        ISingularWallet _to,
+        string _reason
+    )
+    external
     {
-        // we still use the approve/take two-step pattern
-        // which takes place in one transaction;
-        require(_to != singularOwner);
-        uint256 tempExpiry = _expiry;
-        if(_sync == true){
-            tempExpiry = now + 1 minutes;
-        }else{
-            require(tempExpiry > now);
-        }
-        singularRecipient = _to;
-        expiry = tempExpiry;
-        transferReason = _senderNote;// TODO: duplicated logic
-        emit ReceiverApproved(singularOwner, _to, now, _expiry, _senderNote);
 
-        if(_sync == true){
-            _to.offer(this, _senderNote);
-        }else{
-            _to.offerNotify(this, _senderNote);
-        }
+        uint t = now;
+        this.approveReceiver(_to, t, t + 1 minutes, _reason);
+        _to.offer(this, _reason);
+
     }
 
-    function burn(string _reason) external notInTransition ownerOnly nonReentrant constructed {
+    function sendToAsync(
+        ISingularWallet _to,
+        string _reason,
+        uint256 _expiry
+    )
+    external
+    {
+
+        this.approveReceiver(_to, now, _expiry, _reason);
+        _to.offerNotify(this, _reason);
+    }
+
+
+//function sendTo(
+//        ISingularWallet _to,
+//        string _senderNote,
+//        bool _sync,
+//        uint256 _expiry )
+//
+//        notInTransition
+//        ownerOnly
+//        /*nonReentrant*/
+//        constructed
+//        external
+//    {
+//        // we still use the approve/take two-step pattern
+//        // which takes place in one transaction;
+//        require(_to != singularOwner);
+//        uint256 tempExpiry = _expiry;
+//        if(_sync == true){
+//            tempExpiry = now + 1 minutes;
+//        }else{
+//            require(tempExpiry > now);
+//        }
+//        singularRecipient = _to;
+//        expiry = tempExpiry;
+//        transferReason = _senderNote;// TODO: duplicated logic
+//        emit ReceiverApproved(singularOwner, _to, now, _expiry, _senderNote);
+//
+//        if(_sync == true){
+//            _to.offer(this, _senderNote);
+//        }else{
+//            _to.offerNotify(this, _senderNote);
+//        }
+//    }
+
+    function burn(string _reason)
+    external
+    notInTransition
+    ownerOnly
+    nonReentrant
+    constructed
+    {
 
         singularPreviousOwner = singularOwner;
         singularOwner = ISingularWallet(0);
@@ -134,7 +169,7 @@ contract SingularBase is ISingular, ITransferrable, ReentrancyGuard, TransferHis
     //=============================action===============================================
 
     //=============================reaction===============================================
-    function accept(string _receiverNote) external inTransition nonReentrant constructed{
+    function acceptTransfer(string _receiverNote) external inTransition nonReentrant constructed{
         require(msg.sender == address(singularRecipient), "only approver could accept or reject offer");
         singularPreviousOwner = singularOwner;
         singularOwner = ISingularWallet(msg.sender);
@@ -148,7 +183,7 @@ contract SingularBase is ISingular, ITransferrable, ReentrancyGuard, TransferHis
         emitTransferredAndAddTransferHistory(singularPreviousOwner, singularOwner, now, transferReason,_receiverNote);
     }
 
-    function reject(string _receiverNote) external inTransition nonReentrant constructed{
+    function rejectTransfer(string _receiverNote) external inTransition nonReentrant constructed{
         require(msg.sender == address(singularRecipient), "only approver could accept or reject offer");
         //Note, reset states after calling offerRejected()
         singularOwner.offerRejected(this,_receiverNote);
@@ -223,7 +258,15 @@ contract SingularBase is ISingular, ITransferrable, ReentrancyGuard, TransferHis
         return prototype;
     }
 
-    function emitTransferredAndAddTransferHistory(ISingularWallet _from, ISingularWallet _to, uint256 _when, string _senderNote, string _receiverNote) internal{
+    function emitTransferredAndAddTransferHistory(
+        ISingularWallet _from,
+        ISingularWallet _to,
+        uint256 _when,
+        string _senderNote,
+        string _receiverNote
+    )
+    internal
+    {
         emit Transferred(_from,_to,_when,_senderNote,_receiverNote);
         addTransferHistory(_from,_to,_when,_senderNote,_receiverNote);
     }

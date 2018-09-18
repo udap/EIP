@@ -1,7 +1,8 @@
 pragma solidity ^0.4.24;
 
 import "../ISingular.sol";
-import "./SingularMeta.sol";
+import "../SingularMeta.sol";
+import "../ITransferrable.sol";
 
 /**
  * A contract that binds an address (EOA/SC) to a list of Singular tokens. The
@@ -38,8 +39,8 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
 
     address public ownerOfThis;
 
-    constructor(string _name, string _symbol, string _descr, string _tokenURI)
-    SingularMeta(_name, _symbol, _descr, _tokenURI)
+    constructor(string _name, string _symbol, string _descr, string _tokenURI , bytes32 _tokenURIDigest)
+    SingularMeta(_name, _symbol, _descr, _tokenURI, _tokenURIDigest)
     public
     {
         theCreator = msg.sender;    
@@ -88,7 +89,7 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
      * the ownership relation with the token.
      */
      
-    function sent(ISingular token, string note) external {
+    function sent(ITransferrable token, string note) external {
         // this implementation leaves holes in the token array;
         require(token.previousOwner() == this);
         // TODO: handle the note in a transaction history
@@ -108,30 +109,31 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
      * The current owner of the token must be this wallet.
      */
      
-    function received(ISingular token, string note) external {
-        require(token.currentOwner() == this);
+    function received(ITransferrable token, string note) external {
+        require(token.owner() == this);
         require(!alreadyOwn(token));
         addToTokenSet(token);
     }
 
 
     /**
+       @title to offer a transfer
      * @dev to receive a token that has been assigned to the receiver as the next owner.
      * The receiver must decide to take it or not. If this account decides to accept
      * the offer, it MUST call the `accept()` on the token and return `true` If this account will not
      * accept the offer, it can ignore the offer by returning `false`;
      */
-    function offer(
-        ISingular token, 
+    function offerTransfer(
+        ITransferrable token,
         string note
         ) 
         external 
         {
             require(okToAccept(token));
             require(!alreadyOwn(token));
-            token.accept(note); // call back to accept the offer
+            token.acceptTransfer(note); // call back to accept the offer
             //
-            require(token.currentOwner() == this);
+            require(token.owner() == this);
             addToTokenSet(token);
         }
 
@@ -141,12 +143,12 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
      */
     function send(
         ISingularWallet wallet,     ///< the recipient
-        ISingular token             ///< the token to transfer
+        ITransferrable token             ///< the token to transfer
     )
     ownerOnly
     external
     {
-        token.sendTo(wallet, "", true, 60);
+        token.sendTo(wallet, "from wallet");
     }
 
 
@@ -156,16 +158,17 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
     */
     function sendNotify(
         ISingularWallet wallet,     ///< the recipient
-        ISingular token             ///< the token to transfer
+        ITransferrable token,             ///< the token to transfer
+        uint expiry
     )
     ownerOnly
     external
     {
-        token.sendTo(wallet, "", false, 10);
+        token.sendToAsync(wallet, "from wallet", expiry);
     }
 
 
-    function okToAccept(ISingular token) internal returns (bool) {
+    function okToAccept(ITransferrable token) internal returns (bool) {
     // TODO: anti-spamming procedures
         return true;
     }

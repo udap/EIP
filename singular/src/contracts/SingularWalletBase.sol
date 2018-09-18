@@ -2,10 +2,12 @@ pragma solidity ^0.4.24;
 
 import "./ISingular.sol";
 import "./ISingularWallet.sol";
-import "../node_modules/openzeppelin-solidity/contracts/AddressUtils.sol";
-import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "../node_modules/openzeppelin-solidity/contracts/ReentrancyGuard.sol";
+import "./utils/AddressUtils.sol";
+import "./utils/SafeMath.sol";
+import "./utils/ReentrancyGuard.sol";
 import "./utils/Initialized.sol";
+import "./ITransferrable.sol";
+import "./IBurnable.sol";
 
 /*
 
@@ -13,7 +15,8 @@ import "./utils/Initialized.sol";
 
 contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
 
-    //owner could be an EOA address or SmartContract address which must implements function isAuthorized(address _person, address _singular) view external returns(bool)
+    //owner could be an EOA address or SmartContract address which must implements
+    // function isAuthorized(address _person, address _singular) view external returns(bool)
     address internal walletOwner;
     address internal walletOperator;
 
@@ -42,66 +45,90 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
     }
 
     //=============================callback===============================================
-    function sent(ISingular _singular, string _receiverNote) ownsSingular(_singular) constructed external{
+    function sent(ITransferrable _singular, string _receiverNote)
+    ownsSingular(_singular)
+    constructed
+    external{
         require( _singular.previousOwner() == this);
-        emit SingularTransferred(_singular.previousOwner(),_singular.currentOwner(),_singular,now,_receiverNote);
+        emit SingularTransferred(_singular.previousOwner(),_singular.owner(),_singular,now,_receiverNote);
         singularRemoved(_singular);
     }
 
-    function received(ISingular _singular, string _receiverNote) constructed external{
-        require(_singular.currentOwner() == this);
+    function received(ITransferrable _singular, string _receiverNote) constructed external{
+        require(_singular.owner() == this);
         emit SingularTransferred(_singular.previousOwner(),this,_singular,now,_receiverNote);
         singularAdded(_singular);
     }
 
     // called when get an offer
-    function offer(ISingular _singular, string _senderNote) constructed external{
+    function offer(ITransferrable _singular, string _senderNote) constructed external{
         require(_singular.nextOwner() == this);
-        emit SingularOffered(_singular.currentOwner(),_singular, now, _senderNote);
+        emit SingularOffered(_singular.owner(),_singular, now, _senderNote);
         //customized later
         /*
         string _receiverNote;
         _singular.accept(_receiverNote);
         _singular.reject(_receiverNote);
         */
-        _singular.accept("accept unconditionally by sendTo(sync)");
+        _singular.acceptTransfer("accept unconditionally by sendTo(sync)");
 
     }
 
-    function offerNotify(ISingular _singular, string _senderNote) constructed external{
+    function offerNotify(ITransferrable _singular, string _senderNote) constructed external{
         require(_singular.nextOwner() == this);
-        emit SingularOffered(_singular.currentOwner(),_singular, now, _senderNote);
+        emit SingularOffered(_singular.owner(),_singular, now, _senderNote);
     }
 
-    function offerRejected(ISingular _singular, string _receiverNote) constructed external{
-        require( _singular.currentOwner() == this);
-        emit SingularTransferFailed(_singular.currentOwner(),_singular.nextOwner(),_singular,now,_receiverNote);
+    function offerRejected(ITransferrable _singular, string _receiverNote) constructed external{
+        require( _singular.owner() == this);
+        emit SingularTransferFailed(_singular.owner(),_singular.nextOwner(),_singular,now,_receiverNote);
     }
     //=============================callback===============================================
 
 
     //=============================action===============================================
 
-    function send(ISingularWallet _to, ISingular _singular, string _senderNote) onlyOwnerOrOperator ownsSingular(_singular) constructed external{
+    function send(ISingularWallet _to, ITransferrable _singular, string _senderNote)
+    onlyOwnerOrOperator
+    ownsSingular(_singular)
+    constructed
+    external{
         //send contains approve logic so here emit an approve event
         emit SingularReceiverApproved(_to, _singular, now,_senderNote);
-        _singular.sendTo(_to, _senderNote, true,0);
+        _singular.sendTo(_to, _senderNote);
     }
 
-    function sendNotify(ISingularWallet _to, ISingular _singular, string _senderNote, uint256 _expiry) onlyOwnerOrOperator ownsSingular(_singular) constructed external{
+    function sendNotify(ISingularWallet _to, ITransferrable _singular, string _senderNote, uint256 _expiry)
+    onlyOwnerOrOperator
+    ownsSingular(_singular)
+    constructed
+    external{
         //send contains approve logic so here emit an approve event
         require(_expiry > now);
-        _singular.sendTo(_to, _senderNote, false, _expiry);
+        _singular.sendToAsync(_to, _senderNote, _expiry);
     }
 
     //manually approve a singular
-    function approve(ISingularWallet _to, ISingular _singular, string _senderNote, uint256 _expiry ) onlyOwnerOrOperator ownsSingular(_singular) constructed external{
-        require(_expiry > now);
+    function approve(
+        ISingularWallet _to,
+        ITransferrable _singular,
+        string _senderNote,
+//        uint256 _validSince,
+        uint256 _validTill
+    )
+    onlyOwnerOrOperator
+    ownsSingular(_singular)
+    constructed
+    external{
+        require(_validTill > now /*&& _validSince < _validTill*/);
         emit SingularReceiverApproved(_to, _singular, now,_senderNote);
-        _singular.approveReceiver(_to, _expiry, _senderNote);
+        _singular.approveReceiver(_to, 1, _validTill, _senderNote);
     }
 
-    function burn(ISingular _singular, string _burnMsg) onlyOwnerOrOperator constructed external{
+    function burn(IBurnable _singular, string _burnMsg)
+    onlyOwnerOrOperator
+    constructed
+    external{
         _singular.burn(_burnMsg);
     }
     //=============================action===============================================
@@ -110,13 +137,19 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
     //if you agree/refuse maliciously, you will lose your ETH if you like :)
 
     //just forward request to singular.accept
-    function agree(ISingular _singular, string _receiverNote) onlyOwnerOrOperator constructed external {
-        _singular.accept(_receiverNote);
+    function agree(ITransferrable _singular, string _receiverNote)
+    onlyOwnerOrOperator
+    constructed
+    external {
+        _singular.acceptTransfer(_receiverNote);
     }
 
     //just forward request to singular.reject
-    function reject(ISingular _singular, string _receiverNote) onlyOwnerOrOperator constructed external {
-        _singular.reject(_receiverNote);
+    function reject(ITransferrable _singular, string _receiverNote)
+    onlyOwnerOrOperator
+    constructed
+    external {
+        _singular.rejectTransfer(_receiverNote);
     }
     //=============================reaction===============================================
 
