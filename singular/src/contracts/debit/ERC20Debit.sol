@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "./IDebit.sol";
-import "./ERC20WithFactory.sol";
+import "./IERC20DebitFactory.sol";
 import "../ISingularWallet.sol";
 import "../ISingular.sol";
 import "../Tradable.sol";
@@ -16,10 +16,10 @@ import "../Tradable.sol";
  */
 contract ERC20Debit is IDebit, Tradable {
     /// the underlying erc20 type
-    ERC20WithFactory _erc20;
+    IERC20DebitFactory private _erc20;
 
     constructor(
-        ERC20WithFactory addr,
+        IERC20DebitFactory addr,
         ISingularWallet wal
     )
     Tradable(
@@ -41,7 +41,8 @@ contract ERC20Debit is IDebit, Tradable {
     public view
     returns(
         address
-    ){
+    )
+    {
         return _erc20;
     }
 
@@ -66,14 +67,13 @@ contract ERC20Debit is IDebit, Tradable {
                                 ///< erc20 type
         uint256 amount          ///< how many units of tokens to transfer
     )
+    public
     sameTokenType(another)
     ownerOnly
-    public
     {
         _erc20.transfer(address(another), amount);
     }
-    
-    
+
     /**
      * To dump the all the coin value from the argument to this coin container.
      * The owners must be the same and the coin types must be the same.

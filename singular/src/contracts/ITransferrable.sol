@@ -58,7 +58,6 @@ contract ITransferrable is ISingular{
     );
 
 
-
     /**
 
       There can only be one approved receiver at a given time. This receiver cannot

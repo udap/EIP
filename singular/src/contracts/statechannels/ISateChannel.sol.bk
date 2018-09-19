@@ -68,7 +68,6 @@ interface IStateChannel is IChannelMember{
 
 
     /**
-    @title request to close the channel by some participants
     @dev channel will notify the other participants of the request and grant grace period. This
     may happen when some of the participant are not cooperative in settlement (e.g. intentionally
     delaying settlement, or been offline for extended period of time), or some of the

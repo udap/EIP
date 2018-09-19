@@ -62,8 +62,8 @@ contract Transferable is SingularMeta, ITransferrable {
     }
 
     function creator()
-    view
     external
+    view
     returns (
         address         ///< the owner elected
     ) {
@@ -71,8 +71,8 @@ contract Transferable is SingularMeta, ITransferrable {
     }
 
     function tokenType()
-    view
     external
+    view
     returns(
         address                 ///< address that describes the type of the token.
     ){
@@ -86,18 +86,33 @@ contract Transferable is SingularMeta, ITransferrable {
     /**
      * get the current owner as type of SingularOwner
      */
-    function previousOwner() view external returns (ISingularWallet) {
+    function previousOwner() 
+    external 
+    view 
+    returns (
+        ISingularWallet
+    ) {
         return ownerPrevious;
     }
 
-    function nextOwner() view external returns (ISingularWallet){
+    function nextOwner() 
+    external
+    view
+    returns (
+        ISingularWallet
+    ){
         return transferOffer.nextOwner;
     }
 
     /**
      * get the current owner as type of SingularOwner
      */
-    function owner() view external returns (ISingularWallet) {
+    function owner() 
+    external 
+    view 
+    returns (
+        ISingularWallet
+    ) {
         return currentOwner;
     }
 
@@ -131,8 +146,12 @@ contract Transferable is SingularMeta, ITransferrable {
         transferOffer.senderNote = _reason;
         transferOffer.nextOwner = _to;
 
-        emit  ReceiverApproved(address(currentOwner), address(transferOffer.nextOwner),
-            _validFrom, _validTill, transferOffer.senderNote);
+        emit  ReceiverApproved(
+            address(currentOwner), 
+            address(transferOffer.nextOwner),
+            _validFrom, 
+            _validTill, 
+            transferOffer.senderNote);
 
     }
 

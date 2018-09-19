@@ -117,7 +117,7 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
 
 
     /**
-       @title to offer a transfer
+       to offer a transfer
      * @dev to receive a token that has been assigned to the receiver as the next owner.
      * The receiver must decide to take it or not. If this account decides to accept
      * the offer, it MUST call the `accept()` on the token and return `true` If this account will not

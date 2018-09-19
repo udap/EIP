@@ -7,11 +7,11 @@ import "./utils/AddressUtils.sol";
 import "./TransferHistory.sol";
 import "./IBurnable.sol";
 //import "./Transferable.sol";
+
 /**
 *
-*/
-
 //singular must transfer by its owner(SingularWallet) and between SingularWallets
+*/
 contract SingularBase is  ITransferrable, ReentrancyGuard, TransferHistory, IBurnable {
 
     address internal prototype; // token types, a ref to type information
@@ -22,10 +22,13 @@ contract SingularBase is  ITransferrable, ReentrancyGuard, TransferHistory, IBur
     address internal singularCreator; // the first owner which is also the creator, unchangeable
 
 /*    //is the operator of current singular, only is able to send singular
-    address internal operator;*/
+    address internal operator;
+    */
 
     // ownership transition
-    uint256 internal expiry; // seconds since epoch time, absolutely. You can't cancel a transition/expiry and it will auto cancel when expiry < now or receiver reject/accept
+    /// seconds since epoch time, absolutely. You can't cancel a transition/expiry and it will auto cancel
+    /// when expiry < now or receiver reject/accept
+    uint256 internal expiry;
     string internal transferReason;// transfer message
 
 /*    constructor(string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest, address _to) SingularMeta( _name,  _symbol,  _description,  _tokenURI, _tokenURIDigest)public
@@ -35,7 +38,8 @@ contract SingularBase is  ITransferrable, ReentrancyGuard, TransferHistory, IBur
         ISingularWallet(_to).received(this,"new singular created");
 
         emit Transferred(address(0), _to, now, "created", "created");
-    }*/
+    }
+    */
 
     constructor()public payable{
 
@@ -196,12 +200,11 @@ contract SingularBase is  ITransferrable, ReentrancyGuard, TransferHistory, IBur
     //=============================reaction===============================================
 
 
-
-
     /**
      * To get the full token ownership history of this token
      */
-/*    function getHistory() view public returns (TransferRecord[]){
+/*
+    function getHistory() view public returns (TransferRecord[]){
         return transferHistory;
     }*/
 
