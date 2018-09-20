@@ -1,6 +1,6 @@
 ### status
 
-- 0.1 version is cut. The basics and ERC20 and 721 adapter are in the ERC20/721 directories. 
+- 0.1 version is cut. The basics and ERC20 and 721 adapters are in the ERC20/721 directories. 
 
 The most interesting class is `Tradable`, which is a tradable singular that can do transfers, swaps, buy and sells with erc20 tokens wrapped in ERC20Debit. 
   
