@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "./ISingularWallet.sol";
-import "./debit/IDebit.sol";
+import "./ERC20/IDebit.sol";
 //import "./debit/ERC20Debit.sol";
 
 
@@ -17,6 +17,32 @@ import "./debit/IDebit.sol";
  * @author Bing Ran<bran@udap.io>
  */
 contract ITradable is ISingular {
+    struct SellOffer {
+        address erc20;          ///< the currency type
+        uint256 price;          ///< price
+        uint256 validFrom;      ///< when an offer is valid from
+        uint256 validTill;      ///< when the offer expires
+        string note;             ///< additional note
+    }
+
+    // ? we might use a predicator to set the swap target, to make it compatible for sell and swap
+    struct SwapOffer {
+        ITradable target;          ///< what to swap
+        uint256 validFrom;      ///< when an offer is valid from
+        uint256 validTill;      ///< when the offer expires
+        //        string note;             ///< additional note
+    }
+
+    struct TransferOffer {
+        ISingularWallet nextOwner; /// next owner choice
+        uint256 validFrom;
+        uint256 validTill;
+        string senderNote;
+    }
+
+    TransferOffer public transferOffer;
+    SellOffer public sellOffer;
+    SwapOffer public swapOffer;
 
     /**
       * When the current owner has approved someone else as the next owner, subject
@@ -51,6 +77,67 @@ contract ITradable is ISingular {
         string senderNote,          ///< offer note
         string receiverNote            ///< acceptance note
     );
+
+    /**
+  */
+    event SwapApproved(
+        ITradable indexed from, ///< the item for swap
+        ITradable indexed to,  ///< the desired item
+        uint256 validFrom,      ///< when an offer is valid from
+        uint256 validTill,      ///< when the offer expires
+        string note             ///< additional note
+    );
+
+    /**
+     */
+    event Swapped(
+        ITradable indexed from, ///< the item for swap
+        ITradable indexed to,  ///< the desired item
+        uint when,              ///< when this happened
+        string note             ///< additional note
+    );
+
+    /**
+     * When the current owner has approved someone else as the next owner, subject
+     * to acceptance or rejection.
+     */
+    event SellOfferApproved(
+        ITradable indexed item, ///< the item for sell
+        address indexed erc20,  ///< the currency type
+        uint256 price,          ///< price
+        uint256 validFrom,      ///< when an offer is valid from
+        uint256 validTill,      ///< when the offer expires
+        string note             ///< additional note
+    );
+
+    /**
+     * the ownership has been successfully transferred from A to B.
+     */
+    event Sold(
+        ITradable indexed item, ///< the item for sell
+        ISingularWallet indexed seller, ///< seller
+        ISingularWallet indexed buyer,  ///< buyer
+        address erc20,  ///< the currency type
+        uint256 price,          ///< price
+        uint256 when,           ///< when the tx completes
+        string note             ///< additional note
+    );
+
+
+    function previousOwner()
+    external
+    view
+    returns (
+        ISingularWallet
+    );
+
+    function nextOwner()
+    external
+    view
+    returns (
+        ISingularWallet
+    );
+
 
     /**
       There can only be one approved receiver at a given time. This receiver cannot
@@ -111,78 +198,6 @@ contract ITradable is ISingular {
     )
     external;
 
-    struct SellOffer {
-        address erc20;          ///< the currency type
-        uint256 price;          ///< price
-        uint256 validFrom;      ///< when an offer is valid from
-        uint256 validTill;      ///< when the offer expires
-        string note;             ///< additional note
-    }
-
-    // ? we might use a predicator to set the swap target, to make it compatible for sell and swap
-    struct SwapOffer {
-        ITradable target;          ///< what to swap
-        uint256 validFrom;      ///< when an offer is valid from
-        uint256 validTill;      ///< when the offer expires
-//        string note;             ///< additional note
-    }
-
-    struct TransferOffer {
-        ISingularWallet nextOwner; /// next owner choice
-        uint256 validFrom;
-        uint256 validTill;
-        string senderNote;
-    }
-
-    TransferOffer public transferOffer;
-    SellOffer public sellOffer;
-    SwapOffer public swapOffer;
-
-
-    /**
-     */
-    event SwapApproved(
-        ITradable indexed from, ///< the item for swap
-        ITradable indexed to,  ///< the desired item
-        uint256 validFrom,      ///< when an offer is valid from
-        uint256 validTill,      ///< when the offer expires
-        string note             ///< additional note
-    );
-
-    /**
-     */
-    event Swapped(
-        ITradable indexed from, ///< the item for swap
-        ITradable indexed to,  ///< the desired item
-        uint when,              ///< when this happened
-        string note             ///< additional note
-    );
-
-    /**
-     * When the current owner has approved someone else as the next owner, subject
-     * to acceptance or rejection.
-     */
-    event SellOfferApproved(
-        ITradable indexed item, ///< the item for sell
-        address indexed erc20,  ///< the currency type
-        uint256 price,          ///< price
-        uint256 validFrom,      ///< when an offer is valid from
-        uint256 validTill,      ///< when the offer expires
-        string note             ///< additional note
-    );
-
-    /**
-     * the ownership has been successfully transferred from A to B.
-     */
-    event Sold(
-        ITradable indexed item, ///< the item for sell
-        ISingularWallet indexed seller, ///< seller
-        ISingularWallet indexed buyer,  ///< buyer
-        address erc20,  ///< the currency type
-        uint256 price,          ///< price
-        uint256 when,           ///< when the tx completes
-        string note             ///< additional note
-    );
 
 
     /**

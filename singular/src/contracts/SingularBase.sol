@@ -12,6 +12,14 @@ import "./IBurnable.sol";
 //singular must transfer by its owner(SingularWallet) and between SingularWallets
 */
 contract SingularBase is ITradable, ReentrancyGuard, TransferHistory, IBurnable {
+    function contractName()
+    external
+    view
+    returns(
+        string              ///< the name of the contract class
+    ) {
+        return "SingularBase";
+    }
 
     address internal prototype; // token types, a ref to type information
 

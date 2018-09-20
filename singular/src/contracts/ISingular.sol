@@ -2,17 +2,27 @@ pragma solidity ^0.4.24;
 
 import "./ISingularWallet.sol";
 
+
 /**
  * @title A concrete asset token representing a single item of things. It should
  * be used together with ISingularMeta to fully specified the information about 
  * this item.
  *
- *
- * //TODO: evaluating naming options: IItem, etc, for clarity and easiness of reference
  * @author Bing Ran<bran@udap.io>
  * @author Guxiang Tang<gtang@udap.io>
  */
 interface ISingular {
+
+    /**
+    to show the 'class' name of this contract. Similar idea to ERC165.
+    The concrete singulars must return the contract name as the value.
+    */
+    function contractName()
+    external
+    view
+    returns(
+        string name             ///< the name of the contract class
+    );
 
     /**
      * get the current owner. From asset point of view, an owner owns this token. 
@@ -22,22 +32,6 @@ interface ISingular {
     view
     returns (
         ISingularWallet         ///< owner is an ISingularWallet
-    );
-
-    // should really be in transferable
-
-    function previousOwner()
-    external
-    view
-    returns (
-        ISingularWallet
-    );
-
-    function nextOwner()
-    external
-    view
-    returns (
-        ISingularWallet
     );
 
     /**
@@ -59,7 +53,6 @@ interface ISingular {
     returns (
         uint256         ///< when this thing was created
     );
-
 
     /**
 

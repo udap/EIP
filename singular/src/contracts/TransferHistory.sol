@@ -7,6 +7,14 @@ import "./SingularBase.sol";
 import "./utils/Initialized.sol";
 
 contract TransferHistory is ITransferHistory, Initialized {
+    function contractName()
+    external
+    view
+    returns(
+        string              ///< the name of the contract class
+    ) {
+        return "TransferHistory";
+    }
 
 
     /// ownership history enumeration

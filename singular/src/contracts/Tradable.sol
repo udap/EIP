@@ -4,18 +4,29 @@ import "./ISingularWallet.sol";
 import "./ISingular.sol";
 import "./ITradable.sol";
 import "./SingularMeta.sol";
-import "./debit/IDebit.sol";
+import "./ERC20/IDebit.sol";
 
 
 /**
+@title A tradable Singular implementation
+
+A countract of this class can be used in trading.
 
 @author bing ran<bran@udap.io>
 
-XXX  should really inherit from ITradable. But it would cause Error: Definition of base has to
-precede definition of derived contract.
 */
 contract Tradable is ITradable, SingularMeta {
+    function contractName()
+    external
+    view
+    returns(
+        string              ///< the name of the contract class
+    ) {
+        return "Tradable";
+    }
+
     ISingularWallet currentOwner; /// current owner
+
     ISingularWallet ownerPrevious; /// next owner choice
     address internal theCreator; /// who creates this token
     uint256 whenCreated;
@@ -28,7 +39,7 @@ contract Tradable is ITradable, SingularMeta {
         string _descr,
         string _tokenURI,
         bytes32 _tokenURIHash,
-        address _tokenType,
+        address _tokenType,         ///< an address that indicate the origin of this instance.
         ISingularWallet _wallet
     )
     public

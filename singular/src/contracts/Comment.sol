@@ -6,7 +6,17 @@ import "./utils/Initialized.sol";
 import "./SingularBase.sol";
 
 contract Comment is IComment, Initialized, SingularBase{
+    function contractName()
+    external
+    view
+    returns(
+        string              ///< the name of the contract class
+    ) {
+        return "Comment";
+    }
+
     constructor () public{
+
 
     }
 

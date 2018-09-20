@@ -6,8 +6,17 @@ import "./SingularMeta.sol";
 import "./ISingularAll.sol";
 
 contract Singular is SingularBase, SingularMeta, Comment{
-    constructor() public payable{
 
+    function contractName()
+    external
+    view
+    returns(
+        string              ///< the name of the contract class
+    ) {
+        return "Singular";
+    }
+
+    constructor() public payable{
     }
 
     function init (
