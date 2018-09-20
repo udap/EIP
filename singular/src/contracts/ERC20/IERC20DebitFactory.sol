@@ -29,5 +29,5 @@ contract IERC20DebitFactory {
     );
 
     /////
-    event Transfer(address indexed from, address indexed to, uint256 value);
+    event DebitCreated(IDebit indexed debit, ISingularWallet indexed wallet, uint256 value);
 }

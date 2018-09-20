@@ -50,7 +50,6 @@ contract SimpleERC20WithFactory is IERC20DebitFactory {
 
         balances[msg.sender] -= _value;
         balances[_to] += _value;
-        emit Transfer(msg.sender, _to, _value);
         return true;
     }
 
@@ -80,24 +79,8 @@ contract SimpleERC20WithFactory is IERC20DebitFactory {
         IDebit debit = new ERC20Debit(this, wallet);
         if (denomination > 0)
             transfer(debit, denomination);
+        emit DebitCreated(debit, wallet, denomination);
         return debit;
     }
-
-//    function split(
-//        IDebit acct,
-//        uint amount
-//    )
-//    public
-//    returns(
-//        IDebit
-//    )
-//    {
-//        require(msg.sender == address(acct) ||
-//        msg.sender == address(acct.owner()),
-//        "sender is not the owner");
-//        IDebit to = new ERC20Debit(this, acct.owner());
-//        transfer(to, amount);
-//        return to;
-//    }
 
 }

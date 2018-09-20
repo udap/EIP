@@ -46,14 +46,8 @@ contract ERC20DebitFactory is IERC20DebitFactory {
         IDebit debit = new ERC20Debit(this, wallet);
         if (denomination > 0)
             erc20.transfer(debit, denomination);
+        emit DebitCreated(debit, wallet, denomination);
         return debit;
     }
 
-    /************** functions of erc20 that are not used for this surrogate ********/
-    // function allowance(address tokenOwner, address spender) public constant returns (uint remaining);
-    // function approve(address spender, uint tokens) public returns (bool success);
-    // function transferFrom(address from, address to, uint256 tokens) public returns (bool success);
-
-
-    //    event Transfer(address indexed from, address indexed to, uint256 value);
 }
