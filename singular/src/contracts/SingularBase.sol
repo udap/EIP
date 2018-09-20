@@ -1,18 +1,17 @@
 pragma solidity ^0.4.24;
 
-import "./ITransferrable.sol";
+import "./ITradable.sol";
 import "./ISingularWallet.sol";
 import "./utils/ReentrancyGuard.sol";
 import "./utils/AddressUtils.sol";
 import "./TransferHistory.sol";
 import "./IBurnable.sol";
-//import "./Transferable.sol";
 
 /**
 *
 //singular must transfer by its owner(SingularWallet) and between SingularWallets
 */
-contract SingularBase is  ITransferrable, ReentrancyGuard, TransferHistory, IBurnable {
+contract SingularBase is ITradable, ReentrancyGuard, TransferHistory, IBurnable {
 
     address internal prototype; // token types, a ref to type information
 

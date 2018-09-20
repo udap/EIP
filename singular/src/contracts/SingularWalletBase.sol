@@ -6,7 +6,7 @@ import "./utils/AddressUtils.sol";
 import "./utils/SafeMath.sol";
 import "./utils/ReentrancyGuard.sol";
 import "./utils/Initialized.sol";
-import "./ITransferrable.sol";
+import "./ITradable.sol";
 import "./IBurnable.sol";
 
 /*
@@ -45,7 +45,7 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
     }
 
     //=============================callback===============================================
-    function sent(ITransferrable _singular, string _receiverNote)
+    function sent(ITradable _singular, string _receiverNote)
     ownsSingular(_singular)
     constructed
     external{
@@ -54,14 +54,14 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
         singularRemoved(_singular);
     }
 
-    function received(ITransferrable _singular, string _receiverNote) constructed external{
+    function received(ITradable _singular, string _receiverNote) constructed external{
         require(_singular.owner() == this);
         emit SingularTransferred(_singular.previousOwner(),this,_singular,now,_receiverNote);
         singularAdded(_singular);
     }
 
     // called when get an offer
-    function offer(ITransferrable _singular, string _senderNote) constructed external{
+    function offer(ITradable _singular, string _senderNote) constructed external{
         require(_singular.nextOwner() == this);
         emit SingularOffered(_singular.owner(),_singular, now, _senderNote);
         //customized later
@@ -74,12 +74,12 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
 
     }
 
-    function offerNotify(ITransferrable _singular, string _senderNote) constructed external{
+    function offerNotify(ITradable _singular, string _senderNote) constructed external{
         require(_singular.nextOwner() == this);
         emit SingularOffered(_singular.owner(),_singular, now, _senderNote);
     }
 
-    function offerRejected(ITransferrable _singular, string _receiverNote) constructed external{
+    function offerRejected(ITradable _singular, string _receiverNote) constructed external{
         require( _singular.owner() == this);
         emit SingularTransferFailed(_singular.owner(),_singular.nextOwner(),_singular,now,_receiverNote);
     }
@@ -88,7 +88,7 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
 
     //=============================action===============================================
 
-    function send(ISingularWallet _to, ITransferrable _singular, string _senderNote)
+    function send(ISingularWallet _to, ITradable _singular, string _senderNote)
     onlyOwnerOrOperator
     ownsSingular(_singular)
     constructed
@@ -98,7 +98,7 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
         _singular.sendTo(_to, _senderNote);
     }
 
-    function sendNotify(ISingularWallet _to, ITransferrable _singular, string _senderNote, uint256 _expiry)
+    function sendNotify(ISingularWallet _to, ITradable _singular, string _senderNote, uint256 _expiry)
     onlyOwnerOrOperator
     ownsSingular(_singular)
     constructed
@@ -111,7 +111,7 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
     //manually approve a singular
     function approve(
         ISingularWallet _to,
-        ITransferrable _singular,
+        ITradable _singular,
         string _senderNote,
 //        uint256 _validSince,
         uint256 _validTill
@@ -137,7 +137,7 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
     //if you agree/refuse maliciously, you will lose your ETH if you like :)
 
     //just forward request to singular.accept
-    function agree(ITransferrable _singular, string _receiverNote)
+    function agree(ITradable _singular, string _receiverNote)
     onlyOwnerOrOperator
     constructed
     external {
@@ -145,7 +145,7 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
     }
 
     //just forward request to singular.reject
-    function reject(ITransferrable _singular, string _receiverNote)
+    function reject(ITradable _singular, string _receiverNote)
     onlyOwnerOrOperator
     constructed
     external {

@@ -2,17 +2,115 @@ pragma solidity ^0.4.24;
 
 import "./ISingularWallet.sol";
 import "./debit/IDebit.sol";
-import "./debit/ERC20Debit.sol";
+//import "./debit/ERC20Debit.sol";
+
 
 /**
- * @title
- * support of ownership trading
+ * @title Interface of tradable ISingular
  *
- *
+ * It supports:
+ * 1. simple transfer
+ * 2. swap between singulars
+ * 3. buy and sell
+ * 4. auction (todo)
  *
  * @author Bing Ran<bran@udap.io>
  */
-contract ITradable is ITransferrable {
+contract ITradable is ISingular {
+
+    /**
+      * When the current owner has approved someone else as the next owner, subject
+      * to acceptance or rejection.
+      */
+    event ReceiverApproved(
+        address indexed from,           ///< the from party of transaction
+        address indexed to,             ///< the receiver
+        uint256 validFrom,      ///< when an offer is valid from
+        uint256 validTill,      ///< when the offer expires
+        string senderNote       ///< additional note
+    );
+
+    /**
+     * the ownership has been successfully transferred from A to B.
+     */
+    event Transferred(
+        address indexed from,
+        address indexed to,
+        uint256 when,
+        string senderNote,          ///< offer note
+        string receiverNote            ///< acceptance note
+    );
+
+    /**
+    * the ownership transition fails from A to B
+    */
+    event TransferFailed(
+        address indexed from,
+        address indexed to,
+        uint256 when,
+        string senderNote,          ///< offer note
+        string receiverNote            ///< acceptance note
+    );
+
+    /**
+      There can only be one approved receiver at a given time. This receiver cannot
+      be changed before the expiry time.
+
+      approveReceiver must check if the current message sender can is authorized by
+      the token owner to invoke this function.
+     */
+    function approveReceiver(
+        ISingularWallet to,     ///< address to be approved as the next owner
+        uint256 validFrom,         ///< the time lock start. in seconds since the epoch
+        uint256 validTill,         ///< the time lock end. in seconds since the epoch
+        string reason           ///< the reason for the transfer
+    )
+    external;
+
+    /**
+     The approved account takes the ownership of this token. The caller must have
+     been set as the next owner of this token previously in a call by the current
+     owner to the approve() function. The expiry time must be in the future
+     This function MUST call the `ISingularWallet::transferred()` on both
+     parties of the transaction for them to update the wallet.
+
+     */
+    function acceptTransfer(
+        string note
+    )
+    external;
+
+    /**
+     To reject an offer. It must be called by the approved next owner to reject a previous
+     offer. The implementation MUST notify the token owner of the fact by calling
+     ISingularWallet::offerRejected.
+     */
+    function rejectTransfer(
+        string note
+    )
+    external;
+
+    /**
+     * to send this token synchronously to a SingularWallet. It must call approveReceiver
+     * first and invoke the "offer" function on the other SingularWallet. Setting the
+     * current owner directly is not allowed.
+     */
+    function sendTo(
+        ISingularWallet to,         ///< the recipient
+        string note                 ///< additional information
+    )
+    external;
+
+    /**
+    to make an transfer approval and notify the other party
+    */
+    function sendToAsync(
+        ISingularWallet to,
+        string note,
+        uint256 expiry
+    )
+    external;
+
     struct SellOffer {
         address erc20;          ///< the currency type
         uint256 price;          ///< price
@@ -29,6 +127,14 @@ contract ITradable is ITransferrable {
 //        string note;             ///< additional note
     }
 
+    struct TransferOffer {
+        ISingularWallet nextOwner; /// next owner choice
+        uint256 validFrom;
+        uint256 validTill;
+        string senderNote;
+    }
+
+    TransferOffer public transferOffer;
     SellOffer public sellOffer;
     SwapOffer public swapOffer;
 
@@ -112,7 +218,7 @@ contract ITradable is ITransferrable {
 
      */
     function buy(
-        ERC20Debit debitcard   ///< the money. The denomination MUST be >= offer price.
+        IDebit debitcard   ///< the money. The denomination MUST be >= offer price.
     )
     external;
 
@@ -122,7 +228,7 @@ contract ITradable is ITransferrable {
     set up a swap arrangement
     */
     function approveSwap(
-        ISingular target,
+        ITradable target,
         uint validFrom,
         uint validTill,
         string note
@@ -143,8 +249,10 @@ contract ITradable is ITransferrable {
     )
     public;
 
+    function commitOwnerChange()
+    public;
+
     function rejectSwap(
-        ITradable offered
     )
     public;
 

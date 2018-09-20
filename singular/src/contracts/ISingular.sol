@@ -18,8 +18,8 @@ interface ISingular {
      * get the current owner. From asset point of view, an owner owns this token. 
      */
     function owner()
-    view
     external
+    view
     returns (
         ISingularWallet         ///< owner is an ISingularWallet
     );
@@ -27,15 +27,15 @@ interface ISingular {
     // should really be in transferable
 
     function previousOwner()
-    view
     external
+    view
     returns (
         ISingularWallet
     );
 
     function nextOwner()
-    view
     external
+    view
     returns (
         ISingularWallet
     );
@@ -44,8 +44,8 @@ interface ISingular {
     * get the creator
     */
     function creator()
-    view
     external
+    view
     returns (
         address         ///< who has created this, be it a factory or ERC721 type of contracts, or a wallet.
     );
@@ -54,8 +54,8 @@ interface ISingular {
     * get the creation time
     */
     function creationTime()
-    view
     external
+    view
     returns (
         uint256         ///< when this thing was created
     );
@@ -67,8 +67,8 @@ interface ISingular {
 
     */
     function tokenType()
-    view
     external
+    view
     returns(
         address                 ///< address that describes the type of the token.
     );

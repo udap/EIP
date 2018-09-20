@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "./ITransferrable.sol";
 import "./ISingular.sol";
+import "./ITradable.sol";
 
 /**
  * A contract that binds an address (EOA/SC) to a collection of Singular tokens. The
@@ -18,7 +18,6 @@ import "./ISingular.sol";
  * @author Guxiang Tang<gtang@udap.io>
  *
  */
-
 interface ISingularWallet {
     /**
     * event emitted when approve target Singular to some another wallet
@@ -49,6 +48,7 @@ interface ISingularWallet {
         uint256 when,
         string receiverNote
     );
+
     /**
     * event emitted when target Singular transfer fails;
     */
@@ -60,40 +60,22 @@ interface ISingularWallet {
         string receiverNote
     );
 
-
     /**
      get the owner address of this account
      */
     function ownerAddress()
-    view
     external
+    view
     returns (
         address           ///< the parent owner of this account
     );
 
-    /**
-     To find out if an address is an authorized to act on a specific asset. How the authorization
-     list is maintained is up to implementations.
-
-     This function is intended for the `Singular` tokens to call, in an Inversion-of-Control manner,
-     for access control in case that a transaction is requested on the tokens. This account
-     must agree with the tokens on the action names to maintain the authorizations.
-
-     */
-    function isActionAuthorized(
-        address caller,     ///< the action invoker
-        bytes32 action,      ///< the action intended
-        ISingular token     ///< of target of the action
-    )
-    view
-    external
-    returns (bool);      ///< true of authorized; false otherwise
 
     /**
     to notify the *sender* that the intended token transfer has completed and the token has been sent
     */
     function sent(
-        ITransferrable token,        ///< the token that has been sent
+        ITradable token,        ///< the token that has been sent
         string note             ///< additional info
     )
     external;
@@ -104,24 +86,21 @@ interface ISingularWallet {
     the recipient.
     */
     function received(
-        ITransferrable token,        ///< the token that has been sent
+        ITradable token,        ///< the token that has been sent
         string note             ///< additional info
     )
     external;
 
     /**
-
     a callback to notify the the wallet that the transaction
     has been rejected. The parties may synchronize the local state to reflect the
     ownership change.
     */
     function offerRejected(
-        ITransferrable token,    ///< the token of concern
+        ITradable token,    ///< the token of concern
         string note         ///< the associated note
     )
     external;
-
-
 
     /**
     to send a token in this wallet to a recipient. The recipient SHOULD respond by calling `ISingular::accept()` or
@@ -129,7 +108,7 @@ interface ISingularWallet {
     */
     function send(
         ISingularWallet toWallet,     ///< the recipient
-        ITransferrable token,             ///< the token to transfer
+        ITradable token,             ///< the token to transfer
         string _senderNote
     )
     external;
@@ -140,13 +119,11 @@ interface ISingularWallet {
     */
     function sendNotify(
         ISingularWallet toWallet,     ///< the recipient
-        ITransferrable token,             ///< the token to transfer
+        ITradable token,             ///< the token to transfer
         string _senderNote,
         uint256 _expiry
     )
     external;
-
-
 
     /**
      Offers a token that has been assigned to the receiver as the next owner.
@@ -157,7 +134,7 @@ interface ISingularWallet {
 
      */
     function offer(
-        ITransferrable token, ///< the offered token
+        ITradable token, ///< the offered token
         string note         ///< additional information
     )
     external;
@@ -168,7 +145,7 @@ interface ISingularWallet {
     separate transaction.
     */
     function offerNotify(
-        ITransferrable token, ///< the offered token
+        ITradable token, ///< the offered token
         string note         ///< additional information
     )
     external;
@@ -177,7 +154,7 @@ interface ISingularWallet {
     to agree an offer when offerNotify is called
     */
     function agreeTransfer(
-        ITransferrable _token,
+        ITradable _token,
         string _reply
     )
     external;
@@ -186,7 +163,7 @@ interface ISingularWallet {
     to reject an offer when offerNotify is called
     */
     function rejectTransfer(
-        ITransferrable _token,
+        ITradable _token,
         string _reply
     )
     external;
@@ -216,6 +193,23 @@ interface ISingularWallet {
 
     //-------------- asset enumeration
 
+    /**
+     To find out if an address is an authorized to act on a specific asset. How the authorization
+     list is maintained is up to implementations.
+
+     This function is intended for the `Singular` tokens to call, in an Inversion-of-Control manner,
+     for access control in case that a transaction is requested on the tokens. This account
+     must agree with the tokens on the action names to maintain the authorizations.
+
+     */
+    function isActionAuthorized(
+        address caller,     ///< the action invoker
+        bytes32 action,      ///< the action intended
+        ISingular token     ///< of target of the action
+    )
+    external
+    view
+    returns (bool);      ///< true of authorized; false otherwise
 
     /**
      retrieve all the Singular tokens, not in any particular order.

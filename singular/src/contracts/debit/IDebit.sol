@@ -1,6 +1,5 @@
 pragma solidity ^0.4.24;
-
-//import "../ISingular.sol";
+import "../ISingular.sol";
 //import "../ITradable.sol";
 
 
@@ -18,7 +17,7 @@ IDebit makes some fungible tokens a single unit of value that can participate in
 @author Bing Ran<bran@udap.io>
 
 */
-contract IDebit/* is ISingular*/{
+contract IDebit is ISingular {
 
 
     function currencyType()
@@ -35,7 +34,6 @@ contract IDebit/* is ISingular*/{
     returns(
         uint256 value           ///< the token value of this packet
     );
-
 
     /**
      * To transfer some tokens to another coin of the same ERC20 type.

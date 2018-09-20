@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import "../ISingular.sol";
 import "../SingularMeta.sol";
-import "../ITransferrable.sol";
+import "../ITradable.sol";
 
 /**
  * A contract that binds an address (EOA/SC) to a list of Singular tokens. The
@@ -46,8 +46,6 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
         theCreator = msg.sender;    
     }
 
-
-    
     /**
      * get the owner address.
      */
@@ -59,7 +57,6 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
         require(msg.sender == theCreator);
         ownerOfThis = _owner;
     }
-
 
     /**
      * to find out if an address is an authorized operator for the Singular token's
@@ -88,8 +85,7 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
      * The previous owner should remove the asset for the asset list to synchronize
      * the ownership relation with the token.
      */
-     
-    function sent(ITransferrable token, string note) external {
+    function sent(ITradable token, string note) external {
         // this implementation leaves holes in the token array;
         require(token.previousOwner() == this);
         // TODO: handle the note in a transaction history
@@ -109,7 +105,7 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
      * The current owner of the token must be this wallet.
      */
      
-    function received(ITransferrable token, string note) external {
+    function received(ITradable token, string note) external {
         require(token.owner() == this);
         require(!alreadyOwn(token));
         addToTokenSet(token);
@@ -124,7 +120,7 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
      * accept the offer, it can ignore the offer by returning `false`;
      */
     function offerTransfer(
-        ITransferrable token,
+        ITradable token,
         string note
         ) 
         external 
@@ -143,7 +139,7 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
      */
     function send(
         ISingularWallet wallet,     ///< the recipient
-        ITransferrable token             ///< the token to transfer
+        ITradable token             ///< the token to transfer
     )
     ownerOnly
     external
@@ -158,7 +154,7 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
     */
     function sendNotify(
         ISingularWallet wallet,     ///< the recipient
-        ITransferrable token,             ///< the token to transfer
+        ITradable token,             ///< the token to transfer
         uint expiry
     )
     ownerOnly
@@ -168,7 +164,7 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
     }
 
 
-    function okToAccept(ITransferrable token) internal returns (bool) {
+    function okToAccept(ITradable token) internal returns (bool) {
     // TODO: anti-spamming procedures
         return true;
     }

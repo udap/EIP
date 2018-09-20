@@ -1,7 +1,8 @@
 pragma solidity ^0.4.24;
 
-import '../Transferable.sol';
+import '../Tradable.sol';
 import './IDebit.sol';
+import "../ISingularWallet.sol";
 // import './DebitFactory.sol';
 
 /**
@@ -13,7 +14,7 @@ todo: needs to work with some kind of issuer.
 
 @author Bing Ran<bran@udap.io>
 */
-contract DebitBasic is IDebit, Transferable {
+contract DebitBasic is IDebit, Tradable {
 
     uint256 faceValue;
     DebitBasic public whoCanDeposit;
@@ -27,7 +28,7 @@ contract DebitBasic is IDebit, Transferable {
         address _currencyType,           ///< currency type
         ISingularWallet _wal     ///< owner
     ) 
-    Transferable (
+    Tradable (
         "DebitBasic", 
         _symbol, 
         "DebitBasic", 

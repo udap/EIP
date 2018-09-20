@@ -6,7 +6,7 @@ import "./ISingularWallet.sol";
    @title support of ownership swap between two singulars
 
 
-   XXX consider the ITransferrable a special case of ISwappable, with the target of address(0)
+   XXX consider the ITransferable a special case of ISwappable, with the target of address(0)
 
    @author Bing Ran<bran@udap.io>
  */

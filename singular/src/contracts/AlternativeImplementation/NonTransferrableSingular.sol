@@ -15,7 +15,7 @@ import "../ISingular.sol";
  * @author Bing Ran<bran@udap.io>
  *
  */
-contract NonTransferrableSingular is ISingular, SingularMeta{
+contract NonTradableSingular is ISingular, SingularMeta{
 
     ISingularWallet public owner; /// current owner
 
