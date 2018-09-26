@@ -45,3 +45,4 @@ We call our basic asset contract `Singular` and the design decisions are:
 ## notes
 
 1. Swap is not in the specification yet. 
+2. License: PGL2.0
