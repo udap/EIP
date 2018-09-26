@@ -4,7 +4,7 @@ import "./IDebit.sol";
 import "./IERC20DebitFactory.sol";
 import "../ISingularWallet.sol";
 import "../ISingular.sol";
-import "../Tradable.sol";
+import "../impl/Tradable.sol";
 
 
 

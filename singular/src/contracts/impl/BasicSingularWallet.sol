@@ -17,7 +17,7 @@ import "../ITradable.sol";
  * @author Bing Ran<bran@udap.io>
  *
  */
-contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Singular to make a composite pattern
+contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement Singular to make a composite pattern
 
 
     address theCreator;
@@ -39,8 +39,19 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
 
     address public ownerOfThis;
 
-    constructor(string _name, string _symbol, string _descr, string _tokenURI , bytes32 _tokenURIDigest)
-    SingularMeta(_name, _symbol, _descr, _tokenURI, _tokenURIDigest)
+    constructor(
+        string _name,
+        string _symbol,
+        string _descr,
+        string _tokenURI,
+        bytes32 _tokenURIDigest
+    )
+    SingularMeta(
+        _name,
+            _symbol,
+            _descr,
+            _tokenURI,
+            _tokenURIDigest)
     public
     {
         theCreator = msg.sender;    
@@ -111,6 +122,34 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
         addToTokenSet(token);
     }
 
+    /**
+     a callback to notify the the wallet that the transaction
+     has been rejected. The parties may synchronize the local state to reflect the
+     ownership change.
+     */
+    function offerRejected(
+        ITradable token,    ///< the token of concern
+        string note         ///< the associated note
+    )
+    external {
+        revert("not implementd");
+    }
+
+
+    /**
+    To notify this account that a token transfer offer is ready. The function should return
+    without doing anything on the token. This account can accept/reject the offer in a
+    separate transaction.
+    */
+    function offerNotify(
+        ITradable token, ///< the offered token
+        string note         ///< additional information
+    )
+    external {
+        revert("not implemented");
+    }
+
+
 
     /**
        to offer a transfer
@@ -119,7 +158,7 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
      * the offer, it MUST call the `accept()` on the token and return `true` If this account will not
      * accept the offer, it can ignore the offer by returning `false`;
      */
-    function offerTransfer(
+    function offer(
         ITradable token,
         string note
         ) 
@@ -139,12 +178,13 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
      */
     function send(
         ISingularWallet wallet,     ///< the recipient
-        ITradable token             ///< the token to transfer
+        ITradable token,             ///< the token to transfer
+        string _senderNote
     )
     ownerOnly
     external
     {
-        token.sendTo(wallet, "from wallet");
+        token.sendTo(wallet, _senderNote);
     }
 
 
@@ -155,12 +195,13 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
     function sendNotify(
         ISingularWallet wallet,     ///< the recipient
         ITradable token,             ///< the token to transfer
+        string _senderNote,
         uint expiry
     )
     ownerOnly
     external
     {
-        token.sendToAsync(wallet, "from wallet", expiry);
+        token.sendToAsync(wallet, _senderNote, expiry);
     }
 
 
@@ -178,6 +219,34 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
         return false;
     }
 
+
+    /**
+    to create a new ISingularWallet and move the ownership of he elements from this wallet to a new
+    ISingularWallet. The new container's owner is the the owner of this container
+    */
+    function slice(
+        ISingular[] elements    ///< the elements to move slice off from this container.
+    )
+    external
+    returns(
+        ISingularWallet         ///< the new ISingularWallet instance owning the elements
+    )
+    {
+        revert("not implemented");
+    }
+
+    /**
+    to dump all the elements of the specified wallet to this container. The incoming container's owner
+    must be the same as this container.
+    */
+    function join(
+        ISingularWallet container   ///< the source container which must be owned by the same owner as this.
+    )
+    external {
+        revert("not implemented");
+    }
+
+
     /**
      * add a token to the owned token set.
     */
@@ -194,8 +263,6 @@ contract SingularWallet is ISingularWallet, SingularMeta {/// can implement Sing
         }
         tokens.push(token);
     }
-    
-
 
     /// enueration of the owned tokens
     /**

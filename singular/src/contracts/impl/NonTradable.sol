@@ -15,7 +15,7 @@ import "../ISingular.sol";
  * @author Bing Ran<bran@udap.io>
  *
  */
-contract NonTradableSingular is ISingular, SingularMeta{
+contract NonTradable is ISingular, SingularMeta{
     function contractName()
     external
     view

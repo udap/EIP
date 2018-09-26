@@ -1,10 +1,9 @@
 pragma solidity ^0.4.24;
 
-import "../Tradable.sol";
 import "./IERC721.sol";
 import "../ISingularWallet.sol";
-import "../AlternativeImplementation/NonTransferrableSingular.sol";
 import "./IERC721Singular.sol";
+import "../impl/NonTradable.sol";
 
 
 /**
@@ -13,7 +12,7 @@ import "./IERC721Singular.sol";
 @author bing ran<bran@udap.io>
 
 */
-contract ERC721NonTradable is IERC721Singular, NonTradableSingular {
+contract ERC721NonTradable is IERC721Singular, NonTradable {
 
     function contractName()
     external
@@ -26,6 +25,7 @@ contract ERC721NonTradable is IERC721Singular, NonTradableSingular {
 
     IERC721 erc721;
     uint tokenNumber;
+
     /**
     construct a Tradable backed by an ERC721 token.
     */
@@ -38,7 +38,7 @@ contract ERC721NonTradable is IERC721Singular, NonTradableSingular {
         IERC721 _erc721,
         uint _tokenId
     )
-    NonTradableSingular(
+    NonTradable(
         _name,
         _erc721.symbol(),
         _description,

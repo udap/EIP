@@ -1,10 +1,10 @@
 pragma solidity ^0.4.24;
 
-import "./ISingularWallet.sol";
-import "./ISingular.sol";
-import "./ITradable.sol";
-import "./SingularMeta.sol";
-import "./ERC20/IDebit.sol";
+import "../ISingularWallet.sol";
+import "../ISingular.sol";
+import "../ITradable.sol";
+import "../SingularMeta.sol";
+import "../ERC20/IDebit.sol";
 
 
 /**
@@ -32,6 +32,8 @@ contract Tradable is ITradable, SingularMeta {
     uint256 whenCreated;
 
     address tokenTypeAddr;
+
+    string private receiverNote;
 
     constructor(
         string _name,
@@ -186,7 +188,8 @@ contract Tradable is ITradable, SingularMeta {
     external
     permitted(msg.sender, "rejectTransfer", transferOffer.nextOwner)
     {
-//        receiverNote = note;
+        receiverNote = note;
+
         reset();
     }
 

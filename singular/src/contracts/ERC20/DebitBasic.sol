@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24;
 
-import '../Tradable.sol';
 import './IDebit.sol';
 import "../ISingularWallet.sol";
+import "../impl/Tradable.sol";
 // import './DebitFactory.sol';
 
 /**

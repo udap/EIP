@@ -150,23 +150,25 @@ interface ISingularWallet {
     )
     external;
 
-    /**
-    to agree an offer when offerNotify is called
-    */
-    function agreeTransfer(
-        ITradable _token,
-        string _reply
-    )
-    external;
+    ///// bran: should consifer remove these
 
-    /**
-    to reject an offer when offerNotify is called
-    */
-    function rejectTransfer(
-        ITradable _token,
-        string _reply
-    )
-    external;
+//    /**
+//    to agree an offer when offerNotify is called
+//    */
+//    function agreeTransfer(
+//        ITradable _token,
+//        string _reply
+//    )
+//    external;
+//
+//    /**
+//    to reject an offer when offerNotify is called
+//    */
+//    function rejectTransfer(
+//        ITradable _token,
+//        string _reply
+//    )
+//    external;
 
     //------------- interactions between containers
 

@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 contract Commenting {
-    struct Comment {
+    struct Remark {
         address who;
         uint256 at;
         string comment;
@@ -13,10 +13,10 @@ contract Commenting {
         string comment
     );
 
-    Comment[] ownerComment; // might be operators;
+    Remark[] ownerComment; // might be operators;
 
     function addComment(address who, uint256 when, string _comment) internal {
-        ownerComment.push(Comment(who, when, _comment));
+        ownerComment.push(Remark(who, when, _comment));
         emit Commented(who, when, _comment);
     }
 

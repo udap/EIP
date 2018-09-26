@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
-import "../Tradable.sol";
 import "./IERC721.sol";
 import "../ISingularWallet.sol";
 import "./IERC721Singular.sol";
+import "../impl/Tradable.sol";
 
 
 /**
