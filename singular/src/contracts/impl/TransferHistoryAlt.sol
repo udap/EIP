@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "../ISingularWallet.sol";
 import "../ISingular.sol";
 
-contract AltTransferHistory {
+contract AltTransferHistoryAlt {
 
     struct TransferRec {
         ISingularWallet from;
@@ -29,10 +29,17 @@ contract AltTransferHistory {
     }
     /**
      * To get a specific transfer record in the format defined by implementation.
-     * @param index the inde of the inquired record. It must in the range of
-     * [0, numberOfTransfers())
+     *
+     *
      */
-    function getTransferAt(uint256 index) view external returns(string) {
+    function getTransferAt(
+        uint256 /*index*/   ///< the index of the inquired record. It must in the range of [0, numberOfTransfers())
+    )
+    external
+    view
+    returns(
+        string
+    ) {
         // need to serialize a records
         // return transferHistory[index];
         revert("not implemented");

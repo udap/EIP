@@ -73,7 +73,16 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
      * to find out if an address is an authorized operator for the Singular token's
      * ownership.
      */
-    function isActionAuthorized(address _address, bytes32 _selector, ISingular _singular) view external returns (bool) {
+    function isActionAuthorized(
+        address _address,
+        bytes32 _selector,
+        ISingular _singular
+    )
+    external
+    view
+    returns (
+        bool
+    ) {
         return operatorApprovals[_singular][tokenVersion[_singular]][_selector][_address];
     }
 
@@ -96,7 +105,7 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
      * The previous owner should remove the asset for the asset list to synchronize
      * the ownership relation with the token.
      */
-    function sent(ITradable token, string note) external {
+    function sent(ITradable token, string /*note*/) external {
         // this implementation leaves holes in the token array;
         require(token.previousOwner() == this);
         // TODO: handle the note in a transaction history
@@ -116,7 +125,7 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
      * The current owner of the token must be this wallet.
      */
      
-    function received(ITradable token, string note) external {
+    function received(ITradable token, string /*note*/) external {
         require(token.owner() == this);
         require(!alreadyOwn(token));
         addToTokenSet(token);
@@ -128,8 +137,8 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
      ownership change.
      */
     function offerRejected(
-        ITradable token,    ///< the token of concern
-        string note         ///< the associated note
+        ITradable /*token*/,    ///< the token of concern
+        string /*note*/         ///< the associated note
     )
     external {
         revert("not implementd");
@@ -142,8 +151,8 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
     separate transaction.
     */
     function offerNotify(
-        ITradable token, ///< the offered token
-        string note         ///< additional information
+        ITradable /*token*/, ///< the offered token
+        string /*note*/         ///< additional information
     )
     external {
         revert("not implemented");
@@ -205,12 +214,12 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
     }
 
 
-    function okToAccept(ITradable token) internal returns (bool) {
+    function okToAccept(ITradable /*token*/) internal pure returns (bool) {
     // TODO: anti-spamming procedures
         return true;
     }
 
-    function alreadyOwn(ISingular token) view internal returns (bool){
+    function alreadyOwn(ISingular token) internal view returns (bool){
         for (uint i = 0; i < tokens.length; i++) {
             if (token == tokens[i]) {
                return true;
@@ -225,7 +234,7 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
     ISingularWallet. The new container's owner is the the owner of this container
     */
     function slice(
-        ISingular[] elements    ///< the elements to move slice off from this container.
+        ISingular[] /*elements*/    ///< the elements to move slice off from this container.
     )
     external
     returns(
@@ -240,7 +249,7 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
     must be the same as this container.
     */
     function join(
-        ISingularWallet container   ///< the source container which must be owned by the same owner as this.
+        ISingularWallet /*container*/   ///< the source container which must be owned by the same owner as this.
     )
     external {
         revert("not implemented");
@@ -285,7 +294,7 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
     /**
      * get the token at a specific index. TODO how to properly implement this on list with holes?
      */
-    function getTokenAt(uint256 idx) view external returns (ISingular) {
+    function getTokenAt(uint256 /*idx*/) view external returns (ISingular) {
         // TODO: privacy and permission control
         revert("not implemented yet");
     }

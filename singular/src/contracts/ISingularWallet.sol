@@ -70,71 +70,15 @@ interface ISingularWallet {
         address           ///< the parent owner of this account
     );
 
-
-    /**
-    to notify the *sender* that the intended token transfer has completed and the token has been sent
-    */
-    function sent(
-        ITradable token,        ///< the token that has been sent
-        string note             ///< additional info
-    )
-    external;
-
-
-    /**
-    to notify the recipient that the intended token transfer has completed and the token is now owned by
-    the recipient.
-    */
-    function received(
-        ITradable token,        ///< the token that has been sent
-        string note             ///< additional info
-    )
-    external;
-
-    /**
-    a callback to notify the the wallet that the transaction
-    has been rejected. The parties may synchronize the local state to reflect the
-    ownership change.
-    */
-    function offerRejected(
-        ITradable token,    ///< the token of concern
-        string note         ///< the associated note
-    )
-    external;
-
-    /**
-    to send a token in this wallet to a recipient. The recipient SHOULD respond by calling `ISingular::accept()` or
-    `ISingular::reject()` in the same transaction.
-    */
-    function send(
-        ISingularWallet toWallet,     ///< the recipient
-        ITradable token,             ///< the token to transfer
-        string _senderNote
-    )
-    external;
-
-    /**
-    to approve a new owner of a token and notify the recipient. The recipient SHOULD accept or reject the offer in
-    a separate transaction. This is of the "offer/accept" two-step pattern.
-    */
-    function sendNotify(
-        ISingularWallet toWallet,     ///< the recipient
-        ITradable token,             ///< the token to transfer
-        string _senderNote,
-        uint256 _expiry
-    )
-    external;
-
     /**
      Offers a token that has been assigned to the receiver as the next owner.
      The receiver SHOULD choose to take a synchronous action by calling `accept()`
      or `reject()` in the same transaction on the token in the method body,
      or take a note and return, followed by an asynchronous call to `accept/reject
      at a later time`.
-
      */
     function offer(
-        ITradable token, ///< the offered token
+        ITradable token,    ///< the offered token
         string note         ///< additional information
     )
     external;
@@ -145,30 +89,29 @@ interface ISingularWallet {
     separate transaction.
     */
     function offerNotify(
-        ITradable token, ///< the offered token
+        ITradable token,    ///< the offered token
         string note         ///< additional information
     )
     external;
 
-    ///// bran: should consifer remove these
+    /**
+    to notify the *sender* that the intended token transfer has completed and the token has been sent
+    */
+    function sent(
+        ITradable token,        ///< the token that has been sent
+        string note             ///< additional info
+    )
+    external;
 
-//    /**
-//    to agree an offer when offerNotify is called
-//    */
-//    function agreeTransfer(
-//        ITradable _token,
-//        string _reply
-//    )
-//    external;
-//
-//    /**
-//    to reject an offer when offerNotify is called
-//    */
-//    function rejectTransfer(
-//        ITradable _token,
-//        string _reply
-//    )
-//    external;
+    /**
+    to notify the recipient that the intended token transfer has completed and the token is now owned by
+    the recipient.
+    */
+    function received(
+        ITradable token,        ///< the token that has been sent
+        string note             ///< additional info
+    )
+    external;
 
     //------------- interactions between containers
 

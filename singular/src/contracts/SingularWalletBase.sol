@@ -34,7 +34,7 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
         walletOperator = _walletOperator;
     }
 
-    function isActionAuthorized(address _caller, bytes32 _action,ISingular singular) view external returns(bool){
+    function isActionAuthorized(address _caller, bytes32 /*_action*/, ISingular /*singular*/) view external returns(bool){
         if(AddressUtils.isContract(_caller)){
             // TODO: serialize the transferHistory
             revert("not implemented");
@@ -175,7 +175,7 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
     /**
      get the token at a specific index.
      */
-    function getTokenAt(uint256 _idx) view external returns (ISingular){
+    function getTokenAt(uint256 /*_idx*/) view external returns (ISingular){
         revert("implement later");
     }
 

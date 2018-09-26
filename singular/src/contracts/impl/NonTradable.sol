@@ -62,6 +62,7 @@ contract NonTradable is ISingular, SingularMeta{
 
     function owner()
     public
+    view
     returns(
         ISingularWallet
     )

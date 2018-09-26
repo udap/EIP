@@ -190,7 +190,7 @@ contract DebitBasic is IDebit, Tradable {
     }
 
     function split(
-        uint256 amount      ///< the value in the new coin
+        uint256 /*amount*/      ///< the value in the new coin
     )
     public
     returns(

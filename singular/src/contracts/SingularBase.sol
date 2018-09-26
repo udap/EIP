@@ -6,6 +6,7 @@ import "./utils/ReentrancyGuard.sol";
 import "./utils/AddressUtils.sol";
 import "./TransferHistory.sol";
 import "./IBurnable.sol";
+import "./TransferHistory.sol";
 
 /**
 *
@@ -195,9 +196,9 @@ contract SingularBase is ITradable, ReentrancyGuard, TransferHistory, IBurnable 
     }
 
     function rejectTransfer(string _receiverNote) external inTransition nonReentrant constructed{
-        require(msg.sender == address(singularRecipient), "only approver could accept or reject offer");
+        require(msg.sender == address(singularRecipient), "only the approved could accept or reject offer");
         //Note, reset states after calling offerRejected()
-        singularOwner.offerRejected(this,_receiverNote);
+//        singularOwner.offerRejected(this,_receiverNote);
 
         emit TransferFailed(singularOwner, singularRecipient, now, transferReason,_receiverNote);
 
