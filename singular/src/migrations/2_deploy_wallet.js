@@ -10,6 +10,6 @@ module.exports = function(deployer, network, accounts) {
       web3.utils.fromAscii("0"), // to bytes32
       {from: accounts[0]}
   ).then((inst) => {
-      console.log(inst.address);
+      // console.log(inst.address);
   });
 };
