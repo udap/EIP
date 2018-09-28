@@ -130,4 +130,7 @@ contract ERC20Debit is IDebit, Tradable {
         require(ISingular(t).owner() == theOwner, "The debit owners are different");
         _;
     }
+
+    function toITradable() public returns(ITradable) {return this;}
+
 }

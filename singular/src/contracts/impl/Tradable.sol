@@ -171,8 +171,8 @@ contract Tradable is NonTradable, ITradable {
        offer to sell this item for some money in some currency type.
        It allows for overriding previous settings.
 
-       There is no guarantee of the availability even within the valid sell time period, in contrast to
-       other transactions where the counter-party is explicit.
+       There is no guarantee of the availability even within the valid sell time period,
+       in contrast to other transactions where the counter-party is explicit.
 
        A sell offer can be overidden by swap offer or transfer offers.
 
@@ -309,19 +309,18 @@ contract Tradable is NonTradable, ITradable {
         // shall we require the sender be the debit owner?
         require(msg.sender == address(debitcard.owner()), "ownership does not match. ");
 
-        // XXX this is ugly casting!
-        ITradable money = ITradable(debitcard);
+        ITradable coin = debitcard.toITradable();
 
         // let's set up a swap
-        swapOffer.target = money;
+        swapOffer.target = coin;
         swapOffer.validTill = now + 30 seconds;
 
         // swap the coin and this token
-        money.acceptSwap(sellOffer.note);
+        coin.acceptSwap(sellOffer.note);
 
         require(
-            money.owner() == ownerPrevious
-            && money.previousOwner() == theOwner
+            coin.owner() == ownerPrevious
+            && coin.previousOwner() == theOwner
             ,
             "swap in a purchase did not work"
         );

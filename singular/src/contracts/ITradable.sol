@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 
 import "./ISingularWallet.sol";
 import "./ERC20/IDebit.sol";
-//import "./debit/ERC20Debit.sol";
 
 
 /**

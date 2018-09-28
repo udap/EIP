@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 import "../ISingular.sol";
-//import "../ITradable.sol";
+import "../ITradable.sol";
 
 
 /**
@@ -66,5 +66,8 @@ contract IDebit is ISingular {
     returns(
         IDebit          ///< the spawned child account
     );
+
+    /// to make it ITradable compatible
+    function toITradable() public returns(ITradable);
 
 }

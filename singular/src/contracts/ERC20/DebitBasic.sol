@@ -251,4 +251,5 @@ contract DebitBasic is IDebit, Tradable {
             _;
         }
 
+    function toITradable() public returns(ITradable) {return this;}
 }
