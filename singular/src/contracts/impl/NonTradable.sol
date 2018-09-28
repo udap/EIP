@@ -7,7 +7,7 @@ import "../ISingular.sol";
 
 /**
  * @title Concrete asset token representing a single piece of asset that's not tradable
- *
+ * The owner cannot be changed once it's set.
  *
  * See the comments in the Singular interface for method documentation.
  * 
@@ -16,14 +16,7 @@ import "../ISingular.sol";
  *
  */
 contract NonTradable is ISingular, SingularMeta{
-    function contractName()
-    external
-    view
-    returns(
-        string              ///< the name of the contract class
-    ) {
-        return "NonTradableSingular";
-    }
+    function contractName() external view returns(string) {return "NonTradable";}
 
     ISingularWallet theOwner; /// current owner
 

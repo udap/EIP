@@ -250,10 +250,6 @@ contract ITradable is ISingular {
     )
     public;
 
-    /**
- the target calls this from within the takeSwap().
- */
-
 
     /**
     The owner of the desired item to accept the swap offer.
@@ -264,12 +260,12 @@ contract ITradable is ISingular {
     )
     public;
 
-    function commitOwnerChange()
-    public;
+    /**
+    */
+    function commitOwnerChange() public;
 
-    function rejectSwap(
-    )
-    public;
+
+    function rejectSwap() public;
 
 
 

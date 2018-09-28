@@ -71,11 +71,12 @@ interface ISingularWallet {
     );
 
     /**
-     Offers a token that has been assigned to the receiver as the next owner.
+     To receive an incoming transfer offer. The token has been assigned to this receiver as the next owner.
      The receiver SHOULD choose to take a synchronous action by calling `accept()`
      or `reject()` in the same transaction on the token in the method body,
      or take a note and return, followed by an asynchronous call to `accept/reject
      at a later time`.
+     todo: consider changing the name to `receiveOwnership`
      */
     function offer(
         ITradable token,    ///< the offered token
@@ -87,6 +88,7 @@ interface ISingularWallet {
     To notify this account that a token transfer offer is ready. The function should return
     without doing anything on the token. This account can accept/reject the offer in a
     separate transaction.
+     todo: consider changing the name to `receiveOwnershipNotify`
     */
     function offerNotify(
         ITradable token,    ///< the offered token
@@ -145,6 +147,10 @@ interface ISingularWallet {
      This function is intended for the `Singular` tokens to call, in an Inversion-of-Control manner,
      for access control in case that a transaction is requested on the tokens. This account
      must agree with the tokens on the action names to maintain the authorizations.
+
+     XXX Delagating back to the wallet to manage the authorization is questionable. It's hard to maintain at the
+     wallet level. Doing the access control at the Singular token level might be a better design, in the
+     spirit of objects and their intelligence staying together.
 
      */
     function isActionAuthorized(

@@ -14,7 +14,7 @@ import "./ISingularWallet.sol";
 interface ISingular {
 
     /**
-    to show the 'class' name of this contract. Similar idea to ERC165.
+    to show the 'class' name of this contract.
     The concrete singulars must return the contract name as the value.
     */
     function contractName()

@@ -30,9 +30,10 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
     /// we use the tokenVersion to track the latest set of authorizations
     mapping(address => uint32) tokenVersion;
 
+
     mapping(
         address => mapping(     // singular contract address
-            uint32 => mapping(      // version of ownership
+            uint32 => mapping(      // version of ownership. since we cannot delete an entry in mapping
                 bytes32 => mapping(     // action name
                     address => bool     //  the visitor, can / cannot
                     )))) internal operatorApprovals;
@@ -54,7 +55,8 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
             _tokenURIDigest)
     public
     {
-        theCreator = msg.sender;    
+        theCreator = msg.sender;
+        ownerOfThis = msg.sender;
     }
 
     /**
@@ -161,7 +163,7 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
 
 
     /**
-       to offer a transfer
+     *  to offer a transfer
      * @dev to receive a token that has been assigned to the receiver as the next owner.
      * The receiver must decide to take it or not. If this account decides to accept
      * the offer, it MUST call the `accept()` on the token and return `true` If this account will not

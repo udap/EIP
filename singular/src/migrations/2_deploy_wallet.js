@@ -7,9 +7,19 @@ module.exports = function(deployer, network, accounts) {
       "wallet",
       "simple wallet",
       "",
-      web3.utils.fromAscii("0"), // to bytes32
+      web3.utils.fromAscii("0"),
       {from: accounts[0]}
-  ).then((inst) => {
-      // console.log(inst.address);
+  ).then(async (inst) => {
+      console.log("deployed wallet 1: " + inst.address);
+      let w2 = await deployer.deploy(
+          w,
+          "Andrew's wallet",
+          "wallet",
+          "simple wallet",
+          "",
+          web3.utils.fromAscii("0"),
+          {from: accounts[1]}
+      )
+      console.log("deployed wallet 2: " + w2.address);
   });
 };

@@ -11,7 +11,8 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "testtest": "node $NODE_DEBUG_OPTION /usr/local/lib/node_modules/truffle test",
+    "test": "node $NODE_DEBUG_OPTION /usr/local/lib/node_modules/truffle/build/cli.bundled.js test",
     "install": "truffle install bytes"
   },
   "author": "",

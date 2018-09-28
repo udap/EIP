@@ -16,14 +16,7 @@ A countract of this class can be used in trading.
 
 */
 contract Tradable is ITradable, SingularMeta {
-    function contractName()
-    external
-    view
-    returns(
-        string              ///< the name of the contract class
-    ) {
-        return "Tradable";
-    }
+    function contractName() external view returns(string) {return "Tradable";}
 
     ISingularWallet currentOwner; /// current owner
 
@@ -288,9 +281,6 @@ contract Tradable is ITradable, SingularMeta {
     public
     inSwap
     {
-        //        approveSwap(offered, now, now + 10 seconds, "");
-        // simply change ownership?
-        //        SwapOffer offer = offered.swapOffer();
         ITradable target;
         uint256 vFrom;
         uint256 vTill;
@@ -426,9 +416,11 @@ contract Tradable is ITradable, SingularMeta {
         ISingularWallet authenticator
     ) {
         require(
-            address(authenticator) == caller ||
-        authenticator.isActionAuthorized(caller, action, this),
-            "action not authorized");
+            address(authenticator) == caller
+            || authenticator.ownerAddress() == caller
+            || authenticator.isActionAuthorized(caller, action, this),
+            "action not authorized"
+        );
         _;
     }
 
