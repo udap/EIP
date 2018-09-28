@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 import "../ISingularWallet.sol";
 import "../SingularMeta.sol";
 import "../ISingular.sol";
+import "../utils/CommonModifiers.sol";
 
 
 /**
@@ -15,7 +16,7 @@ import "../ISingular.sol";
  * @author Bing Ran<bran@udap.io>
  *
  */
-contract NonTradable is ISingular, SingularMeta{
+contract NonTradable is ISingular, SingularMeta, CommonModifiers{
     function contractName() external view returns(string) {return "NonTradable";}
 
     ISingularWallet internal theOwner; /// current owner
@@ -37,6 +38,10 @@ contract NonTradable is ISingular, SingularMeta{
         ISingularWallet _wallet
     )
     public
+    max128Bytes(_name)
+    max64Bytes(_symbol)
+    max256Bytes(_descr)
+    max128Bytes(_tokenURI)
     SingularMeta(_name, _symbol, _descr, _tokenURI, _tokenURIHash)
     {
         theCreator = msg.sender;
@@ -97,9 +102,12 @@ contract NonTradable is ISingular, SingularMeta{
         address caller = msg.sender;
         require(
             caller != address(0)
-            || address(theOwner) == caller
-            || theOwner.ownerAddress() == caller
-            || theOperator == caller,
+            &&
+            (
+                address(theOwner) == caller
+                || theOwner.ownerAddress() == caller
+                || theOperator == caller
+            ),
             "the msg.sender was not owner or operator"
         );
         _;

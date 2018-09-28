@@ -15,7 +15,7 @@ import "./ERC20/IDebit.sol";
  *
  * @author Bing Ran<bran@udap.io>
  */
-contract ITradable is ISingular {
+contract ITradable2 is ISingular {
     struct SellOffer {
         address erc20;          ///< the currency type
         uint256 price;          ///< price
@@ -26,7 +26,7 @@ contract ITradable is ISingular {
 
     // ? we might use a predicator to set the swap target, to make it compatible for sell and swap
     struct SwapOffer {
-        ITradable target;          ///< what to swap
+        ITradable2 target;          ///< what to swap
         uint256 validFrom;      ///< when an offer is valid from
         uint256 validTill;      ///< when the offer expires
         string note;             ///< additional note
@@ -81,7 +81,7 @@ contract ITradable is ISingular {
      * to indicate that a ownership transfer has been rejected
      */
     event TransferRejected(
-        ITradable indexed from, ///< the item for swap
+        ITradable2 indexed from, ///< the item for swap
         ISingularWallet who,     ///< whoever has rejected the offer
         uint when,              ///< when this happened
         string note             ///< additional note
@@ -92,7 +92,7 @@ contract ITradable is ISingular {
      * to acceptance or rejection.
      */
     event SellOfferApproved(
-        ITradable indexed item, ///< the item for sell
+        ITradable2 indexed item, ///< the item for sell
         address indexed erc20,  ///< the currency type
         uint256 price,          ///< price
         uint256 validFrom,      ///< when an offer is valid from
@@ -104,7 +104,7 @@ contract ITradable is ISingular {
      * the ownership has been successfully transferred from A to B.
      */
     event Sold(
-        ITradable indexed item, ///< the item for sell
+        ITradable2 indexed item, ///< the item for sell
         ISingularWallet indexed seller, ///< seller
         ISingularWallet indexed buyer,  ///< buyer
         address erc20,  ///< the currency type
@@ -194,39 +194,39 @@ contract ITradable is ISingular {
     )
     external;
 
-    /**
-    */
-    event SwapApproved(
-        ITradable indexed from, ///< the item for swap
-        ITradable indexed to,  ///< the desired item
-        uint256 validFrom,      ///< when an offer is valid from
-        uint256 validTill,      ///< when the offer expires
-        string note             ///< additional note
-    );
-
-    /**
- * to indicate that a swap arrangement has been rejected by the target
- */
-    event SwapRejected(
-        ITradable indexed from, ///< the item for swap
-        ITradable indexed to,  ///< the desired item
-        uint when,              ///< when this happened
-        string note             ///< additional note
-    );
-
-
-    /**
-        offer to sell this item for
-
-     */
-    function sellFor(
-        address erc20,          ///< the currency type
-        uint256 price,          ///< price
-        uint256 validFrom,      ///< when an offer is valid from
-        uint256 validTill,      ///< when the offer expires
-        string note             ///< additional note
-    )
-    external;
+//    /**
+//    */
+//    event SwapApproved(
+//        ITradable2 indexed from, ///< the item for swap
+//        ITradable2 indexed to,  ///< the desired item
+//        uint256 validFrom,      ///< when an offer is valid from
+//        uint256 validTill,      ///< when the offer expires
+//        string note             ///< additional note
+//    );
+//
+//    /**
+// * to indicate that a swap arrangement has been rejected by the target
+// */
+//    event SwapRejected(
+//        ITradable2 indexed from, ///< the item for swap
+//        ITradable2 indexed to,  ///< the desired item
+//        uint when,              ///< when this happened
+//        string note             ///< additional note
+//    );
+//
+//
+//    /**
+//        offer to sell this item for
+//
+//     */
+//    function sellFor(
+//        address erc20,          ///< the currency type
+//        uint256 price,          ///< price
+//        uint256 validFrom,      ///< when an offer is valid from
+//        uint256 validTill,      ///< when the offer expires
+//        string note             ///< additional note
+//    )
+//    external;
 
     /**
     to cancel the current sell offer, if any
@@ -252,31 +252,31 @@ contract ITradable is ISingular {
     /**
     set up a swap arrangement
     */
-    function approveSwap(
-        ITradable target,
-        uint validFrom,
-        uint validTill,
-        string note
-    )
-    public;
+//    function approveSwap(
+//        ITradable2 target,
+//        uint validFrom,
+//        uint validTill,
+//        string note
+//    )
+//    public;
 
 
     /**
     The owner of the desired item to accept the swap offer.
     Again, source code must be verified to conduct the swap, due to lots of ownerships transitions.
     The target must have been set up to do a swapping in the opposite direction before calling this function.
-    */
-    function acceptSwap(
-        string note
-    ) public;
-
-
-    function rejectSwap(
-        string note
-    ) public;
-
-    /**
-    to cancel all pending transaction offers.
-    */
-    function reset() public;
+//    */
+//    function acceptSwap(
+//        string note
+//    ) public;
+//
+//
+//    function rejectSwap(
+//        string note
+//    ) public;
+//
+//    /**
+//    to cancel all pending transaction offers.
+//    */
+//    function reset() public;
 }

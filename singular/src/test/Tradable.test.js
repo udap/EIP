@@ -1,6 +1,8 @@
 const { assertRevert } = require('./helpers/assertRevert');
 var Tradable = artifacts.require("./impl/Tradable.sol");
 var SingularWallet = artifacts.require("./impl/BasicSingularWallet.sol");
+var {TimeUtil} = require("./helpers/TimeUtil");
+var lib = artifacts.require("./impl/TradableLib.sol");
 
 contract('Tradable', function ([aliceEOA, bobEOA, someEOA]) {
 
@@ -12,6 +14,11 @@ contract('Tradable', function ([aliceEOA, bobEOA, someEOA]) {
     const DESCR = "Andrew is a good boy";
     const URI = "http://t.me/123123";
 
+    // let link the lib to the contract first
+    lib.deployed().then((libinstance) => {
+        // console.log("lib: " + libinstance.address);
+        Tradable.link("TradableLib", libinstance.address); // has to link explicitly to the symbol
+    })
 
     describe('all about transfers', function () {
         let aliceWallet = null;
@@ -45,16 +52,13 @@ contract('Tradable', function ([aliceEOA, bobEOA, someEOA]) {
                 BYTES32, // to bytes32
                 aliceEOA,  //
                 aliceWallet.address,
-                {from: aliceEOA}
+                {from: aliceEOA,/* gas: 4000000, gasprice: 100000000000*/}
             );
+            // console.log("token: " + token.address);
 
         });
 
         it("should probably set up in the constructor", async () => {
-            // var alice = await SingularWallet.deployed();
-            // var alice = await SingularWallet.at("0xE6c2c610d48C95793a201D85824C6c6AEcdF0079");
-            // console.log("alice address:" + alice.address);
-
             assert.equal(await token.contractName.call(), "Tradable");
             assert.equal(await token.creator.call(), aliceEOA);
             assert.equal(await token.tokenType.call(), aliceEOA);
@@ -73,16 +77,9 @@ contract('Tradable', function ([aliceEOA, bobEOA, someEOA]) {
 
         });
 
-        it("approve", async () => {
-            let now = Math.round(new Date().getTime()/1000); // turn to seconds since epoch.
+        it("approve from owner", async () => {
+            let now = TimeUtil.nowInSeconds();
             let validTill = now + 10;
-            // in solidity we have on the token
-            //     function approveReceiver(
-            //         ISingularWallet _to,
-            //         uint256 _validFrom,
-            //         uint256 _validTill,
-            //         string _reason
-            //      )
             let tx = await token.approveReceiver(
                 bobWallet.address,
                 now,
@@ -90,7 +87,93 @@ contract('Tradable', function ([aliceEOA, bobEOA, someEOA]) {
                 "for fun",
                 {from: aliceEOA}
             );
-            console.log(tx);
+            // console.log(tx);
+        });
+        it("shoudl not approve from unauthorized", async () => {
+            let now = TimeUtil.nowInSeconds();
+            let validTill = now + 10;
+            assertRevert(token.approveReceiver(
+                bobWallet.address,
+                now,
+                validTill,
+                "for fun",
+                {from: bobEOA}
+            ))
+
+        });
+    });
+
+    describe('swapping', function () {
+        let aliceWallet = null;
+        let bobWallet = null;
+        let aliceToken = null;
+        let bobToken = null;
+
+        beforeEach(async function () {
+            aliceWallet = await SingularWallet.new(
+                "alice",
+                "wallet",
+                "simple wallet for alice",
+                "",
+                web3.utils.fromAscii("0"),
+                {from: aliceEOA}
+            );
+
+            bobWallet = await SingularWallet.new(
+                "bob",
+                "wallet",
+                "simple wallet for bob",
+                "",
+                web3.utils.fromAscii("0"),
+                {from: bobEOA}
+            );
+
+            aliceToken = await Tradable.new(
+                "aliceToken",
+                PERSON,
+                DESCR,
+                URI,
+                BYTES32, // to bytes32
+                aliceEOA,  //
+                aliceWallet.address,
+                {from: aliceEOA}
+            );
+
+            bobToken = await Tradable.new(
+                "bobToken",
+                PERSON,
+                DESCR,
+                URI,
+                BYTES32, // to bytes32
+                aliceEOA,  //
+                aliceWallet.address,
+                {from: bobEOA}
+            );
+
+        });
+
+        it("approves swaps", async () => {
+            let now = TimeUtil.nowInSeconds();
+            let validTill = now + 10;
+            await aliceToken.approveSwap(
+                bobToken.address,
+                now,
+                validTill,
+                "cool",
+                {from: aliceEOA}
+            )
+
+        });
+        it("not approve swaps", async () => {
+            let now = TimeUtil.nowInSeconds();
+            let validTill = now + 10;
+            assertRevert(aliceToken.approveSwap(
+                bobToken.address,
+                now,
+                validTill,
+                "cool",
+                {from: bobEOA}
+            ))
         });
     });
 })

@@ -1,11 +1,10 @@
 pragma solidity ^0.4.24;
 
 import "../ISingularWallet.sol";
-import "../ITradable.sol";
+import "../ITradable2.sol";
 import "../ERC20/IDebit.sol";
 import "./NonTradable.sol";
 import "./TradableLib.sol";
-import "../ITradable.sol";
 
 
 
@@ -18,7 +17,7 @@ A countract of this class can be used in trading.
 @author bing ran<bran@udap.io>
 
 */
-contract Tradable is NonTradable, ITradable {
+contract Tradable2 is NonTradable, ITradable2 {
     function contractName() external view returns(string) {return "Tradable";}
 
     ISingularWallet theOwner; /// current owner
@@ -114,8 +113,6 @@ contract Tradable is NonTradable, ITradable {
         theOwner = transferOffer.nextOwner; // the single most important step!!!
         reset();
         uint256 moment = now;
-        ownerPrevious.sent(this, _note);
-        theOwner.received(this, _note);
 
         emit Transferred(address(ownerPrevious), address(theOwner), moment,
             transferOffer.senderNote, _note);
@@ -151,7 +148,7 @@ contract Tradable is NonTradable, ITradable {
     {
         uint t = now;
         this.approveReceiver(_to, t, t + 1 minutes, _note);
-        _to.offer(this, _note);
+//        _to.offer(this, _note);
 
     }
 
@@ -166,7 +163,7 @@ contract Tradable is NonTradable, ITradable {
     {
 
         this.approveReceiver(_to, now, _expiry, _note);
-        _to.offerNotify(this, _note);
+//        _to.offerNotify(this, _note);
     }
 
     function hardSetOwner(
@@ -179,8 +176,8 @@ contract Tradable is NonTradable, ITradable {
     {
         ownerPrevious = theOwner;
         theOwner = newOwner;
-        ownerPrevious.sent(this, note);
-        theOwner.received(this, note);
+//        ownerPrevious.sent(this, note);
+//        theOwner.received(this, note);
 
     }
 
@@ -229,46 +226,53 @@ contract Tradable is NonTradable, ITradable {
         // should emit an event
     }
 
-    function approveSwap(
-        ITradable target,
-        uint validFrom,
-        uint validTill,
-        string note
-    )
-    public
-    onlyOwnerOrOperator
-    notInTx
-    max128Bytes(note)
-    {
-        swapOffer.target = target;
-        swapOffer.validFrom = validFrom;
-        swapOffer.validTill = validTill;
-        swapOffer.note = note;
-
-        emit SwapApproved(this, target, validFrom, validTill, note);
-    }
+//    function approveSwap(
+//        ITradable2 target,
+//        uint validFrom,
+//        uint validTill,
+//        string note
+//    )
+//    public
+//    onlyOwnerOrOperator
+//    notInTx
+//    max128Bytes(note)
+//    {
+//        swapOffer.target = target;
+//        swapOffer.validFrom = validFrom;
+//        swapOffer.validTill = validTill;
+//        swapOffer.note = note;
+//
+////        emit SwapApproved(this, target, validFrom, validTill, note);
+//    }
     /**
     owner facing API. Source code must be verified to conduct the swap, due to lots of ownerships transitions.
     The caller must have setup a swap offer that goes in the direction opposite of this token's offer.
     todo: must be sure that the other party's contract is trustworthy
     */
-    function acceptSwap(
-        string note
-    )
-    public
-    inSwap
-    permittedSender2(swapOffer.target)
-    {
-        TradableLib.acceptSwap(this, note);
-    }
-
+//    function acceptSwap(
+//        string note
+//    )
+//    public
+//    inSwap
+//    permittedSender2(swapOffer.target)
+//    {
+////        TradableLib.acceptSwap(this, note);
+//    }
+//
     function rejectSwap(
         string note
     )
-    permittedSender2(swapOffer.target)
-    max128Bytes(note)
+//    permittedSender2(swapOffer.target)
+//    max128Bytes(note)
     public {
-        emit SwapRejected(this, swapOffer.target, now, note);
+                address caller = msg.sender;
+                require(
+                    caller == address(swapOffer.target)
+//                    || caller == address(swapOffer.target.owner())
+//                    || caller == swapOffer.target.owner().ownerAddress()
+                    ,
+                    "the sender was not the target wallet or the owner thereof");
+//        emit SwapRejected(this, swapOffer.target, now, note);
         reset();
     }
 
@@ -283,7 +287,7 @@ contract Tradable is NonTradable, ITradable {
     external
     inSell
     {
-        TradableLib.buy(this, debitcard);
+//        TradableLib.buy(this, debitcard);
     }
 
     /***************************** modifiers **************************/
@@ -312,14 +316,15 @@ contract Tradable is NonTradable, ITradable {
         _;
     }
 
-    modifier permittedSender2(ITradable target) {
-        address caller = msg.sender;
-        require(
-            caller == address(target)
-            || caller == address(target.owner())
-            || caller == target.owner().ownerAddress()
-            ,
-            "the sender was not the target wallet or the owner thereof");
+    modifier permittedSender2(ITradable2 target) {
+//        address caller = msg.sender;
+//        require(
+//            caller == address(target)
+//            || caller == address(target.owner())
+//            || caller == target.owner().ownerAddress()
+//            ,
+//            "the sender was not the target wallet or the owner thereof"
+//        );
         _;
     }
 
@@ -384,5 +389,5 @@ contract Tradable is NonTradable, ITradable {
     }
 
     /////
-    function ping() public {TradableLib.ping();}
+//    function ping() public {TradableLib.ping();}
 }

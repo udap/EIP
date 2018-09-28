@@ -63,7 +63,7 @@ contract SingularBase is ITradable, ReentrancyGuard, TransferHistory, IBurnable 
         TransferHistory.init();
         singularCreator = _singularCreator;
         singularOwner = ISingularWallet(_wallet);
-        ISingularWallet(_wallet).received(this,"new singular created");
+        ISingularWallet(_wallet).received(this, "new instance in init");
         // is msg.sender safe? what if called from another contract?
         // should use tx.origin instead?
 

@@ -19,8 +19,6 @@ contract('SingularWallet', function ([aliceEOA, bobEOA, someEOA]) {
 
         it("should probably set up in the constructor", async () => {
             assert.equal(await aliceWallet.ownerAddress.call(), aliceEOA);
-
-
         });
     });
 })
