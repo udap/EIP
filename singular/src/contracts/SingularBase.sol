@@ -227,11 +227,9 @@ contract SingularBase is ITradable, ReentrancyGuard, TransferHistory, IBurnable 
     }
 
     modifier ownerOnly {
-        if(AddressUtils.isContract(msg.sender)){
-            require(msg.sender == address(singularOwner));
-        }else{
-            singularOwner.isActionAuthorized(msg.sender,bytes32(0x00),this);
-        }
+        require(
+            msg.sender == address(singularOwner) || msg.sender == singularOwner.ownerAddress(),
+            "only owner can do this action");
         _;
     }
 

@@ -5,6 +5,7 @@ import "../ISingular.sol";
 import "../ITradable.sol";
 import "../SingularMeta.sol";
 import "../ERC20/IDebit.sol";
+import "./NonTradable.sol";
 
 
 /**
@@ -15,19 +16,14 @@ A countract of this class can be used in trading.
 @author bing ran<bran@udap.io>
 
 */
-contract Tradable is ITradable, SingularMeta {
+contract Tradable is NonTradable, ITradable {
     function contractName() external view returns(string) {return "Tradable";}
 
-    ISingularWallet currentOwner; /// current owner
+    ISingularWallet theOwner; /// current owner
 
     ISingularWallet ownerPrevious; /// next owner choice
-    address internal theCreator; /// who creates this token
-    uint256 whenCreated;
 
-    address tokenTypeAddr;
-
-    string private receiverNote;
-
+//    string private receiverNote;
     constructor(
         string _name,
         string _symbol,
@@ -38,81 +34,31 @@ contract Tradable is ITradable, SingularMeta {
         ISingularWallet _wallet
     )
     public
-    SingularMeta(
+    NonTradable(
         _name,
         _symbol,
         _descr,
         _tokenURI,
-        _tokenURIHash
+        _tokenURIHash,
+        _tokenType,
+        _wallet
     )
-    {
-        theCreator = msg.sender;
-        whenCreated = now;
-        currentOwner = _wallet;
-        tokenTypeAddr = _tokenType;
-    }
+    {}
 
-    function creator()
-    external
-    view
-    returns (
-        address         ///< the owner elected
-    ) {
-        return theCreator;
-    }
-
-    function tokenType()
-    external
-    view
-    returns(
-        address                 ///< address that describes the type of the token.
-    ){
-        return tokenTypeAddr;
-    }
-
-    function creationTime() public view returns(uint256) {
-        return whenCreated;
-    }
 
     /**
      * get the current owner as type of SingularOwner
      */
-    function previousOwner()
-    external
-    view
-    returns (
-        ISingularWallet
-    ) {
-        return ownerPrevious;
-    }
+    function previousOwner() external view returns (ISingularWallet) {return ownerPrevious;}
 
-    function nextOwner()
-    external
-    view
-    returns (
-        ISingularWallet
-    ){
-        return transferOffer.nextOwner;
-    }
-
-    /**
-     * get the current owner as type of SingularOwner
-     */
-    function owner()
-    external
-    view
-    returns (
-        ISingularWallet
-    ) {
-        return currentOwner;
-    }
+    function nextOwner() external view returns (ISingularWallet){return transferOffer.nextOwner;}
 
 
     /**
      * There can only be one approved receiver at a given time. This receiver cannot
      * be changed before the expiry time.
      * Can only be called by the token owner (in the form of SingularOwner account or
-     * the naked account address associated with the currentowner) or an approved operator.
+     * the naked account address associated with the the Owner or an approved operator.
      * Note: the approved receiver can only accept() or reject() the offer. His power is limited
      * before he becomes the owner. This is in contract to the the transferFrom() of ERC20 or
      * ERC721.
@@ -122,11 +68,12 @@ contract Tradable is ITradable, SingularMeta {
         ISingularWallet _to,
         uint256 _validFrom,
         uint256 _validTill,
-        string _reason
+        string _note
     )
     external
-    permitted(msg.sender, "approveReceiver", currentOwner)
-    notInTransition
+    onlyOwnerOrOperator
+    notInTx
+    max128Bytes(_note)
     {
 
         require(address(_to) != address(0), "cannot send to null address");
@@ -134,11 +81,11 @@ contract Tradable is ITradable, SingularMeta {
 
         transferOffer.validFrom = _validFrom;
         transferOffer.validTill = _validTill;
-        transferOffer.senderNote = _reason;
+        transferOffer.senderNote = _note;
         transferOffer.nextOwner = _to;
 
         emit  ReceiverApproved(
-            address(currentOwner),
+            address(theOwner),
             address(transferOffer.nextOwner),
             _validFrom,
             _validTill,
@@ -154,22 +101,22 @@ contract Tradable is ITradable, SingularMeta {
      TODO: evaluate re-entrance attack
      */
     function acceptTransfer(
-        string _reason
+        string _note
     )
     external
     inTransition
-    permitted(msg.sender, "accept", transferOffer.nextOwner)
+    permittedSender(transferOffer.nextOwner)
+    max128Bytes(_note)
     {
-        ownerPrevious = currentOwner;
-        currentOwner = transferOffer.nextOwner; // the single most important step!!!
+        ownerPrevious = theOwner;
+        theOwner = transferOffer.nextOwner; // the single most important step!!!
         reset();
-        // transferHistory.push(TransferRec(ownerPrevious, owner, now, senderNote, _reason, this));
         uint256 moment = now;
-        ownerPrevious.sent(this, _reason);
-        currentOwner.received(this, _reason);
+        ownerPrevious.sent(this, _note);
+        theOwner.received(this, _note);
 
-        emit Transferred(address(ownerPrevious), address(currentOwner), moment,
-            transferOffer.senderNote, _reason);
+        emit Transferred(address(ownerPrevious), address(theOwner), moment,
+            transferOffer.senderNote, _note);
 
     }
 
@@ -179,10 +126,11 @@ contract Tradable is ITradable, SingularMeta {
      */
     function rejectTransfer(string note)
     external
-    permitted(msg.sender, "rejectTransfer", transferOffer.nextOwner)
+    inTransition
+    permittedSender(transferOffer.nextOwner)
+    max128Bytes(note)
     {
-        receiverNote = note;
-
+        emit TransferRejected(this, transferOffer.nextOwner, now, note);
         reset();
     }
 
@@ -193,43 +141,53 @@ contract Tradable is ITradable, SingularMeta {
      */
     function sendTo(
         ISingularWallet _to,
-        string _reason
+        string _note
     )
     external
+    onlyOwnerOrOperator
+    max128Bytes(_note)
     {
-
         uint t = now;
-        this.approveReceiver(_to, t, t + 1 minutes, _reason);
-        _to.offer(this, _reason);
+        this.approveReceiver(_to, t, t + 1 minutes, _note);
+        _to.offer(this, _note);
 
     }
 
     function sendToAsync(
         ISingularWallet _to,
-        string _reason,
+        string _note,
         uint256 _expiry
     )
     external
+    onlyOwnerOrOperator
+    max128Bytes(_note)
     {
 
-        this.approveReceiver(_to, now, _expiry, _reason);
-        _to.offerNotify(this, _reason);
+        this.approveReceiver(_to, now, _expiry, _note);
+        _to.offerNotify(this, _note);
     }
 
     /**
        offer to sell this item for some money in some currency type.
        It allows for overriding previous settings.
 
+       There is no guarantee of the availability even within the valid sell time period, in contrast to
+       other transactions where the counter-party is explicit.
+
+       A sell offer can be overidden by swap offer or transfer offers.
+
     */
     function sellFor(
         address erc20,          ///< the currency type
         uint256 price,          ///< price
         uint256 validFrom,      ///< when an offer is valid from
-        uint256 validTill,      ///< when the offer expires
+        uint256 validTill,      ///< when the offer expires.
         string note             ///< additional note
     )
     external
-    notInTransition
+    notInTx
+    onlyOwnerOrOperator
+    max128Bytes(note)
     {
         sellOffer.erc20 = erc20;
         sellOffer.price = price;
@@ -249,6 +207,7 @@ contract Tradable is ITradable, SingularMeta {
 
     function cancelSellOffer()
     public
+    onlyOwnerOrOperator
     {
         delete sellOffer;
         // should emit an event
@@ -261,7 +220,9 @@ contract Tradable is ITradable, SingularMeta {
         string note
     )
     public
+    onlyOwnerOrOperator
     notInTx
+    max128Bytes(note)
     {
         swapOffer.target = target;
         swapOffer.validFrom = validFrom;
@@ -274,61 +235,60 @@ contract Tradable is ITradable, SingularMeta {
 
     /**
     owner facing API. Source code must be verified to conduct the swap, due to lots of ownerships transitions.
+    The caller must have setup a swap offer that goes in the direction opposite of this token's offer.
+    todo: must be sure that the other party's contract is trustworthy
     */
     function acceptSwap(
-        ITradable offered
+        string note
     )
     public
     inSwap
+    permittedSender2(swapOffer.target)
+    max128Bytes(note)
     {
-        ITradable target;
-        uint256 vFrom;
-        uint256 vTill;
-        string memory note = "swap";
+        ITradable counterTarget;
+        uint256 counterVFrom;
+        uint256 counterVTill;
 
-        (target, vFrom, vTill) = offered.swapOffer(); // look how struct is returned
+        ITradable target = swapOffer.target;
+//        // check the reciprocal offer
+        (counterTarget, counterVFrom, counterVTill) = target.swapOffer();
+        require(counterTarget == this, "the other offer was not targeted to me");
+        // now transition the ownership on this side
+        ISingularWallet counterOwner = target.owner();
+        if (counterOwner != theOwner) {
+            // ownership has not been changed. It's the first part of swapping
+            ownerPrevious = theOwner;
+            theOwner = counterOwner;
+            // notify the owners for accounting
+            ownerPrevious.sent(this, note);
+            theOwner.received(this, note);
+            ///////// I've done my part. Now it's your turn!
+            target.acceptSwap(note); // callback
+            ///////// make sure the other party has done his duty
+            require(target.owner() == ownerPrevious, "swap() did not change the ownership over to me");
+            reset();
 
-        require(target == this, "the other offer is not targeted to me");
-        require(swapValid(SwapOffer(target, vFrom, vTill)), "the other offer is not valid, expired?");
+            emit Swapped(this, target, now, note);
+        }
+        else {
+            ownerPrevious = theOwner;
+            theOwner = target.previousOwner();
+            // notify the owners for proper accounting
+            ownerPrevious.sent(this, note);
+            theOwner.received(this, note);
+            reset();
+        }
 
-        ownerPrevious = currentOwner;
-        currentOwner = offered.owner();
-
-        ownerPrevious.sent(this, note);
-        currentOwner.received(this, note);
-
-        // XXX bad casting
-        offered.commitOwnerChange();
-
-        require(offered.owner() == currentOwner, "swap() did not change the ownership over to me");
-        reset();
-
-        emit Swapped(offered, this, now, note);
     }
 
     function rejectSwap(
+        string note
     )
-    permitted(msg.sender, "rejectTransfer", swapOffer.target.owner())
+    permittedSender2(swapOffer.target)
+    max128Bytes(note)
     public {
-        reset();
-    }
-
-    function commitOwnerChange()
-    public
-    inSwap
-    {
-        ITradable target = swapOffer.target;
-        require(msg.sender == address(target), "swap target mismatch");
-        // has the other party changed the owner yet?  Is this really enough an insurance?
-        require(target.owner() == currentOwner, "the ownership was not set to my owner");
-
-        //
-        ownerPrevious = currentOwner;
-        currentOwner = target.previousOwner(); // assuming...
-
-        ownerPrevious.sent(this, "swapOffer");
-        currentOwner.received(this, "swap");
-
+        emit SwapRejected(this, swapOffer.target, now, note);
         reset();
     }
 
@@ -346,54 +306,46 @@ contract Tradable is ITradable, SingularMeta {
         require(debitcard.denomination() >= sellOffer.price, "not enough fund to make the purchase");
         require(debitcard.currencyType() == sellOffer.erc20, "currency types mismatch");
 
-        // shall re require the sender be the debit owner?
+        // shall we require the sender be the debit owner?
         require(msg.sender == address(debitcard.owner()), "ownership does not match. ");
 
-        ITradable target;
-        uint256 vFrom;
-        uint256 vTill;
+        // XXX this is ugly casting!
+        ITradable money = ITradable(debitcard);
 
-        // XXX ugly casting to avoid the inter-dependency of ITradable and IDebit
-        (target, vFrom, vTill) = ITradable(debitcard).swapOffer();
+        // let's set up a swap
+        swapOffer.target = money;
+        swapOffer.validTill = now + 30 seconds;
 
+        // swap the coin and this token
+        money.acceptSwap(sellOffer.note);
 
-        require(target == this, "the cash is not targeted to me");
-        require(swapValid(SwapOffer(target, vFrom, vTill)), "the other offer is not valid, expired?");
-
-        ownerPrevious = currentOwner;
-        currentOwner = debitcard.owner();
-
-        ownerPrevious.sent(this, "bought out");
-        currentOwner.received(this, "bought in");
-
-        Tradable(debitcard).commitOwnerChange();
-
-        require(debitcard.owner() == ownerPrevious, "swap() did not change the ownership over to me");
+        require(
+            money.owner() == ownerPrevious
+            && money.previousOwner() == theOwner
+            ,
+            "swap in a purchase did not work"
+        );
         reset();
 
-        uint p = sellOffer.price;
-        string storage orinote = sellOffer.note;
-        reset(); // immediately ?
-
-
         emit Sold(
-            this, ///< the item for sell
-            ownerPrevious, ///< seller
-            currentOwner,  ///< buyer
-            debitcard.currencyType(),  ///< the currency type
-            p,          ///< price
-            now,           ///< when the tx completes
-            orinote             ///< additional note);
+            this,                       ///< the item for sell
+            ownerPrevious,              ///< seller
+            theOwner,               ///< buyer
+            debitcard.currencyType(),   ///< the currency type
+            sellOffer.price,            ///< price
+            now,                        ///< when the tx completes
+            sellOffer.note              ///< additional note);
         );
+        reset(); // immediately ?
     }
 
     /***************************** modifiers **************************/
 
-    modifier notInTransition() {
-        require(now > transferOffer.validTill, "this singular is in ownership transition");
-        _;
-    }
-
+//    modifier notInTransition() {
+//        require(now > transferOffer.validTill, "this singular is in ownership transition");
+//        _;
+//    }
+//
     modifier inTransition() {
         require(inTransfer(),
             "not in valid ownership transition time window.");
@@ -402,25 +354,30 @@ contract Tradable is ITradable, SingularMeta {
 
     function inTransfer() internal view returns (bool) {
         uint256 t = now;
-        return t >= transferOffer.validFrom && t <= transferOffer.validTill;
+        if( t >= transferOffer.validFrom && t <= transferOffer.validTill) {
+            return !swapValid(swapOffer);
+        }
+        return false;
     }
 
-    modifier ownerOnly() {
-        require(msg.sender == address(currentOwner), "only owner can do this action");
+    modifier permittedSender(ISingularWallet target) {
+        address caller = msg.sender;
+        require(
+            caller == address(target)
+            || caller == target.ownerAddress()
+            ,
+            "the sender was not the target wallet or the owner thereof");
         _;
     }
 
-    modifier permitted(
-        address caller,
-        bytes32 action,
-        ISingularWallet authenticator
-    ) {
+    modifier permittedSender2(ITradable target) {
+        address caller = msg.sender;
         require(
-            address(authenticator) == caller
-            || authenticator.ownerAddress() == caller
-            || authenticator.isActionAuthorized(caller, action, this),
-            "action not authorized"
-        );
+            caller == address(target)
+            || caller == address(target.owner())
+            || caller == target.owner().ownerAddress()
+            ,
+            "the sender was not the target wallet or the owner thereof");
         _;
     }
 
@@ -434,10 +391,22 @@ contract Tradable is ITradable, SingularMeta {
         _;
     }
 
+    modifier max128Bytes(string s) {
+        require(bytes(s).length <= 128, "the string used more than 128 bytes");
+        _;
+    }
+
+    modifier max256Bytes(string s) {
+        require(bytes(s).length <= 256, "the string used more than 128 bytes");
+        _;
+    }
+
+    /// only check if this token is involved with any transaction that has dedicated counterparty.
     function isInTx() internal view returns(bool) {
-        if (sellValid())
-            return true;
-        else if(swapValid(swapOffer))
+//        if (sellValid())
+//            return true;
+//        else
+        if(swapValid(swapOffer))
             return true;
         else
             return inTransfer();
@@ -447,6 +416,7 @@ contract Tradable is ITradable, SingularMeta {
         delete sellOffer;
         delete swapOffer;
         delete transferOffer;
+        delete theOperator;
     }
 
     function sellValid() internal view returns(bool){
@@ -466,9 +436,9 @@ contract Tradable is ITradable, SingularMeta {
         && _offer.validTill >= t;
     }
 
-
     modifier inSwap() {
         require(swapValid(swapOffer), "this item is not in swap mode");
+        require(now > transferOffer.validTill, "this singular is in ownership transition");
         _;
     }
 }

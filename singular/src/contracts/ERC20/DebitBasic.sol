@@ -95,7 +95,7 @@ contract DebitBasic is IDebit, Tradable {
     )
     public
     sameTokenType(another)
-    permitted(msg.sender, "transfer", currentOwner)       
+    onlyOwnerOrOperator
     {
         DebitBasic another = DebitBasic(coin);
         require(another.whoCanDeposit() == this, "this is not allowed to put money in the arg");
@@ -176,7 +176,7 @@ contract DebitBasic is IDebit, Tradable {
     public
     sameTokenType(coin)
     sameOwner(coin)
-    permitted(msg.sender, "merge", currentOwner) 
+    onlyOwnerOrOperator
     balanced(this, coin)
     returns(
         uint256 updatedfaceValue

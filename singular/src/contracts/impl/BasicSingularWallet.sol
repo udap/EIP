@@ -31,13 +31,6 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
     mapping(address => uint32) tokenVersion;
 
 
-    mapping(
-        address => mapping(     // singular contract address
-            uint32 => mapping(      // version of ownership. since we cannot delete an entry in mapping
-                bytes32 => mapping(     // action name
-                    address => bool     //  the visitor, can / cannot
-                    )))) internal operatorApprovals;
-
     address public ownerOfThis;
 
     constructor(
@@ -70,37 +63,6 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
         require(msg.sender == theCreator);
         ownerOfThis = _owner;
     }
-
-    /**
-     * to find out if an address is an authorized operator for the Singular token's
-     * ownership.
-     */
-    function isActionAuthorized(
-        address _address,
-        bytes32 _selector,
-        ISingular _singular
-    )
-    external
-    view
-    returns (
-        bool
-    ) {
-        return operatorApprovals[_singular][tokenVersion[_singular]][_selector][_address];
-    }
-
-    /**
-    to configure the operator setting.
-    */
-    function authorizeOperator(
-        address _address, 
-        bytes4 _selector, 
-        ISingular _singular, 
-        bool _ok
-        ) 
-        external
-        {
-            operatorApprovals[_singular][tokenVersion[_singular]][_selector][_address] = _ok;
-        }
 
     /**
      * @dev invoked by Singular.accept() to notify the ownership change has completed.

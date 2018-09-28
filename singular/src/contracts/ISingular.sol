@@ -35,6 +35,18 @@ interface ISingular {
     );
 
     /**
+     * get the current operator who can operate on the owner's behalf. Only the owner can set/remove the
+     * operator.
+     */
+    function operator()
+    external
+    view
+    returns (
+        address         ///< owner is an ISingularWallet
+    );
+
+
+    /**
     * get the creator
     */
     function creator()

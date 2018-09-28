@@ -141,28 +141,6 @@ interface ISingularWallet {
     //-------------- asset enumeration
 
     /**
-     To find out if an address is an authorized to act on a specific asset. How the authorization
-     list is maintained is up to implementations.
-
-     This function is intended for the `Singular` tokens to call, in an Inversion-of-Control manner,
-     for access control in case that a transaction is requested on the tokens. This account
-     must agree with the tokens on the action names to maintain the authorizations.
-
-     XXX Delagating back to the wallet to manage the authorization is questionable. It's hard to maintain at the
-     wallet level. Doing the access control at the Singular token level might be a better design, in the
-     spirit of objects and their intelligence staying together.
-
-     */
-    function isActionAuthorized(
-        address caller,     ///< the action invoker
-        bytes32 action,      ///< the action intended
-        ISingular token     ///< of target of the action
-    )
-    external
-    view
-    returns (bool);      ///< true of authorized; false otherwise
-
-    /**
      retrieve all the Singular tokens, not in any particular order.
      */
     function getAllTokens()

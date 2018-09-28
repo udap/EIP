@@ -89,10 +89,31 @@ contract ITradable is ISingular {
     );
 
     /**
+     * to indicate that a swap arrangement has completed
      */
     event Swapped(
         ITradable indexed from, ///< the item for swap
         ITradable indexed to,  ///< the desired item
+        uint when,              ///< when this happened
+        string note             ///< additional note
+    );
+
+    /**
+     * to indicate that a swap arrangement has been rejected by the target
+     */
+    event SwapRejected(
+        ITradable indexed from, ///< the item for swap
+        ITradable indexed to,  ///< the desired item
+        uint when,              ///< when this happened
+        string note             ///< additional note
+    );
+
+    /**
+     * to indicate that a ownership transfer has been rejected
+     */
+    event TransferRejected(
+        ITradable indexed from, ///< the item for swap
+        ISingularWallet who,     ///< whoever has rejected the offer
         uint when,              ///< when this happened
         string note             ///< additional note
     );
@@ -198,8 +219,6 @@ contract ITradable is ISingular {
     )
     external;
 
-
-
     /**
         offer to sell this item for
 
@@ -213,12 +232,10 @@ contract ITradable is ISingular {
     )
     external;
 
-
     /**
     to cancel the current sell offer, if any
     */
-    function cancelSellOffer()
-    public;
+    function cancelSellOffer() public;
 
     /**
     to buy on an sell offer with some money. The caller MUST
@@ -254,19 +271,14 @@ contract ITradable is ISingular {
     /**
     The owner of the desired item to accept the swap offer.
     Again, source code must be verified to conduct the swap, due to lots of ownerships transitions.
+    The target must have been set up to do a swapping in the opposite direction before calling this function.
     */
     function acceptSwap(
-        ITradable offered
-    )
-    public;
-
-    /**
-    */
-    function commitOwnerChange() public;
+        string note
+    ) public;
 
 
-    function rejectSwap() public;
-
-
-
+    function rejectSwap(
+        string note
+    ) public;
 }

@@ -115,7 +115,7 @@ contract ERC20Debit is IDebit, Tradable {
     )
     {
         require(this.denomination() >= amount, "not enough balance");
-        ISingularWallet wal = currentOwner;
+        ISingularWallet wal = theOwner;
         require(msg.sender == address(wal), "the message sender was not the owner");
         IDebit newCoin = _erc20Factory.newDebit(wal, amount);
         return newCoin;
@@ -127,7 +127,7 @@ contract ERC20Debit is IDebit, Tradable {
     }
 
     modifier sameOwner(IDebit t) {
-        require(ISingular(t).owner() == currentOwner, "The debit owners are different");
+        require(ISingular(t).owner() == theOwner, "The debit owners are different");
         _;
     }
 }

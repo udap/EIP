@@ -18,9 +18,10 @@ import "../ISingular.sol";
 contract NonTradable is ISingular, SingularMeta{
     function contractName() external view returns(string) {return "NonTradable";}
 
-    ISingularWallet theOwner; /// current owner
+    ISingularWallet internal theOwner; /// current owner
 
     address internal theCreator; /// who creates this token
+    address internal theOperator;
 
     uint timeCreated;
 
@@ -44,23 +45,20 @@ contract NonTradable is ISingular, SingularMeta{
         tokenTypeAddr = _tokenTypeAddr;
     }
 
-    function creator()
-    view
-    external
-    returns (
-        address         ///< the owner elected
-    ) {
-        return theCreator;
-    }
+    function owner() public view returns(ISingularWallet){return theOwner;}
+    function creator() view external returns (address) {return theCreator;}
+    function operator() external view returns(address) {return theOperator;}
 
-    function owner()
-    public
-    view
-    returns(
-        ISingularWallet
+    /**
+    to configure the operator
+    */
+    function setOperator(
+        address _address       ///< who to be the operator
     )
+    ownerOnly
+    external
     {
-        return theOwner;
+        theOperator = _address;
     }
 
     /**
@@ -85,6 +83,26 @@ contract NonTradable is ISingular, SingularMeta{
         address                 ///< address that describes the type of the token.
     ) {
         return tokenTypeAddr;
+    }
+
+    modifier ownerOnly() {
+        require(
+            msg.sender == address(theOwner)
+            || msg.sender == theOwner.ownerAddress(),
+            "only owner can do this action");
+        _;
+    }
+
+    modifier onlyOwnerOrOperator() {
+        address caller = msg.sender;
+        require(
+            caller != address(0)
+            || address(theOwner) == caller
+            || theOwner.ownerAddress() == caller
+            || theOperator == caller,
+            "the msg.sender was not owner or operator"
+        );
+        _;
     }
 
 }
