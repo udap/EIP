@@ -17,7 +17,7 @@ import "../utils/CommonModifiers.sol";
  *
  */
 contract NonTradable is ISingular, SingularMeta, CommonModifiers{
-    function contractName() external view returns(string) {return "NonTradable";}
+    function contractName() external pure returns(string) {return "NonTradable";}
 
     ISingularWallet internal theOwner; /// current owner
 
@@ -38,6 +38,7 @@ contract NonTradable is ISingular, SingularMeta, CommonModifiers{
         ISingularWallet _wallet
     )
     public
+    senderMatchesWallet(_wallet)
     max128Bytes(_name)
     max64Bytes(_symbol)
     max256Bytes(_descr)
@@ -50,8 +51,8 @@ contract NonTradable is ISingular, SingularMeta, CommonModifiers{
         tokenTypeAddr = _tokenTypeAddr;
     }
 
-    function owner() public view returns(ISingularWallet){return theOwner;}
-    function creator() view external returns (address) {return theCreator;}
+    function owner() external view returns(ISingularWallet){return theOwner;}
+    function creator() external view returns (address) {return theCreator;}
     function operator() external view returns(address) {return theOperator;}
 
     /**
@@ -111,6 +112,22 @@ contract NonTradable is ISingular, SingularMeta, CommonModifiers{
             "the msg.sender was not owner or operator"
         );
         _;
+    }
+
+    modifier senderMatchesWallet(ISingularWallet wallet) {
+        address caller = msg.sender;
+        require(
+            caller != address(0)
+        &&
+        (
+        address(wallet) == caller
+        || wallet.ownerAddress() == caller
+//        || theOperator == caller // wallet does not have operator yet, but it should really be a tradable!
+        ),
+            "the msg.sender was not the wallet or its owner"
+        );
+        _;
+
     }
 
 }

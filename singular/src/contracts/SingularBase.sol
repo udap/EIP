@@ -15,7 +15,7 @@ import "./TransferHistory.sol";
 contract SingularBase is ITradable, ReentrancyGuard, TransferHistory, IBurnable {
     function contractName()
     external
-    view
+    pure
     returns(
         string              ///< the name of the contract class
     ) {

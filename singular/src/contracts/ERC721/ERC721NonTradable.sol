@@ -13,7 +13,7 @@ import "../impl/NonTradable.sol";
 
 */
 contract ERC721NonTradable is IERC721Singular, NonTradable {
-    function contractName() external view returns(string) {return "ERC721NonTradable";}
+    function contractName() external pure returns(string) {return "ERC721NonTradable";}
 
     IERC721 erc721;
     uint tokenNumber;

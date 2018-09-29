@@ -9,7 +9,7 @@ contract Singular is SingularBase, SingularMeta, Comment{
 
     function contractName()
     external
-    view
+    pure
     returns(
         string              ///< the name of the contract class
     ) {

@@ -15,7 +15,7 @@ import "../impl/Tradable.sol";
 contract ERC721Tradable is IERC721Singular, Tradable {
     function contractName()
     external
-    view
+    pure
     returns(
         string              ///< the name of the contract class
     ) {

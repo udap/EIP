@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import "./ISingularWallet.sol";
 import "./ERC20/IDebit.sol";
+import "./ISingular.sol";
 
 
 /**
@@ -13,9 +14,14 @@ import "./ERC20/IDebit.sol";
  * 3. buy and sell
  * 4. auction (todo)
  *
+ *
+ *
+ *  XXX: Ideally it should inherit from ISingular, but doing so causes remix IDE compiler to complain
+ * about order of definitions. As a compromise, I added the toISingular() to bridge the two interface.
+ *
  * @author Bing Ran<bran@udap.io>
  */
-contract ITradable is ISingular {
+contract ITradable /*is ISingular*/ {
     struct SellOffer {
         address erc20;          ///< the currency type
         uint256 price;          ///< price
@@ -188,6 +194,9 @@ contract ITradable is ISingular {
     )
     external;
 
+    /**
+    * for operator to set the new onership
+    */
     function hardSetOwner(
         ISingularWallet newOwner,
         string note
@@ -279,4 +288,11 @@ contract ITradable is ISingular {
     to cancel all pending transaction offers.
     */
     function reset() public;
+
+    /// compatible method
+    /// to make it ITradable compatible
+    function toISingular() public view returns(ISingular);
+
+//    function owner() external view returns (ISingularWallet);
+
 }

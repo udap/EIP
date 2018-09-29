@@ -1,5 +1,5 @@
 var w = artifacts.require("./impl/BasicSingularWallet.sol");
-var lib = artifacts.require("./impl/TradableLib.sol");
+// var lib = artifacts.require("./impl/TradableLib.sol");
 
 module.exports = function(deployer, network, accounts) {
   // deployer.deploy(
@@ -23,5 +23,5 @@ module.exports = function(deployer, network, accounts) {
   //     )
   //     console.log("deployed wallet 2: " + w2.address);
   // });
-  deployer.deploy(lib);
+  // deployer.deploy(lib);
 };

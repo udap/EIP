@@ -16,14 +16,7 @@ import "../impl/Tradable.sol";
  */
 contract ERC20Debit is IDebit, Tradable {
 
-    function contractName()
-    external
-    view
-    returns(
-        string              ///< the name of the contract class
-    ) {
-        return "ERC20Debit";
-    }
+    function contractName() external pure returns(string) {return "ERC20Debit";}
 
     /// the underlying erc20 type
     IERC20DebitFactory private _erc20Factory;

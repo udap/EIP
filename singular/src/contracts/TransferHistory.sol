@@ -9,7 +9,7 @@ import "./utils/Initialized.sol";
 contract TransferHistory is ITransferHistory, Initialized {
     function contractName()
     external
-    view
+    pure
     returns(
         string              ///< the name of the contract class
     ) {

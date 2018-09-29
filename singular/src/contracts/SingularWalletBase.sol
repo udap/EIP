@@ -46,24 +46,28 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
 
     //=============================callback===============================================
     function sent(ITradable _singular, string _receiverNote)
-    ownsSingular(_singular)
+    ownsSingular(_singular.toISingular())
     constructed
     external{
         require( _singular.previousOwner() == this);
-        emit SingularTransferred(_singular.previousOwner(),_singular.owner(),_singular,now,_receiverNote);
-        singularRemoved(_singular);
+        emit SingularTransferred(
+            _singular.previousOwner(),
+            _singular.toISingular().owner(),
+            _singular,now,_receiverNote
+        );
+        singularRemoved(_singular.toISingular());
     }
 
     function received(ITradable _singular, string _receiverNote) constructed external{
-        require(_singular.owner() == this);
+        require(_singular.toISingular().owner() == this);
         emit SingularTransferred(_singular.previousOwner(),this,_singular,now,_receiverNote);
-        singularAdded(_singular);
+        singularAdded(_singular.toISingular());
     }
 
     // called when get an offer
     function offer(ITradable _singular, string _senderNote) constructed external{
         require(_singular.nextOwner() == this);
-        emit SingularOffered(_singular.owner(),_singular, now, _senderNote);
+        emit SingularOffered(_singular.toISingular().owner(),_singular, now, _senderNote);
         //customized later
         /*
         string _receiverNote;
@@ -76,12 +80,12 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
 
     function offerNotify(ITradable _singular, string _senderNote) constructed external{
         require(_singular.nextOwner() == this);
-        emit SingularOffered(_singular.owner(),_singular, now, _senderNote);
+        emit SingularOffered(_singular.toISingular().owner(),_singular, now, _senderNote);
     }
 
     function offerRejected(ITradable _singular, string _receiverNote) constructed external{
-        require( _singular.owner() == this);
-        emit SingularTransferFailed(_singular.owner(),_singular.nextOwner(),_singular,now,_receiverNote);
+        require( _singular.toISingular().owner() == this);
+        emit SingularTransferFailed(_singular.toISingular().owner(),_singular.nextOwner(),_singular,now,_receiverNote);
     }
     //=============================callback===============================================
 
@@ -90,7 +94,7 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
 
     function send(ISingularWallet _to, ITradable _singular, string _senderNote)
     onlyOwnerOrOperator
-    ownsSingular(_singular)
+    ownsSingular(_singular.toISingular())
     constructed
     external{
         //send contains approve logic so here emit an approve event
@@ -100,7 +104,7 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
 
     function sendNotify(ISingularWallet _to, ITradable _singular, string _senderNote, uint256 _expiry)
     onlyOwnerOrOperator
-    ownsSingular(_singular)
+    ownsSingular(_singular.toISingular())
     constructed
     external{
         //send contains approve logic so here emit an approve event
@@ -117,7 +121,7 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
         uint256 _validTill
     )
     onlyOwnerOrOperator
-    ownsSingular(_singular)
+    ownsSingular(_singular.toISingular())
     constructed
     external{
         require(_validTill > now /*&& _validSince < _validTill*/);

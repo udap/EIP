@@ -74,7 +74,7 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
         require(token.previousOwner() == this);
         // TODO: handle the note in a transaction history
         for (uint i = 0; i < tokens.length; i++) {
-            if (token == tokens[i]) {
+            if (address(token) == address(tokens[i])) {
                 delete tokens[i];
                 totalTokens--;
                 // bump up ownership version in case of later reownning 
@@ -90,24 +90,24 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
      */
      
     function received(ITradable token, string /*note*/) external {
-        require(token.owner() == this);
-        require(!alreadyOwn(token));
-        addToTokenSet(token);
+        require(token.toISingular().owner() == this);
+        require(!alreadyOwn(token.toISingular()));
+        addToTokenSet(token.toISingular());
     }
 
-    /**
-     a callback to notify the the wallet that the transaction
-     has been rejected. The parties may synchronize the local state to reflect the
-     ownership change.
-     */
-    function offerRejected(
-        ITradable /*token*/,    ///< the token of concern
-        string /*note*/         ///< the associated note
-    )
-    external {
-        revert("not implementd");
-    }
-
+//    /**
+//     a callback to notify the the wallet that the transaction
+//     has been rejected. The parties may synchronize the local state to reflect the
+//     ownership change.
+//     */
+//    function offerRejected(
+//        ITradable /*token*/,    ///< the token of concern
+//        string /*note*/         ///< the associated note
+//    )
+//    external {
+//        revert("not implementd");
+//    }
+//
 
     /**
     To notify this account that a token transfer offer is ready. The function should return
@@ -132,14 +132,15 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
      * accept the offer, it can ignore the offer by returning `false`;
      */
     function offer(
-        ITradable token,
+        ITradable _token,
         string note
         ) 
         external 
         {
-            require(okToAccept(token));
+            ISingular token = _token.toISingular();
+            require(okToAccept(_token));
             require(!alreadyOwn(token));
-            token.acceptTransfer(note); // call back to accept the offer
+            _token.acceptTransfer(note); // call back to accept the offer
             //
             require(token.owner() == this);
             addToTokenSet(token);

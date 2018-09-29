@@ -19,7 +19,7 @@ import "../impl/NonTradable.sol";
  */
 contract TruePerson is NonTradable{
     string private constant NAME = "TruePerson";
-    function contractName() external view returns(string) {return NAME;}
+    function contractName() external pure returns(string) {return NAME;}
 
     enum Gender {Male, Female, Unknown}
 

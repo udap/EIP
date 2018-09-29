@@ -5,8 +5,17 @@ var w = artifacts.require("./impl/BasicSingularWallet.sol");
 contract('NonTradable', async function ([acct1, acct2]) {
 
     it("should probably set up in the constructor", async () => {
-        var wallet = await w.deployed();
+        // var wallet = await w.deployed();
         // var wallet = await w.at("0x3536Ca51D15f6fc0a76c1f42693F7949b5165F0D");
+        wallet = await w.new(
+            "alice",
+            "wallet",
+            "simple wallet for alice",
+            "",
+            web3.utils.fromAscii("0"),
+            {from: acct1}
+        );
+
         console.log("wallet address:" + wallet.address);
         const BYTES32SRC = "0123456789abcdef0123456789abcdef";
         const BYTES32= web3.utils.fromAscii(BYTES32SRC)
@@ -47,5 +56,34 @@ contract('NonTradable', async function ([acct1, acct2]) {
         }
     });
 
+    it("should revert if the token creator is not the wallet owner", async () => {
+        wallet = await w.new(
+            "alice",
+            "wallet",
+            "simple wallet for alice",
+            "",
+            web3.utils.fromAscii("0"),
+            {from: acct1}
+        );
+
+        // var wallet = await w.at("0x3536Ca51D15f6fc0a76c1f42693F7949b5165F0D");
+        console.log("wallet address:" + wallet.address);
+        const BYTES32SRC = "0123456789abcdef0123456789abcdef";
+        const BYTES32 = web3.utils.fromAscii(BYTES32SRC)
+        const NAME = "Andrew";
+        const PERSON = "PERSON";
+        const DESCR = "Andrew is a good boy";
+        const URI = "http://t.me/123123";
+        assertRevert(NonTradableTest.new(
+            NAME,
+            PERSON,
+            DESCR,
+            URI,
+            BYTES32, // to bytes32
+            acct2,  //
+            wallet.address,
+            {from: acct2}
+        ))
+    });
 })
 

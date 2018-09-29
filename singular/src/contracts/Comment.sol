@@ -8,7 +8,7 @@ import "./SingularBase.sol";
 contract Comment is IComment, Initialized, SingularBase{
     function contractName()
     external
-    view
+    pure
     returns(
         string              ///< the name of the contract class
     ) {

@@ -4,14 +4,13 @@ import "../ITradable.sol";
 
 
 /**
-@title A tradable Singular implementation
 
-A countract of this class can be used in trading.
+@title the middleman in tradable txs
 
 @author bing ran<bran@udap.io>
 
 */
-library TradableLib {
+contract TradableExecutor {
 
     /**
      * the ownership has been successfully transferred from A to B.
@@ -323,5 +322,4 @@ library TradableLib {
 //        require(bytes(s).length <= 128, "the string used more than 128 bytes");
 //        _;
 //    }
-
 }

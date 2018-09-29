@@ -1,10 +1,13 @@
 const { assertRevert } = require('./helpers/assertRevert');
+const { logit } = require('./helpers/logit');
+const expectEvent = require('./helpers/expectEvent');
 var Tradable = artifacts.require("./impl/Tradable.sol");
 var SingularWallet = artifacts.require("./impl/BasicSingularWallet.sol");
+var e = artifacts.require("./impl/TradableExecutor.sol");
 var {TimeUtil} = require("./helpers/TimeUtil");
-var lib = artifacts.require("./impl/TradableLib.sol");
+// var lib = artifacts.require("./impl/TradableLib.sol");
 
-contract('Tradable', function ([aliceEOA, bobEOA, someEOA]) {
+contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
 
     const WALL_NAME = "Andrew's wallet";
     const BYTES32SRC = "0123456789abcdef0123456789abcdef";
@@ -15,10 +18,13 @@ contract('Tradable', function ([aliceEOA, bobEOA, someEOA]) {
     const URI = "http://t.me/123123";
 
     // let link the lib to the contract first
-    lib.deployed().then((libinstance) => {
-        // console.log("lib: " + libinstance.address);
-        Tradable.link("TradableLib", libinstance.address); // has to link explicitly to the symbol
-    })
+    // lib.deployed().then((libinstance) => {
+    //     // console.log("lib: " + libinstance.address);
+    //     Tradable.link("TradableLib", libinstance.address); // has to link explicitly to the symbol
+    // })
+
+    var exe;
+    e.deployed().then((inst) => {exe = inst})
 
     describe('all about transfers', function () {
         let aliceWallet = null;
@@ -54,8 +60,8 @@ contract('Tradable', function ([aliceEOA, bobEOA, someEOA]) {
                 aliceWallet.address,
                 {from: aliceEOA,/* gas: 4000000, gasprice: 100000000000*/}
             );
-            // console.log("token: " + token.address);
 
+            await token.setExecutor(exe.address, {from: aliceEOA})
         });
 
         it("should probably set up in the constructor", async () => {
@@ -87,7 +93,17 @@ contract('Tradable', function ([aliceEOA, bobEOA, someEOA]) {
                 "for fun",
                 {from: aliceEOA}
             );
-            // console.log(tx);
+            // logit(tx, "approveReceiver");
+            expectEvent.inLogs(
+                tx.logs,
+                'ReceiverApproved',
+                {
+                    from: aliceWallet.address,
+                    to: bobWallet.address,
+                    validFrom: now,
+                    validTill: validTill,
+                    senderNote: 'for fun'}
+                );
         });
         it("shoudl not approve from unauthorized", async () => {
             let now = TimeUtil.nowInSeconds();
@@ -138,6 +154,7 @@ contract('Tradable', function ([aliceEOA, bobEOA, someEOA]) {
                 aliceWallet.address,
                 {from: aliceEOA}
             );
+            await aliceToken.setExecutor(exe.address, {from: aliceEOA})
 
             bobToken = await Tradable.new(
                 "bobToken",
@@ -146,25 +163,60 @@ contract('Tradable', function ([aliceEOA, bobEOA, someEOA]) {
                 URI,
                 BYTES32, // to bytes32
                 aliceEOA,  //
-                aliceWallet.address,
+                bobWallet.address,
                 {from: bobEOA}
             );
-
+            await bobToken.setExecutor(exe.address, {from: bobEOA})
         });
 
-        it("approves swaps", async () => {
-            let now = TimeUtil.nowInSeconds();
-            let validTill = now + 10;
-            await aliceToken.approveSwap(
+        it("approves swaps from the owner", async () => {
+            let validFrom = TimeUtil.nowInSeconds() -1;
+            let validTill = validFrom + 2000;
+            let tx = await aliceToken.approveSwap(
                 bobToken.address,
-                now,
+                validFrom,
                 validTill,
                 "cool",
                 {from: aliceEOA}
             )
-
+            let swapOffer = await aliceToken.swapOffer.call();
+            // logit(swapOffer);
+            assert.equal(swapOffer.target, bobToken.address);
+            assert.equal(swapOffer.validFrom, validFrom);
+            assert.equal(swapOffer.validTill, validTill);
+            assert.equal(swapOffer.note, "cool");
+            // let's do the swap
+            // 1. propose a reverse swap
+            tx = await bobToken.approveSwap(
+                aliceToken.address,
+                validFrom,
+                validTill - 2,
+                "why not",
+                {from: bobEOA}
+            )
+            swapOffer = await bobToken.swapOffer.call();
+            logit(swapOffer, "swp offer on bob");
+            assert.equal(swapOffer.target, aliceToken.address);
+            assert.equal(swapOffer.validFrom, validFrom);
+            assert.equal(swapOffer.validTill, validTill - 2);
+            assert.equal(swapOffer.note, "why not");
+            // 2. verify the onchain time
+            let evmTime = (await bobToken.ping.call({from: bobEOA})).toNumber();
+            logit(evmTime, "evem time")
+            assert.isAtLeast(evmTime, validFrom);
+            assert.isAtMost(evmTime, validTill);
+            assert.isTrue(await aliceToken.isInSwap.call());
+            assert.isTrue(await bobToken.isInSwap.call());
+            // 3. let's do it
+            assertRevert(bobToken.acceptSwap("do it", {from: bobEOA})) // because this method is for counterparty to call
+            logit (" from Alice:" + aliceEOA + " to bobToken:" + bobToken.address, "acceptSwap");
+            tx = await  bobToken.acceptSwap("do it", {from: aliceEOA})
+            // logit(tx, "accept tx");
+            assert.equal(await aliceToken.owner.call(), bobWallet.address, "aliceToken owner was not swapped to bob");
+            assert.equal(await bobToken.owner.call(), aliceWallet.address, "bobToken owner was not swapped to alice");
         });
-        it("not approve swaps", async () => {
+
+        it("not approve swaps aliceToken from Bob", async () => {
             let now = TimeUtil.nowInSeconds();
             let validTill = now + 10;
             assertRevert(aliceToken.approveSwap(

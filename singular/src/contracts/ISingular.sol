@@ -19,7 +19,7 @@ interface ISingular {
     */
     function contractName()
     external
-    view
+    pure
     returns(
         string name             ///< the name of the contract class
     );

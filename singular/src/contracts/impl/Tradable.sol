@@ -4,10 +4,8 @@ import "../ISingularWallet.sol";
 import "../ITradable.sol";
 import "../ERC20/IDebit.sol";
 import "./NonTradable.sol";
-import "./TradableLib.sol";
 import "../ITradable.sol";
-
-
+import "./TradableExecutor.sol";
 
 
 /**
@@ -19,13 +17,12 @@ A countract of this class can be used in trading.
 
 */
 contract Tradable is NonTradable, ITradable {
-    function contractName() external view returns(string) {return "Tradable";}
+    function contractName() external pure returns(string) {return "Tradable";}
 
-    ISingularWallet theOwner; /// current owner
+//    event Log(address who, string what);
 
-    ISingularWallet ownerPrevious; /// next owner choice
+    ISingularWallet internal ownerPrevious; /// next owner choice
 
-//    string private receiverNote;
     constructor(
         string _name,
         string _symbol,
@@ -47,6 +44,7 @@ contract Tradable is NonTradable, ITradable {
     )
     {}
 
+    TradableExecutor public executor;
 
     /**
      * get the current owner as type of SingularOwner
@@ -174,14 +172,13 @@ contract Tradable is NonTradable, ITradable {
         string note
     )
     external
-    onlyOwnerOrOperator
+    operatorOnly
     max128Bytes(note)
     {
         ownerPrevious = theOwner;
         theOwner = newOwner;
         ownerPrevious.sent(this, note);
         theOwner.received(this, note);
-
     }
 
     /**
@@ -257,9 +254,32 @@ contract Tradable is NonTradable, ITradable {
     )
     public
     inSwap
-    permittedSender2(swapOffer.target)
+    hasExecutor
+//    permittedSenders([
+//        address(swapOffer.target),
+//        address(swapOffer.target.toISingular().owner()),
+//        address(swapOffer.target.toISingular().owner().ownerAddress()),
+//        theOperator])
     {
-        TradableLib.acceptSwap(this, note);
+        address caller = msg.sender;
+        ITradable t = swapOffer.target;
+        address a = address(t);
+        // todo: a little ugly. should let the parent to recursively match owner via a method like `matchOwner`
+        if(a != caller) {
+            ISingularWallet w = swapOffer.target.toISingular().owner();
+            a = address(w);
+            if(a != caller) {
+                a = address(w.ownerAddress());
+                if(a != caller) {
+                    a = theOperator;
+                    if (a != caller && executor != caller) {
+                        revert("the caller was neither the target/owner or the operator/executor");
+                    }
+                }
+            }
+        }
+//        emit Log(this, "here");
+        executor.acceptSwap(this, note);
     }
 
     function rejectSwap(
@@ -282,8 +302,9 @@ contract Tradable is NonTradable, ITradable {
     )
     external
     inSell
+    hasExecutor
     {
-        TradableLib.buy(this, debitcard);
+        executor.buy(this, debitcard);
     }
 
     /***************************** modifiers **************************/
@@ -316,10 +337,27 @@ contract Tradable is NonTradable, ITradable {
         address caller = msg.sender;
         require(
             caller == address(target)
-            || caller == address(target.owner())
-            || caller == target.owner().ownerAddress()
-            ,
-            "the sender was not the target wallet or the owner thereof");
+            || caller == address(target.toISingular().owner())
+            || caller == target.toISingular().owner().ownerAddress()
+        ,
+            "the sender was not the target ITradable or the owner thereof");
+        _;
+    }
+
+    modifier permittedSenders(address[4] addrs) {
+        address caller = msg.sender;
+        bool found = false;
+        for (uint i = 0; i < addrs.length; i++) {
+            if (caller == addrs[i]) {
+                found = true;
+                break;
+            }
+        }
+        if(found) _;
+    }
+
+    modifier operatorOnly() {
+        require(msg.sender == theOperator || msg.sender == address(executor), "sender was not the operator");
         _;
     }
 
@@ -330,6 +368,11 @@ contract Tradable is NonTradable, ITradable {
 
     modifier inSell() {
         require(sellValid(), "this item is not for sell at this moment");
+        _;
+    }
+
+    modifier hasExecutor() {
+        require(address(executor) != address(0), "the transacton executor was not set on this tradable token");
         _;
     }
 
@@ -353,6 +396,7 @@ contract Tradable is NonTradable, ITradable {
         delete swapOffer;
         delete transferOffer;
         delete theOperator;
+
     }
 
     function sellValid() internal view returns(bool){
@@ -378,11 +422,44 @@ contract Tradable is NonTradable, ITradable {
         _;
     }
 
+    function isInSwap() public view returns(bool) {
+        return (swapValid(swapOffer));
+    }
+
     modifier max128Bytes(string s) {
         require(bytes(s).length <= 128, "the string used more than 128 bytes");
         _;
     }
 
-    /////
-    function ping() public {TradableLib.ping();}
+    modifier onlyOwnerOrOperator() {
+        address caller = msg.sender;
+        require(
+            caller != address(0)
+        &&
+        (
+        address(theOwner) == caller
+        || theOwner.ownerAddress() == caller
+        || theOperator == caller
+        || executor == caller
+        ),
+            "the msg.sender was not owner or operator"
+        );
+        _;
+    }
+
+
+    function toISingular() public view returns(ISingular) {return ISingular(this);}
+    ///// to find out the current block time.
+    function ping() public view returns (uint){ return now;}
+
+    /**
+    * todo: need to sort out the executor vs operator relationship.
+    */
+    function setExecutor(TradableExecutor _exe)
+    public
+    ownerOnly
+    {
+        executor = _exe;
+        theOperator = _exe;
+    }
 }
