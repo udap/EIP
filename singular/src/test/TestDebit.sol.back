@@ -1,0 +1,33 @@
+pragma solidity ^0.4.24;
+
+import "truffle/Assert.sol";
+import "truffle/DeployedAddresses.sol";
+import "../contracts/impl/BasicSingularWallet.sol";
+import "../contracts/samples/SampleERC20.sol";
+import "../contracts/ERC20/ERC20DebitFactory.sol";
+import "../contracts/ERC20/IERC20.sol";
+
+contract TestDebit {
+
+    /// this thing is so sloooooow!
+
+//    function testWallet() public {
+//        BasicSingularWallet wal = new BasicSingularWallet(
+//            "alice",
+//            "wallet",
+//            "simple wallet",
+//            "",
+//            0x11
+//        );
+//        Assert.equal(wal.name(), "alice", "wallet name was not right");
+//
+//        SampleERC20 e20 = new SampleERC20();
+
+//        ERC20DebitFactory factory = new ERC20DebitFactory(IERC20(e20));
+
+//        IDebit debit = factory.newDebit(wal, 1000);
+//
+//        require(debit.denomination() == 1000, "value is not right");
+//    }
+
+}

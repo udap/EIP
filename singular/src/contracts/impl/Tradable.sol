@@ -23,35 +23,39 @@ contract Tradable is NonTradable, ITradable {
 
     ISingularWallet internal ownerPrevious; /// next owner choice
 
-    constructor(
-        string _name,
-        string _symbol,
-        string _descr,
-        string _tokenURI,
-        bytes32 _tokenURIHash,
-        address _tokenType,         ///< an address that indicate the origin of this instance.
-        ISingularWallet _wallet
-    )
-    public
-    NonTradable(
-        _name,
-        _symbol,
-        _descr,
-        _tokenURI,
-        _tokenURIHash,
-        _tokenType,
-        _wallet
-    )
-    {}
+    // let use the parent init function for the same purpose
 
     TradableExecutor public executor;
+
+
+//    function init(
+//        string _name,
+//        string _symbol,
+//        string _descr,
+//        string _tokenURI,
+//        bytes32 _tokenURIHash,
+//        address _tokenTypeAddr,
+//        ISingularWallet _wallet
+//    )
+//    public
+//    {
+//        NonTradable.init(
+//            _name,
+//            _symbol,
+//            _descr,
+//            _tokenURI,
+//            _tokenURIHash,
+//            _tokenTypeAddr,
+//            _wallet
+//        );
+//    }
 
     /**
      * get the current owner as type of SingularOwner
      */
-    function previousOwner() external view returns (ISingularWallet) {return ownerPrevious;}
+    function previousOwner() external view initialized returns (ISingularWallet) {return ownerPrevious;}
 
-    function nextOwner() external view returns (ISingularWallet){return transferOffer.nextOwner;}
+    function nextOwner() external view initialized returns (ISingularWallet){return transferOffer.nextOwner;}
 
 
     /**
@@ -71,6 +75,7 @@ contract Tradable is NonTradable, ITradable {
         string _note
     )
     external
+    initialized
     onlyOwnerOrOperator
     notInTx
     max128Bytes(_note)
@@ -104,6 +109,7 @@ contract Tradable is NonTradable, ITradable {
         string _note
     )
     external
+    initialized
     inTransition
     permittedSender(transferOffer.nextOwner)
     max128Bytes(_note)
@@ -144,6 +150,7 @@ contract Tradable is NonTradable, ITradable {
         string _note
     )
     external
+    initialized
     onlyOwnerOrOperator
     max128Bytes(_note)
     {
@@ -159,6 +166,7 @@ contract Tradable is NonTradable, ITradable {
         uint256 _expiry
     )
     external
+    initialized
     onlyOwnerOrOperator
     max128Bytes(_note)
     {
@@ -172,6 +180,7 @@ contract Tradable is NonTradable, ITradable {
         string note
     )
     external
+    initialized
     operatorOnly
     max128Bytes(note)
     {
@@ -199,6 +208,7 @@ contract Tradable is NonTradable, ITradable {
         string note             ///< additional note
     )
     external
+    initialized
     notInTx
     onlyOwnerOrOperator
     {
@@ -233,6 +243,7 @@ contract Tradable is NonTradable, ITradable {
         string note
     )
     public
+    initialized
     onlyOwnerOrOperator
     notInTx
     max128Bytes(note)
@@ -253,6 +264,7 @@ contract Tradable is NonTradable, ITradable {
         string note
     )
     public
+    initialized
     inSwap
     hasExecutor
 //    permittedSenders([
@@ -301,6 +313,7 @@ contract Tradable is NonTradable, ITradable {
         IDebit debitcard   ///< the money
     )
     external
+    initialized
     inSell
     hasExecutor
     {
@@ -435,13 +448,13 @@ contract Tradable is NonTradable, ITradable {
         address caller = msg.sender;
         require(
             caller != address(0)
-        &&
-        (
-        address(theOwner) == caller
-        || theOwner.ownerAddress() == caller
-        || theOperator == caller
-        || executor == caller
-        ),
+            &&
+            (
+                address(theOwner) == caller
+                || theOwner.ownerAddress() == caller
+                || theOperator == caller
+                || executor == caller
+            ),
             "the msg.sender was not owner or operator"
         );
         _;

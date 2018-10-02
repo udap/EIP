@@ -10,7 +10,7 @@ contract MiniProxy {
 
     //delegate to somewhere
     bytes32 private constant currentLogicPosition = keccak256(abi.encodePacked(keccak256(abi.encode("currentLogicPosition"))));
-    //who can knock out the init() function
+    // the slot to store the address that can knock out the init() function. see the `Initialized`
     bytes32 private constant initPermission = keccak256(abi.encodePacked(keccak256(abi.encode("initPermission"))));
 
     function setLogicPosition(address _toRegistry) internal {

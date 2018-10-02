@@ -5,25 +5,22 @@ import '../ISingularWallet.sol';
 import "./IERC20.sol";
 
 /**
-@title a basic erc20 interface with newDebit() factory funciton.
+@title a basic erc20 interface with newDebit() factory function.
 */
-contract IERC20DebitFactory {
-
-    function whatERC20()
-    external
-    view
-    returns(
-        IERC20
-    );
+interface IERC20DebitFactory {
+//    function register(
+//        IERC20                      ///< register erc20 that must be owned by this factory
+//    )
+//    external;
 
     /**
     to create a debit account held by the wallet with some cash in it, from the caller's holdings
     */
     function newDebit(
-        ISingularWallet wallet,      ///< the owner of the new debit
+        IERC20 tokenType,                   ///< the erc20 that must be owned by the wallet
         uint256 denomination             ///< how much to put in the debit card
     )
-    public
+    external
     returns(
         IDebit debit
     );

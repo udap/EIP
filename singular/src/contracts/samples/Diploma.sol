@@ -41,8 +41,8 @@ contract Diploma is NonTradable{
         ISingularWallet recipient
     )
     public
-    NonTradable(degree, NAME, description, scanCopyURL, scanCopyHash, address(0), recipient)
     {
+        NonTradable.init(degree, NAME, description, scanCopyURL, scanCopyHash, address(0), recipient);
         degree_ = degree;
         authority_ = authority;
         school_ = school;

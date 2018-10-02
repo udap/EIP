@@ -4,6 +4,7 @@ import "../ISingularWallet.sol";
 import "../SingularMeta.sol";
 import "../ISingular.sol";
 import "../utils/CommonModifiers.sol";
+import "../utils/MustInitialize.sol";
 
 
 /**
@@ -16,7 +17,7 @@ import "../utils/CommonModifiers.sol";
  * @author Bing Ran<bran@udap.io>
  *
  */
-contract NonTradable is ISingular, SingularMeta, CommonModifiers{
+contract NonTradable is ISingular, SingularMeta, CommonModifiers {
     function contractName() external pure returns(string) {return "NonTradable";}
 
     ISingularWallet internal theOwner; /// current owner
@@ -28,7 +29,7 @@ contract NonTradable is ISingular, SingularMeta, CommonModifiers{
 
     address tokenTypeAddr;
 
-    constructor(
+    function init(
         string _name,
         string _symbol,
         string _descr,
@@ -38,22 +39,23 @@ contract NonTradable is ISingular, SingularMeta, CommonModifiers{
         ISingularWallet _wallet
     )
     public
-    senderMatchesWallet(_wallet)
+//    uninitialized // not required since the SingularMeta will do the check
+    fromWallet(_wallet)
     max128Bytes(_name)
     max64Bytes(_symbol)
     max256Bytes(_descr)
     max128Bytes(_tokenURI)
-    SingularMeta(_name, _symbol, _descr, _tokenURI, _tokenURIHash)
     {
+        SingularMeta.init(_name, _symbol, _descr, _tokenURI, _tokenURIHash);
         theCreator = msg.sender;
         theOwner = _wallet;
         timeCreated = now;
         tokenTypeAddr = _tokenTypeAddr;
     }
 
-    function owner() external view returns(ISingularWallet){return theOwner;}
+    function owner() external view initialized returns(ISingularWallet){return theOwner;}
     function creator() external view returns (address) {return theCreator;}
-    function operator() external view returns(address) {return theOperator;}
+    function operator() external view initialized returns(address) {return theOperator;}
 
     /**
     to configure the operator
@@ -61,8 +63,9 @@ contract NonTradable is ISingular, SingularMeta, CommonModifiers{
     function setOperator(
         address _address       ///< who to be the operator
     )
-    ownerOnly
     external
+    initialized
+    ownerOnly
     {
         theOperator = _address;
     }
@@ -114,7 +117,7 @@ contract NonTradable is ISingular, SingularMeta, CommonModifiers{
         _;
     }
 
-    modifier senderMatchesWallet(ISingularWallet wallet) {
+    modifier fromWallet(ISingularWallet wallet) {
         address caller = msg.sender;
         require(
             caller != address(0)

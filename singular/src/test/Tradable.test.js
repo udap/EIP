@@ -17,7 +17,7 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
     const DESCR = "Andrew is a good boy";
     const URI = "http://t.me/123123";
 
-    // let link the lib to the contract first
+    // let link the lib to the contract first // note: we don't use library in this implementation
     // lib.deployed().then((libinstance) => {
     //     // console.log("lib: " + libinstance.address);
     //     Tradable.link("TradableLib", libinstance.address); // has to link explicitly to the symbol
@@ -50,7 +50,8 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
                 {from: bobEOA}
             );
 
-            token = await Tradable.new(
+            token = await Tradable.new();
+            await token.init(
                 NAME,
                 PERSON,
                 DESCR,
@@ -58,7 +59,7 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
                 BYTES32, // to bytes32
                 aliceEOA,  //
                 aliceWallet.address,
-                {from: aliceEOA,/* gas: 4000000, gasprice: 100000000000*/}
+                {from: aliceEOA}
             );
 
             await token.setExecutor(exe.address, {from: aliceEOA})
@@ -144,7 +145,8 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
                 {from: bobEOA}
             );
 
-            aliceToken = await Tradable.new(
+            aliceToken = await Tradable.new({from: aliceEOA});
+            await aliceToken.init(
                 "aliceToken",
                 PERSON,
                 DESCR,
@@ -156,7 +158,8 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
             );
             await aliceToken.setExecutor(exe.address, {from: aliceEOA})
 
-            bobToken = await Tradable.new(
+            bobToken = await Tradable.new({from: bobEOA});
+            await bobToken.init(
                 "bobToken",
                 PERSON,
                 DESCR,
@@ -195,21 +198,21 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
                 {from: bobEOA}
             )
             swapOffer = await bobToken.swapOffer.call();
-            logit(swapOffer, "swp offer on bob");
+            // logit(swapOffer, "swp offer on bob");
             assert.equal(swapOffer.target, aliceToken.address);
             assert.equal(swapOffer.validFrom, validFrom);
             assert.equal(swapOffer.validTill, validTill - 2);
             assert.equal(swapOffer.note, "why not");
             // 2. verify the onchain time
             let evmTime = (await bobToken.ping.call({from: bobEOA})).toNumber();
-            logit(evmTime, "evem time")
+            // logit(evmTime, "evem time")
             assert.isAtLeast(evmTime, validFrom);
             assert.isAtMost(evmTime, validTill);
             assert.isTrue(await aliceToken.isInSwap.call());
             assert.isTrue(await bobToken.isInSwap.call());
             // 3. let's do it
             assertRevert(bobToken.acceptSwap("do it", {from: bobEOA})) // because this method is for counterparty to call
-            logit (" from Alice:" + aliceEOA + " to bobToken:" + bobToken.address, "acceptSwap");
+            // logit (" from Alice:" + aliceEOA + " to bobToken:" + bobToken.address, "acceptSwap");
             tx = await  bobToken.acceptSwap("do it", {from: aliceEOA})
             // logit(tx, "accept tx");
             assert.equal(await aliceToken.owner.call(), bobWallet.address, "aliceToken owner was not swapped to bob");

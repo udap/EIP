@@ -45,7 +45,8 @@ contract ERC721SingularFactory is IERC721SingularFactory {
         ERC721Tradable
     ) {
         require(msg.sender == erc721.ownerOf(tokenId), "the message sender is not the owner of this 721 token");
-        ERC721Tradable s721 = new ERC721Tradable(
+        ERC721Tradable s721 = new ERC721Tradable();
+        s721.init(
             _name,
             _description,
             _tokenURI,
@@ -78,7 +79,8 @@ contract ERC721SingularFactory is IERC721SingularFactory {
         ERC721NonTradable
     ) {
         require(msg.sender == erc721.ownerOf(tokenId), "the message sender is not the owner of this 721 token");
-        ERC721NonTradable s721 = new ERC721NonTradable(
+        ERC721NonTradable s721 = new ERC721NonTradable();
+        s721.init(
             _name,
             _description,
             _tokenURI,

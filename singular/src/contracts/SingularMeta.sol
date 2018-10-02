@@ -1,10 +1,11 @@
 pragma solidity ^0.4.24;
 
 import "./ISingularMeta.sol";
-import "./utils/Initialized.sol";
+//import "./utils/Initialized.sol";
 import "./SingularBase.sol";
+import "./utils/MustInitialize.sol";
 
-contract SingularMeta is ISingularMeta, Initialized {
+contract SingularMeta is ISingularMeta, MustInitialize {
     /// meta
     string theName;
     string theSymbol; /// token type information
@@ -13,17 +14,11 @@ contract SingularMeta is ISingularMeta, Initialized {
     bytes32 theTokenURIDigest;
 
 
-    constructor(string _name, string _symbol, string _description, string _tokenURI, bytes32 _tokenURIDigest) public {
-        theName = _name;
-        theSymbol = _symbol;
-        theDescription = _description;
-        theTokenURI = _tokenURI;
-        theTokenURIDigest = _tokenURIDigest;
-    }
+    constructor() public {}
 
     // for compatibility with proxy, which requires initialization out of constructor
     function init (string _name, string _symbol, string _description, string _tokenURI, bytes32 _tokenURIDigest)
-    unconstructed
+    uninitialized
     public
     {
         theName = _name;

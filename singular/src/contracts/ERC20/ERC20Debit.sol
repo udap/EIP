@@ -18,25 +18,27 @@ contract ERC20Debit is IDebit, Tradable {
 
     function contractName() external pure returns(string) {return "ERC20Debit";}
 
-    /// the underlying erc20 type
-    IERC20DebitFactory private _erc20Factory;
+    IERC20 erc20_;
+//    IERC20DebitFactory _erc20Factory;
 
-    constructor(
-        IERC20DebitFactory addr,
+    function init(
+        string name,
+        IERC20 erc20,
         ISingularWallet wal
     )
-    Tradable(
-        addr.whatERC20().name(),
-        addr.whatERC20().symbol(),
-        "ERC20Debit contract",
-        "",
-        0,
-        addr,
-        wal
-    )
-    public
+    external
     {
-        _erc20Factory = addr;
+        NonTradable.init(
+            name,
+            erc20.symbol(),
+            "ERC20Debit contract",
+            "",
+            0,
+            erc20, // tokenTypeAddress
+            wal
+        );
+        erc20_ = erc20;
+//        _erc20Factory = factory;
     }
 
 
@@ -46,7 +48,7 @@ contract ERC20Debit is IDebit, Tradable {
         address
     )
     {
-        return _erc20Factory;
+        return erc20_;
     }
 
     /**
@@ -58,7 +60,7 @@ contract ERC20Debit is IDebit, Tradable {
         uint256 value           ///< the amount of tokens in this packet   
     ) 
     {
-        return _erc20Factory.whatERC20().balanceOf(this);
+        return erc20_.balanceOf(this);
     }
     
     /**
@@ -74,7 +76,7 @@ contract ERC20Debit is IDebit, Tradable {
     sameTokenType(another)
     ownerOnly
     {
-        _erc20Factory.whatERC20().transfer(address(another), amount);
+//        erc20_.transfer(address(another), amount);
     }
 
     /**
@@ -91,8 +93,8 @@ contract ERC20Debit is IDebit, Tradable {
         uint256 updatedfaceValue
     )
     {
-        coin.transfer(this, coin.denomination());
-        return denomination();
+//        coin.transfer(this, coin.denomination());
+//        return denomination();
     }
 
     /**
@@ -107,11 +109,11 @@ contract ERC20Debit is IDebit, Tradable {
         IDebit          ///< the spawned child coin
     )
     {
-        require(this.denomination() >= amount, "not enough balance");
-        ISingularWallet wal = theOwner;
-        require(msg.sender == address(wal), "the message sender was not the owner");
-        IDebit newCoin = _erc20Factory.newDebit(wal, amount);
-        return newCoin;
+//        require(this.denomination() >= amount, "not enough balance");
+//        ISingularWallet wal = theOwner;
+//        require(msg.sender == address(wal), "the message sender was not the owner");
+//        IDebit newCoin = _erc20Factory.newDebit(erc20_, amount);
+//        return newCoin;
     }
     
     modifier sameTokenType(IDebit t) {

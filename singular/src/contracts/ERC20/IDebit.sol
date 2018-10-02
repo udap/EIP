@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 import "../ISingular.sol";
 import "../ITradable.sol";
+import "./IERC20.sol";
 
 
 /**
@@ -18,7 +19,7 @@ IDebit makes some fungible tokens a single unit of value that can participate in
 
 */
 contract IDebit is ISingular {
-
+    /// to assign owner
 
     function currencyType()
     public view

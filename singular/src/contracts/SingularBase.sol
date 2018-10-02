@@ -39,7 +39,8 @@ contract SingularBase is ITradable, ReentrancyGuard, TransferHistory, IBurnable 
     uint256 internal expiry;
     string internal transferReason;// transfer message
 
-/*    constructor(string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest, address _to) SingularMeta( _name,  _symbol,  _description,  _tokenURI, _tokenURIDigest)public
+/*    constructor(string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest, address _to)
+SingularMeta( _name,  _symbol,  _description,  _tokenURI, _tokenURIDigest)public
     {
         singularCreator = msg.sender;
         singularOwner = ISingularWallet(_to);

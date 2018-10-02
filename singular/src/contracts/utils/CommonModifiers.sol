@@ -6,6 +6,7 @@ pragma solidity ^0.4.24;
  */
 contract CommonModifiers {
 
+
     modifier max16Bytes(string s) {
         require(bytes(s).length <= 16, "the string used more than 128 bytes");
         _;

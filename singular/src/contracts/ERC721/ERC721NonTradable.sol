@@ -21,7 +21,7 @@ contract ERC721NonTradable is IERC721Singular, NonTradable {
     /**
     construct a Tradable backed by an ERC721 token.
     */
-    constructor(
+    function init(
         string _name,
         string _description,
         string _tokenURI,
@@ -30,17 +30,17 @@ contract ERC721NonTradable is IERC721Singular, NonTradable {
         IERC721 _erc721,
         uint _tokenId
     )
-    NonTradable(
-        _name,
-        _erc721.symbol(),
-        _description,
-        _tokenURI,
-        _tokenURIDigest,
-        _erc721,
-        _wallet
-    )
     public
     {
+        NonTradable.init(
+            _name,
+            _erc721.symbol(),
+            _description,
+            _tokenURI,
+            _tokenURIDigest,
+            _erc721,
+            _wallet
+        );
         erc721 = _erc721;
         tokenNumber = _tokenId;
     }

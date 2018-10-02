@@ -1,29 +1,31 @@
 const { assertRevert } = require('./helpers/assertRevert');
-var NonTradableTest = artifacts.require("./impl/NonTradable.sol");
-var w = artifacts.require("./impl/BasicSingularWallet.sol");
+let NonTradableTest = artifacts.require("./impl/NonTradable.sol");
+let w = artifacts.require("./impl/BasicSingularWallet.sol");
 
-contract('NonTradable', async function ([acct1, acct2]) {
+contract('NonTradable', function ([acct1, acct2]) {
+    const BYTES32SRC = "0123456789abcdef0123456789abcdef";
+    const BYTES32 = web3.utils.fromAscii(BYTES32SRC)
+    const NAME = "Andrew";
+    const PERSON = "PERSON";
+    const DESCR = "Andrew is a good boy";
+    const URI = "http://t.me/123123";
+
+    var wallet
+    w.new(
+        "alice",
+        "wallet",
+        "simple wallet for alice",
+        "",
+        web3.utils.fromAscii("0"),
+        {from: acct1}
+    ).then((i) => {wallet = i; });
+
 
     it("should probably set up in the constructor", async () => {
-        // var wallet = await w.deployed();
-        // var wallet = await w.at("0x3536Ca51D15f6fc0a76c1f42693F7949b5165F0D");
-        wallet = await w.new(
-            "alice",
-            "wallet",
-            "simple wallet for alice",
-            "",
-            web3.utils.fromAscii("0"),
+        let nonTrada = await NonTradableTest.new(
             {from: acct1}
         );
-
-        console.log("wallet address:" + wallet.address);
-        const BYTES32SRC = "0123456789abcdef0123456789abcdef";
-        const BYTES32= web3.utils.fromAscii(BYTES32SRC)
-        const NAME = "Andrew";
-        const PERSON = "PERSON";
-        const DESCR = "Andrew is a good boy";
-        const URI = "http://t.me/123123";
-        var nonTrada = await NonTradableTest.new(
+        await nonTrada.init(
             NAME,
             PERSON,
             DESCR,
@@ -31,7 +33,6 @@ contract('NonTradable', async function ([acct1, acct2]) {
             BYTES32, // to bytes32
             acct2,  //
             wallet.address,
-            {from: acct1}
         );
         assert.equal(await nonTrada.contractName.call(), "NonTradable");
         assert.equal(await nonTrada.creator.call(), acct1);
@@ -67,14 +68,18 @@ contract('NonTradable', async function ([acct1, acct2]) {
         );
 
         // var wallet = await w.at("0x3536Ca51D15f6fc0a76c1f42693F7949b5165F0D");
-        console.log("wallet address:" + wallet.address);
+        // console.log("wallet address:" + wallet.address);
         const BYTES32SRC = "0123456789abcdef0123456789abcdef";
         const BYTES32 = web3.utils.fromAscii(BYTES32SRC)
         const NAME = "Andrew";
         const PERSON = "PERSON";
         const DESCR = "Andrew is a good boy";
         const URI = "http://t.me/123123";
-        assertRevert(NonTradableTest.new(
+        let nt = await NonTradableTest.new(
+            {from: acct2}
+        );
+        //should revert because the account does not match the wallet owner
+        assertRevert(nt.init(
             NAME,
             PERSON,
             DESCR,
@@ -85,5 +90,59 @@ contract('NonTradable', async function ([acct1, acct2]) {
             {from: acct2}
         ))
     });
-})
+
+    it("should not allow re-initialization", async () => {
+        let nt = await NonTradableTest.new(
+            {from: acct2}
+        );
+
+        // should be fine the first time
+        await nt.init(
+            NAME,
+            PERSON,
+            DESCR,
+            URI,
+            BYTES32, // to bytes32
+            acct1,  //
+            wallet.address,
+            {from: acct1}
+        );
+
+        // should revert the second time.
+        assertRevert(nt.init(
+            NAME,
+            PERSON,
+            DESCR,
+            URI,
+            BYTES32, // to bytes32
+            acct1,  //
+            wallet.address,
+            {from: acct1}
+        ));
+    });
+
+    it("should not allow any other operation before initialization", async () => {
+        let nt = await NonTradableTest.new(
+            {from: acct2}
+        );
+
+        assertRevert(nt.setOperator(acct2));
+
+        // should be fine the first time
+        await nt.init(
+            NAME,
+            PERSON,
+            DESCR,
+            URI,
+            BYTES32, // to bytes32
+            acct1,  //
+            wallet.address,
+            {from: acct1}
+        );
+
+        // now we can do that
+        await (nt.setOperator(acct2));
+        assert.equal((await nt.operator.call()), acct2);
+    });
+});
 

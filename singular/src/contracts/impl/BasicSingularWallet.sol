@@ -40,14 +40,15 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
         string _tokenURI,
         bytes32 _tokenURIDigest
     )
-    SingularMeta(
-        _name,
+    public
+    {
+        SingularMeta.init(
+            _name,
             _symbol,
             _descr,
             _tokenURI,
-            _tokenURIDigest)
-    public
-    {
+            _tokenURIDigest
+        );
         theCreator = msg.sender;
         ownerOfThis = msg.sender;
     }

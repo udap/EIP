@@ -23,22 +23,22 @@ contract DebitBasic is IDebit, Tradable {
     address currencyType_;
     
     // XXX: fill up parent constructor
-    constructor(
+    function init(
         string _symbol,          ///< currency symbol
         address _currencyType,           ///< currency type
         ISingularWallet _wal     ///< owner
     ) 
-    Tradable (
-        "DebitBasic", 
-        _symbol, 
-        "DebitBasic", 
-        "", 
-        0,
-        _currencyType,
-        _wal
-    )
     public
     {
+        NonTradable.init(
+            "DebitBasic",
+            _symbol,
+            "DebitBasic",
+            "",
+            0,
+            _currencyType,
+            _wal
+            );
     }
 
     function currencyType()

@@ -53,8 +53,8 @@ contract TruePerson is NonTradable{
         ISingularWallet recipient   ///
     )
     public
-    NonTradable(name, NAME, description, "", 0, address(0), recipient)
     {
+        NonTradable.init(name, NAME, description, "", 0, address(0), recipient);
     }
 
 }
