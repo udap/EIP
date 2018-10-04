@@ -4,7 +4,7 @@ const expectEvent = require('./helpers/expectEvent');
 var e20Contract = artifacts.require("./samples/SampleERC20.sol");
 var e721Contract = artifacts.require("./samples/SampleERC721.sol");
 var w = artifacts.require("./impl/SingularWalletWithE20E721.sol");
-var erc20Contract = artifacts.require("./ERC20/ERC20Debit.sol");
+var Erc20DebitContract = artifacts.require("./ERC20/ERC20Debit.sol");
 var e721TradableCon = artifacts.require("./ERC721/ERC721Tradable.sol");
 var e721NonTradableCon = artifacts.require("./ERC721/ERC721NonTradable.sol");
 
@@ -32,7 +32,7 @@ contract('SingularWalletWithE20E721', function ([defaultEOA, aliceEOA, bobEOA, s
         let ttx = await erc20.transfer(wal.address, INIT_AMOUNT, {from: aliceEOA});
 
         // create an empty ERC20Debit
-        let erc20Debit = await erc20Contract.new({from: aliceEOA});
+        let erc20Debit = await Erc20DebitContract.new({from: aliceEOA});
 
         // let's activate it by a wallet which will transfer some fund to the debit card
 

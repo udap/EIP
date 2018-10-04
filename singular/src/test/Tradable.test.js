@@ -2,10 +2,12 @@ const { assertRevert } = require('./helpers/assertRevert');
 const { logit } = require('./helpers/logit');
 const expectEvent = require('./helpers/expectEvent');
 var Tradable = artifacts.require("./impl/Tradable.sol");
-var SingularWallet = artifacts.require("./impl/BasicSingularWallet.sol");
-var e = artifacts.require("./impl/TradableExecutor.sol");
+var Wallet = artifacts.require("./impl/SingularWalletWithE20E721.sol");
+var TradeExecutor = artifacts.require("./impl/TradeExecutor.sol");
 var {TimeUtil} = require("./helpers/TimeUtil");
-// var lib = artifacts.require("./impl/TradableLib.sol");
+
+var E20Contract = artifacts.require("./samples/SampleERC20.sol");
+var Erc20DebitContract = artifacts.require("./ERC20/ERC20Debit.sol");
 
 contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
 
@@ -18,20 +20,20 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
     const URI = "http://t.me/123123";
 
     var exe;
-    e.deployed().then((inst) => {exe = inst})
+    TradeExecutor.deployed().then((inst) => {exe = inst})
 
-    describe('all about transfers', function () {
+    describe('transfers', function () {
         let aliceWallet = null;
         let bobWallet = null;
         let token = null;
 
         beforeEach(async function () {
-            aliceWallet = await SingularWallet.new(
+            aliceWallet = await Wallet.new(
                 "alice",
                 {from: aliceEOA}
             );
 
-            bobWallet = await SingularWallet.new(
+            bobWallet = await Wallet.new(
                 "bob",
                 {from: bobEOA}
             );
@@ -111,12 +113,12 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
         let bobToken = null;
 
         beforeEach(async function () {
-            aliceWallet = await SingularWallet.new(
+            aliceWallet = await Wallet.new(
                 "alice",
                 {from: aliceEOA}
             );
 
-            bobWallet = await SingularWallet.new(
+            bobWallet = await Wallet.new(
                 "bob",
                 {from: bobEOA}
             );
@@ -163,7 +165,7 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
             assert.equal(swapOffer.target, bobToken.address);
             assert.equal(swapOffer.validFrom, validFrom);
             assert.equal(swapOffer.validTill, validTill);
-            assert.equal(swapOffer.note, "cool");
+            // assert.equal(swapOffer.note, "cool");
             // let's do the swap
             // 1. propose a reverse swap
             tx = await bobToken.approveSwap(
@@ -178,7 +180,7 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
             assert.equal(swapOffer.target, aliceToken.address);
             assert.equal(swapOffer.validFrom, validFrom);
             assert.equal(swapOffer.validTill, validTill - 2);
-            assert.equal(swapOffer.note, "why not");
+            // assert.equal(swapOffer.note, "why not");
             // 2. verify the onchain time
             let evmTime = (await bobToken.ping.call({from: bobEOA})).toNumber();
             // logit(evmTime, "evem time")
@@ -187,9 +189,9 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
             assert.isTrue(await aliceToken.isInSwap.call());
             assert.isTrue(await bobToken.isInSwap.call());
             // 3. let's do it
-            assertRevert(bobToken.acceptSwap("do it", {from: bobEOA})) // because this method is for counterparty to call
+            // assertRevert(bobToken.acceptSwap("do it", {from: bobEOA})) // because this method is for counterparty to call
             // logit (" from Alice:" + aliceEOA + " to bobToken:" + bobToken.address, "acceptSwap");
-            tx = await  bobToken.acceptSwap("do it", {from: aliceEOA})
+            tx = await  exe.swap(aliceToken.address, bobToken.address, {from: aliceEOA});
             // logit(tx, "accept tx");
             assert.equal(await aliceToken.owner.call(), bobWallet.address, "aliceToken owner was not swapped to bob");
             assert.equal(await bobToken.owner.call(), aliceWallet.address, "bobToken owner was not swapped to alice");
@@ -206,6 +208,143 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
                 {from: bobEOA}
             ))
         });
+    });
+    describe('sell and buy', function () {
+        let ERC20_AMOUNT = 2000;
+        let DEBIT_AMOUNT = 1000;
+
+        let aliceWallet = null;
+        let bobWallet = null;
+        let aliceToken = null;
+        let bobToken = null;
+        let erc20;
+        let debit; // bob has a debit card
+
+        beforeEach(async function () {
+            aliceWallet = await Wallet.new(
+                "alice",
+                {from: aliceEOA}
+            );
+
+            bobWallet = await Wallet.new(
+                "bob",
+                {from: bobEOA}
+            );
+
+            aliceToken = await Tradable.new({from: aliceEOA});
+            await aliceToken.init(
+                "aliceToken",
+                PERSON,
+                DESCR,
+                URI,
+                BYTES32, // to bytes32
+                aliceEOA,  //
+                aliceWallet.address,
+                {from: aliceEOA}
+            );
+            await aliceToken.setExecutor(exe.address, {from: aliceEOA})
+
+            bobToken = await Tradable.new({from: bobEOA});
+            await bobToken.init(
+                "bobToken",
+                PERSON,
+                DESCR,
+                URI,
+                BYTES32, // to bytes32
+                aliceEOA,  //
+                bobWallet.address,
+                {from: bobEOA}
+            );
+            await bobToken.setExecutor(exe.address, {from: bobEOA});
+
+            erc20 = await E20Contract.new({from: bobEOA});
+            let ttx = await erc20.transfer(bobWallet.address, ERC20_AMOUNT, {from: bobEOA});
+
+            debit = await Erc20DebitContract.new({from: bobEOA});
+
+            // let's activate it by a wallet which will transfer some fund to the debit card
+
+            let tx = await bobWallet.activateE20Debit(
+                "bob's debit card",
+                debit.address,
+                erc20.address,
+                DEBIT_AMOUNT,
+                {from: bobEOA}
+            );
+            // now bob's debit card is ready to buy something
+
+        });
+
+        it("makes a sell", async () => {
+            let validFrom = TimeUtil.nowInSeconds() -1;
+            let validTill = validFrom + 2000;
+            const PRICE = 900;
+            let tx = await aliceToken.sellFor(
+                erc20.address,
+                PRICE,
+                validFrom,
+                validTill,
+                "buy it now!",
+                {from: aliceEOA}
+            )
+            let saleOffer = await aliceToken.saleOffer.call();
+            assert.equal(saleOffer.owner, aliceWallet.address);
+            assert.equal(saleOffer.erc20, erc20.address);
+            assert.equal(saleOffer.price, PRICE);
+            assert.equal(saleOffer.validFrom, validFrom);
+            assert.equal(saleOffer.validTill, validTill);
+            // assert.equal(saleOffer.note, "buy it now!");
+            expectEvent.inLogs(tx.logs, "SaleOfferApproved", {
+                item: aliceToken.address,
+                erc20: erc20.address,
+                price: PRICE,
+                validFrom: validFrom,
+                validTill: validTill
+            } );
+
+            // let's make a purchase
+            // 1. bob propose a  swap
+
+            tx = await debit.setExecutor(exe.address, {from: bobEOA});
+            tx = await debit.approveSwap(
+                aliceToken.address,
+                validFrom,
+                validTill - 2,
+                "why not",
+                {from: bobEOA}
+            )
+            swapOffer = await debit.swapOffer.call();
+            assert.equal(swapOffer.target, aliceToken.address);
+            assert.equal(swapOffer.validFrom, validFrom);
+            assert.equal(swapOffer.validTill, validTill - 2);
+            // assert.equal(swapOffer.note, "why not");
+            // 2. verify states
+            let evmTime = (await bobToken.ping.call({from: bobEOA})).toNumber();
+            // logit(evmTime, "evem time")
+            assert.isAtLeast(evmTime, validFrom);
+            assert.isAtMost(evmTime, validTill);
+            assert.isTrue(await aliceToken.isForSale.call());
+            assert.isTrue(await debit.isInSwap.call());
+            // 3. let's do it
+            tx = await  exe.buy(aliceToken.address, debit.address, {from: bobEOA});
+            // logit(tx, "accept tx");
+            expectEvent.inLogs(tx.logs, "Sold");
+
+            assert.equal(await aliceToken.owner.call(), bobWallet.address, "aliceToken owner was not transferred to bob");
+            assert.equal(await debit.owner.call(), aliceWallet.address, "bob's debit was not transferred to alice");
+        });
+        //
+        // it("not approve swaps aliceToken from Bob", async () => {
+        //     let now = TimeUtil.nowInSeconds();
+        //     let validTill = now + 10;
+        //     assertRevert(aliceToken.approveSwap(
+        //         bobToken.address,
+        //         now,
+        //         validTill,
+        //         "cool",
+        //         {from: bobEOA}
+        //     ))
+        // });
     });
 })
 

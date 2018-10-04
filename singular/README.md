@@ -2,6 +2,7 @@
 ### status
 
 - 0.1 version is cut. The basics and ERC20 and 721 adapters are in the ERC20/721 directories. 
+- 0.2 version is cut. Swapping and buys with ERC20Debit are working. A bunch of tests have been added to the the source code tree, which can be invoked with truffle test in the singular/src directory. Check the truffle-config.json for the eth client setup.  
 
 The most interesting class is `Tradable`, which is a tradable singular that can do transfers, swaps, buy and sells with erc20 tokens wrapped in ERC20Debit. 
   

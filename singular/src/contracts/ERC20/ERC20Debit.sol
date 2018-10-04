@@ -76,8 +76,30 @@ contract ERC20Debit is IDebit, Tradable {
     sameTokenType(another)
     ownerOnly
     {
-//        erc20_.transfer(address(another), amount);
+        erc20_.transfer(address(another), amount);
+        // todo
     }
+
+    /**
+  called by swap executor to set the new owner, as the last step in swapping
+  */
+    function swapInOwner(
+        ISingularWallet newOwner,
+        string note
+    )
+    external
+    initialized
+    forTradeExecutor
+    max128Bytes(note)
+    {
+        require(address(newOwner) != address(0), "the newOwner was null");
+        ownerPrevious = theOwner;
+        theOwner = newOwner;
+        ownerPrevious.sent(this, note);
+        theOwner.received(this, note);
+        reset();
+    }
+
 
     /**
      * To dump the all the coin value from the argument to this coin container.
@@ -93,8 +115,8 @@ contract ERC20Debit is IDebit, Tradable {
         uint256 updatedfaceValue
     )
     {
-//        coin.transfer(this, coin.denomination());
-//        return denomination();
+        coin.transfer(this, coin.denomination());
+        return denomination();
     }
 
     /**

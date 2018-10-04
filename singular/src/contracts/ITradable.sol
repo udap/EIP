@@ -22,20 +22,23 @@ import "./ISingular.sol";
  * @author Bing Ran<bran@udap.io>
  */
 contract ITradable /*is ISingular*/ {
-    struct SellOffer {
+    struct SaleOffer {
+        ISingularWallet owner;  ///< who owns the item
         address erc20;          ///< the currency type
         uint256 price;          ///< price
         uint256 validFrom;      ///< when an offer is valid from
         uint256 validTill;      ///< when the offer expires
-        string note;             ///< additional note
+//        string note;             ///< additional note
     }
 
     // ? we might use a predicator to set the swap target, to make it compatible for sell and swap
     struct SwapOffer {
-        ITradable target;          ///< what to swap
+        ISingularWallet who;    ///< who makes the offer
+        ITradable target;       ///< what to swap for
         uint256 validFrom;      ///< when an offer is valid from
         uint256 validTill;      ///< when the offer expires
-        string note;             ///< additional note
+//        string note;            ///< additional note
+//        ISwapExecutor executor; ///< who to execute the swapping
     }
 
     struct TransferOffer {
@@ -46,7 +49,7 @@ contract ITradable /*is ISingular*/ {
     }
 
     TransferOffer public transferOffer;
-    SellOffer public sellOffer;
+    SaleOffer public saleOffer;
     SwapOffer public swapOffer;
 
     /**
@@ -97,7 +100,7 @@ contract ITradable /*is ISingular*/ {
      * When the current owner has approved someone else as the next owner, subject
      * to acceptance or rejection.
      */
-    event SellOfferApproved(
+    event SaleOfferApproved(
         ITradable indexed item, ///< the item for sell
         address indexed erc20,  ///< the currency type
         uint256 price,          ///< price
@@ -110,7 +113,7 @@ contract ITradable /*is ISingular*/ {
      * the ownership has been successfully transferred from A to B.
      */
     event Sold(
-        ITradable indexed item, ///< the item for sell
+        ITradable indexed item, ///< the item for sale
         ISingularWallet indexed seller, ///< seller
         ISingularWallet indexed buyer,  ///< buyer
         address erc20,  ///< the currency type
@@ -195,9 +198,9 @@ contract ITradable /*is ISingular*/ {
     external;
 
     /**
-    * for operator to set the new onership
+    * for operator to set the new owner
     */
-    function hardSetOwner(
+    function swapInOwner(
         ISingularWallet newOwner,
         string note
     )
@@ -224,6 +227,8 @@ contract ITradable /*is ISingular*/ {
     );
 
 
+//    function matchSaleOfferNow(IDebit debit) external view returns(bool);
+
     /**
         offer to sell this item for
 
@@ -238,23 +243,9 @@ contract ITradable /*is ISingular*/ {
     external;
 
     /**
-    to cancel the current sell offer, if any
+    to cancel the current sale offer, if any
     */
-    function cancelSellOffer() public;
-
-    /**
-    to buy on an sell offer with some money. The caller MUST
-    1. set up a SwapOffer to this token on the IDebit
-    2. ensure the denomination is >= offer price.
-
-    Note: no change is returned! For the buyer's best interest, he/she will create a debitcard with
-    the exact amount before making the purchase.
-
-     */
-    function buy(
-        IDebit debitcard   ///< the money. The denomination MUST be >= offer price.
-    )
-    external;
+    function cancelSaleOffer() public;
 
 
     /*********************** swapping ******************/
@@ -275,9 +266,9 @@ contract ITradable /*is ISingular*/ {
     Again, source code must be verified to conduct the swap, due to lots of ownerships transitions.
     The target must have been set up to do a swapping in the opposite direction before calling this function.
     */
-    function acceptSwap(
-        string note
-    ) public;
+//    function acceptSwap(
+//        ITradable target        ///< the target of the original swap proposal
+//    ) public;
 
 
     function rejectSwap(

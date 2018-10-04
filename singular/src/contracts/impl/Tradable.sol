@@ -4,7 +4,8 @@ import "../ISingularWallet.sol";
 import "../ITradable.sol";
 import "../ERC20/IDebit.sol";
 import "./NonTradable.sol";
-import "./TradableExecutor.sol";
+import "./TradeExecutor.sol";
+import "../ITradable.sol";
 
 
 /**
@@ -24,7 +25,7 @@ contract Tradable is NonTradable, ITradable {
 
     // let use the parent init function for the same purpose
 
-    TradableExecutor public executor;
+    TradeExecutor public executor;
 
     function init(
         string _name,
@@ -173,19 +174,23 @@ contract Tradable is NonTradable, ITradable {
         _to.offerNotify(this, _note);
     }
 
-    function hardSetOwner(
+    /**
+    called by swap executor to set the new owner, as the last step in swapping
+    */
+    function swapInOwner(
         ISingularWallet newOwner,
         string note
     )
     external
     initialized
-    operatorOnly
+    forTradeExecutor
     max128Bytes(note)
     {
         ownerPrevious = theOwner;
         theOwner = newOwner;
         ownerPrevious.sent(this, note);
         theOwner.received(this, note);
+        reset();
     }
 
     /**
@@ -203,34 +208,35 @@ contract Tradable is NonTradable, ITradable {
         uint256 price,          ///< price
         uint256 validFrom,      ///< when an offer is valid from
         uint256 validTill,      ///< when the offer expires.
-        string note             ///< additional note
+        string              ///< additional note
     )
     external
     initialized
     notInTx
     onlyOwnerOrOperator
     {
-        sellOffer.erc20 = erc20;
-        sellOffer.price = price;
-        sellOffer.validFrom = validFrom;
-        sellOffer.validTill = validTill;
-        sellOffer.note = note;
+        saleOffer.owner = theOwner;
+        saleOffer.erc20 = erc20;
+        saleOffer.price = price;
+        saleOffer.validFrom = validFrom;
+        saleOffer.validTill = validTill;
+//        saleOffer.note = note;
 
-        emit SellOfferApproved(
+        emit SaleOfferApproved(
             this, ///< the item for sell
             erc20,  ///< the currency type
             price,          ///< price
             validFrom,      ///< when an offer is valid from
             validTill,      ///< when the offer expires
-            note             ///< additional note
+            ""             ///< additional note
         );
     }
 
-    function cancelSellOffer()
+    function cancelSaleOffer()
     public
     onlyOwnerOrOperator
     {
-        delete sellOffer;
+        delete saleOffer;
         // should emit an event
     }
 
@@ -238,58 +244,21 @@ contract Tradable is NonTradable, ITradable {
         ITradable target,
         uint validFrom,
         uint validTill,
-        string note
+        string
     )
     public
     initialized
     onlyOwnerOrOperator
     notInTx
-    max128Bytes(note)
+//    max128Bytes(note)
     {
+        swapOffer.who = theOwner;
         swapOffer.target = target;
         swapOffer.validFrom = validFrom;
         swapOffer.validTill = validTill;
-        swapOffer.note = note;
+//        swapOffer.note = note;
 
-        emit SwapApproved(this, target, validFrom, validTill, note);
-    }
-    /**
-    owner facing API. Source code must be verified to conduct the swap, due to lots of ownerships transitions.
-    The caller must have setup a swap offer that goes in the direction opposite of this token's offer.
-    todo: must be sure that the other party's contract is trustworthy
-    */
-    function acceptSwap(
-        string note
-    )
-    public
-    initialized
-    inSwap
-    hasExecutor
-//    permittedSenders([
-//        address(swapOffer.target),
-//        address(swapOffer.target.toISingular().owner()),
-//        address(swapOffer.target.toISingular().owner().ownerAddress()),
-//        theOperator])
-    {
-        address caller = msg.sender;
-        ITradable t = swapOffer.target;
-        address a = address(t);
-        // todo: a little ugly. should let the parent to recursively match owner via a method like `matchOwner`
-        if(a != caller) {
-            ISingularWallet w = swapOffer.target.toISingular().owner();
-            a = address(w);
-            if(a != caller) {
-                a = address(w.ownerAddress());
-                if(a != caller) {
-                    a = theOperator;
-                    if (a != caller && executor != caller) {
-                        revert("the caller was neither the target/owner or the operator/executor");
-                    }
-                }
-            }
-        }
-//        emit Log(this, "here");
-        executor.acceptSwap(this, note);
+        emit SwapApproved(this, target, validFrom, validTill, "");
     }
 
     function rejectSwap(
@@ -302,21 +271,6 @@ contract Tradable is NonTradable, ITradable {
         reset();
     }
 
-    /**
-        Debit owner calls this function to make a purchase.
-        Note: no change is returned if the denomination is > price.
-        The debit card MUST been set up with a proper SwapOffer with the denomination and swap target
-     */
-    function buy(
-        IDebit debitcard   ///< the money
-    )
-    external
-    initialized
-    inSell
-    hasExecutor
-    {
-        executor.buy(this, debitcard);
-    }
 
     /***************************** modifiers **************************/
 
@@ -377,13 +331,26 @@ contract Tradable is NonTradable, ITradable {
         _;
     }
 
-    modifier inSell() {
-        require(sellValid(), "this item is not for sell at this moment");
+    modifier forSale() {
+        require(isForSale(), "not for sell");
         _;
     }
 
+    function isForSale() public view returns (bool) {
+        return saleOfferValid();
+    }
+
+
     modifier hasExecutor() {
         require(address(executor) != address(0), "the transacton executor was not set on this tradable token");
+        _;
+    }
+
+    modifier forTradeExecutor(){
+        require(
+            msg.sender == address(executor),
+            "function was not called by the swap executor"
+        );
         _;
     }
 
@@ -403,23 +370,22 @@ contract Tradable is NonTradable, ITradable {
     public
     onlyOwnerOrOperator
     {
-        delete sellOffer;
+        delete saleOffer;
         delete swapOffer;
         delete transferOffer;
         delete theOperator;
-
     }
 
-    function sellValid() internal view returns(bool){
+    function saleOfferValid() internal view returns(bool){
         uint t = now;
         return
-        sellOffer.erc20 != address(0)
-        && sellOffer.validFrom <= t
-        && sellOffer.validTill >= t
-        && sellOffer.price > 0;
+        saleOffer.erc20 != address(0)
+        && saleOffer.validFrom <= t
+        && saleOffer.validTill >= t
+        && saleOffer.price > 0;
     }
 
-    function swapValid(SwapOffer _offer) internal view returns(bool){
+    function swapValid(SwapOffer storage _offer) internal view returns(bool){
         uint t = now;
         return
         _offer.target != address(0)
@@ -466,7 +432,7 @@ contract Tradable is NonTradable, ITradable {
     /**
     * todo: need to sort out the executor vs operator relationship.
     */
-    function setExecutor(TradableExecutor _exe)
+    function setExecutor(TradeExecutor _exe)
     public
     ownerOnly
     {
