@@ -4,10 +4,25 @@
 - 0.1 version is cut. The basics and ERC20 and 721 adapters are in the ERC20/721 directories. 
 - 0.2 version is cut. Swapping and buys with ERC20Debit are working. A bunch of tests have been added to the the source code tree, which can be invoked with truffle test in the singular/src directory. Check the truffle-config.json for the eth client setup.  
 
-The most interesting class is `Tradable`, which is a tradable singular that can do transfers, swaps, buy and sells with erc20 tokens wrapped in ERC20Debit. 
   
+Do the following steps to start hacking:
 
- 
+git clone https://github.com/udap/EIP/tree/concern-separation
+
+In the singular/src directory:
+1. npm install
+2. truffle compile
+3. truffle test 
+
+Note: 
+
+1. I was using ganache GUI as the testing eth client, as reflected in the port setting in the truffle-config.json. 
+2. I was using truufle v5 beta 1 as the dev environment.
+3. The most interesting class is `Tradable`, which is a tradable singular that can do transfers, swaps, buy and sells with erc20 tokens wrapped in ERC20Debit. Check out the Tradable.test.js for the usage. 
+4. the code is sitting in the concern-separation branch, not the master. 
+
+
+
 # The Singular Token Account in UDAP 
 
 UDAP has the vision that every single thing in the world should have a unique address on the blockchain, including people and everything. 
