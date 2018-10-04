@@ -34,20 +34,19 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
     address public ownerOfThis;
 
     constructor(
-        string _name,
-        string _symbol,
-        string _descr,
-        string _tokenURI,
-        bytes32 _tokenURIDigest
+        string _name
+//        string _descr,
+//        string _tokenURI,
+//        bytes32 _tokenURIDigest
     )
     public
     {
         SingularMeta.init(
             _name,
-            _symbol,
-            _descr,
-            _tokenURI,
-            _tokenURIDigest
+            "BasicSingularWallet",
+            "",
+            "",
+            0
         );
         theCreator = msg.sender;
         ownerOfThis = msg.sender;
@@ -90,10 +89,14 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
      * The current owner of the token must be this wallet.
      */
      
-    function received(ITradable token, string /*note*/) external {
-        require(token.toISingular().owner() == this);
-        require(!alreadyOwn(token.toISingular()));
-        addToTokenSet(token.toISingular());
+    function received(
+        ISingular token,
+        string /*note*/
+    )
+    external {
+        require(token.owner() == this, "cannot register a token not owned by this wallet");
+        require(!alreadyOwn(token), "the token has been registered before");
+        addToTokenSet(token);
     }
 
 //    /**
@@ -239,7 +242,15 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
         tokens.push(token);
     }
 
-    /// enueration of the owned tokens
+    /// enumeration of the owned tokens
+    function owns(ISingular token) external view returns (bool) {
+        for (uint i = 0; i < tokens.length; i++) {
+            if (address(tokens[i]) == address(token))
+                return true;
+        }
+        return false;
+    }
+
     /**
      * retrieve all the Singular tokens. Note: there may be holes in the array. The caller should
      * skip those holes
@@ -266,7 +277,7 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
     }
 
     modifier ownerOnly() {
-        require(msg.sender == ownerOfThis);
+        require(msg.sender == ownerOfThis, "msg.sender was not the ownerOfThis");
         _;
     }
 }

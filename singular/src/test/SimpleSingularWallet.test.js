@@ -9,10 +9,6 @@ contract('BasicSingularWallet', function ([aliceEOA, bobEOA, someEOA]) {
         beforeEach(async function () {
             aliceWallet = await SingularWallet.new(
                 "alice",
-                "wallet",
-                "simple wallet for alice",
-                "",
-                web3.utils.fromAscii("0"),
                 {from: aliceEOA}
             );
         });

@@ -4,11 +4,7 @@ var w = artifacts.require("./impl/BasicSingularWallet.sol");
 module.exports = function(deployer, network, accounts) {
   deployer.deploy(
       w,
-      "alice",
-      "wallet",
-      "simple wallet",
-      "",
-      web3.utils.fromAscii("0"),
+      "alice wallet",
       {from: accounts[0]}
   );
 

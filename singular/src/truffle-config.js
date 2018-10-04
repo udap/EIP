@@ -29,6 +29,7 @@ module.exports = {
     compilers: {
         solc: {
             version: "native",   // let's use the native for faster work. bran: slower for small project!!
+            // version: "0.4.25"
             settings: {
                 optimizer: {
                     enabled: true, // Default: false

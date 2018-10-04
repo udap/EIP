@@ -49,6 +49,7 @@ contract NonTradable is ISingular, SingularMeta, CommonModifiers {
         SingularMeta.init(_name, _symbol, _descr, _tokenURI, _tokenURIHash);
         theCreator = msg.sender;
         theOwner = _wallet;
+        _wallet.received(this, "set in NonTradable.init()");
         timeCreated = now;
         tokenTypeAddr = _tokenTypeAddr;
     }
@@ -123,9 +124,9 @@ contract NonTradable is ISingular, SingularMeta, CommonModifiers {
             caller != address(0)
         &&
         (
-        address(wallet) == caller
-        || wallet.ownerAddress() == caller
-//        || theOperator == caller // wallet does not have operator yet, but it should really be a tradable!
+            address(wallet) == caller
+            || wallet.ownerAddress() == caller
+    //        || theOperator == caller // wallet does not have operator yet, but it should really be a tradable!
         ),
             "the msg.sender was not the wallet or its owner"
         );

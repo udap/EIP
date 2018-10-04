@@ -110,7 +110,7 @@ interface ISingularWallet {
     the recipient.
     */
     function received(
-        ITradable token,        ///< the token that has been sent
+        ISingular token,        ///< the token that has become owned by the wallet
         string note             ///< additional info
     )
     external;
@@ -139,6 +139,9 @@ interface ISingularWallet {
     external;
 
     //-------------- asset enumeration
+
+    /// to test if an ISingular is owned by this wallet.
+    function owns(ISingular token) external view returns (bool);
 
     /**
      retrieve all the Singular tokens, not in any particular order.

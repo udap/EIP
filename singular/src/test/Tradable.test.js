@@ -17,12 +17,6 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
     const DESCR = "Andrew is a good boy";
     const URI = "http://t.me/123123";
 
-    // let link the lib to the contract first // note: we don't use library in this implementation
-    // lib.deployed().then((libinstance) => {
-    //     // console.log("lib: " + libinstance.address);
-    //     Tradable.link("TradableLib", libinstance.address); // has to link explicitly to the symbol
-    // })
-
     var exe;
     e.deployed().then((inst) => {exe = inst})
 
@@ -34,19 +28,11 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
         beforeEach(async function () {
             aliceWallet = await SingularWallet.new(
                 "alice",
-                "wallet",
-                "simple wallet for alice",
-                "",
-                web3.utils.fromAscii("0"),
                 {from: aliceEOA}
             );
 
             bobWallet = await SingularWallet.new(
                 "bob",
-                "wallet",
-                "simple wallet for bob",
-                "",
-                web3.utils.fromAscii("0"),
                 {from: bobEOA}
             );
 
@@ -74,14 +60,12 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
             assert.equal(await token.symbol.call(), PERSON);
             assert.equal(await token.description.call(), DESCR);
             assert.equal(await token.tokenURI.call(), URI);
-            // use startsWith to avoid the trailing nulls with the string. toAscii bug?
-            // assert.isTrue(web3.utils.toAscii(await token.tokenURIDigest.call()).startsWith(BYTES32SRC));
             assert.equal(await token.tokenURIDigest.call(), BYTES32);
             // owners
             assert.equal(await token.owner.call(), aliceWallet.address);
             assert.equal(await token.previousOwner.call(), 0);
             assert.equal(await token.nextOwner.call(), 0);
-
+            assert.isTrue(await aliceWallet.owns.call(token.address));
         });
 
         it("approve from owner", async () => {
@@ -129,19 +113,11 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
         beforeEach(async function () {
             aliceWallet = await SingularWallet.new(
                 "alice",
-                "wallet",
-                "simple wallet for alice",
-                "",
-                web3.utils.fromAscii("0"),
                 {from: aliceEOA}
             );
 
             bobWallet = await SingularWallet.new(
                 "bob",
-                "wallet",
-                "simple wallet for bob",
-                "",
-                web3.utils.fromAscii("0"),
                 {from: bobEOA}
             );
 

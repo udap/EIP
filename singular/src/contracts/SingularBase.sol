@@ -7,12 +7,13 @@ import "./utils/AddressUtils.sol";
 import "./TransferHistory.sol";
 import "./IBurnable.sol";
 import "./TransferHistory.sol";
+import "./ISingular.sol";
 
 /**
 *
 //singular must transfer by its owner(SingularWallet) and between SingularWallets
 */
-contract SingularBase is ITradable, ReentrancyGuard, TransferHistory, IBurnable {
+contract SingularBase is ITradable, ISingular, ReentrancyGuard, TransferHistory, IBurnable {
     function contractName()
     external
     pure

@@ -58,10 +58,10 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
         singularRemoved(_singular.toISingular());
     }
 
-    function received(ITradable _singular, string _receiverNote) constructed external{
-        require(_singular.toISingular().owner() == this);
-        emit SingularTransferred(_singular.previousOwner(),this,_singular,now,_receiverNote);
-        singularAdded(_singular.toISingular());
+    function received(ISingular _singular, string _receiverNote) constructed external{
+        require(_singular.owner() == this);
+//        emit SingularTransferred(_singular.previousOwner(),this,_singular,now,_receiverNote);
+        singularAdded(_singular);
     }
 
     // called when get an offer

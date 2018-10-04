@@ -4,7 +4,7 @@ import "./ISingular.sol";
 import "./ITradable.sol";
 
 /**
- * @title a wallet with more action functions built in.
+ * @title a wallet of barebone.
 
  * @author Bing Ran<bran@udap.io>
  * @author Guxiang Tang<gtang@udap.io>

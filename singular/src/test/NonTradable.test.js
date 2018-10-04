@@ -12,16 +12,12 @@ contract('NonTradable', function ([acct1, acct2]) {
 
     var wallet
     w.new(
-        "alice",
-        "wallet",
-        "simple wallet for alice",
-        "",
-        web3.utils.fromAscii("0"),
+        "alice wallet",
         {from: acct1}
     ).then((i) => {wallet = i; });
 
 
-    it("should probably set up in the constructor", async () => {
+    it("should probably set up", async () => {
         let nonTrada = await NonTradableTest.new(
             {from: acct1}
         );
@@ -43,9 +39,11 @@ contract('NonTradable', function ([acct1, acct2]) {
         assert.equal(await nonTrada.symbol.call(), PERSON);
         assert.equal(await nonTrada.description.call(), DESCR);
         assert.equal(await nonTrada.tokenURI.call(), URI);
-        // use startsWith to avoid the trailing nulls with the string. toAscii bug?
-        // assert.isTrue(web3.utils.toAscii(await nonTrada.tokenURIDigest.call()).startsWith(BYTES32SRC));
         assert.equal(await nonTrada.tokenURIDigest.call(), BYTES32);
+
+        // ownership interlocked with the wallet
+        assert.isTrue(await wallet.owns.call(nonTrada.address));
+
         try {
             await nonTrada.sendTo(acct2, nonTrada.address);// sendTo does not exist
             assert.fail("the error was not caught");
@@ -59,11 +57,7 @@ contract('NonTradable', function ([acct1, acct2]) {
 
     it("should revert if the token creator is not the wallet owner", async () => {
         wallet = await w.new(
-            "alice",
-            "wallet",
-            "simple wallet for alice",
-            "",
-            web3.utils.fromAscii("0"),
+            "alice wallet",
             {from: acct1}
         );
 

@@ -4,7 +4,6 @@ import "../ISingularWallet.sol";
 import "../ITradable.sol";
 import "../ERC20/IDebit.sol";
 import "./NonTradable.sol";
-import "../ITradable.sol";
 import "./TradableExecutor.sol";
 
 
@@ -27,28 +26,27 @@ contract Tradable is NonTradable, ITradable {
 
     TradableExecutor public executor;
 
-
-//    function init(
-//        string _name,
-//        string _symbol,
-//        string _descr,
-//        string _tokenURI,
-//        bytes32 _tokenURIHash,
-//        address _tokenTypeAddr,
-//        ISingularWallet _wallet
-//    )
-//    public
-//    {
-//        NonTradable.init(
-//            _name,
-//            _symbol,
-//            _descr,
-//            _tokenURI,
-//            _tokenURIHash,
-//            _tokenTypeAddr,
-//            _wallet
-//        );
-//    }
+    function init(
+        string _name,
+        string _symbol,
+        string _descr,
+        string _tokenURI,
+        bytes32 _tokenURIHash,
+        address _tokenTypeAddr,
+        ISingularWallet _wallet
+    )
+    public
+    {
+        NonTradable.init(
+            _name,
+            _symbol,
+            _descr,
+            _tokenURI,
+            _tokenURIHash,
+            _tokenTypeAddr,
+            _wallet
+        );
+    }
 
     /**
      * get the current owner as type of SingularOwner

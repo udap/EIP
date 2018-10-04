@@ -31,7 +31,8 @@ contract ERC721Tradable is IERC721Singular, Tradable {
     )
     public
     {
-        NonTradable.init(
+        require(msg.sender == address(_wallet), "ERC721Tradable can only be initialized by the owning wallet");
+        Tradable.init(
             _name,
             _erc721.symbol(),
             _description,
