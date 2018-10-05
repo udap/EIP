@@ -23,6 +23,7 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
     mapping(address => bool) ownedSingulars;
     uint256 ownedSingularsAmount;
 
+    uint whenAssetsLastUpdates_;
 
 /*
     constructor(address _walletOwner, address _walletOperator) public {
@@ -50,6 +51,12 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
 
     function setOperator(address _operator) onlyOwnerOrOperator constructed public{
         walletOperator = _operator;
+    }
+
+    function whenAssetsLastUpdates() external view returns (
+        uint
+    ) {
+        return whenAssetsLastUpdates_;
     }
 
     //=============================callback===============================================
@@ -173,21 +180,27 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
     }
 
 
-    function getAllTokens() view external returns (ISingular[]){
+    function getAllTokens() view external returns (
+        ISingular[],
+        uint timestamp
+    ){
         revert("discussing implement this function heavily or not");
     }
 
     /**
      get the number of owned tokens
      */
-    function numOfTokens() view external returns (uint256){
-        return ownedSingularsAmount;
+    function numOfTokens() view external returns (
+        uint256 num,
+        uint timestamp
+    ){
+        return (ownedSingularsAmount, whenAssetsLastUpdates_);
     }
 
     /**
      get the token at a specific index.
      */
-    function getTokenAt(uint256 /*_idx*/) view external returns (ISingular){
+    function getTokenAt(uint256 /*_idx*/, uint timestamp) view external returns (ISingular){
         revert("implement later");
     }
 
@@ -204,12 +217,14 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
         require(!owns(_added));
         ownedSingulars[_added] = true;
         ownedSingularsAmount = SafeMath.add(ownedSingularsAmount,uint256(1));
+        whenAssetsLastUpdates_ = now;
     }
 
     function singularRemoved(ISingular _added) internal{
         require(owns(_added));
         ownedSingulars[_added] = false;
         ownedSingularsAmount = SafeMath.sub(ownedSingularsAmount,uint256(1));
+        whenAssetsLastUpdates_ = now;
     }
 
     //==============================internal==============================================

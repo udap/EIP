@@ -75,13 +75,13 @@ contract Tradable is NonTradable, ITradable {
     )
     external
     initialized
-    onlyOwnerOrOperator
+    ownerOrOperator("caller not owner for approveReceiver")
     notInTx
     max128Bytes(_note)
     {
 
         require(address(_to) != address(0), "cannot send to null address");
-        require(_validTill > now && _validTill > _validFrom, "expiry must be later than now and from");
+        require(_validTill >= now && now >= _validFrom, "expiry must be later than now and from");
 
         transferOffer.validFrom = _validFrom;
         transferOffer.validTill = _validTill;
@@ -150,11 +150,24 @@ contract Tradable is NonTradable, ITradable {
     )
     external
     initialized
-    onlyOwnerOrOperator
+    ownerOrOperator("not owner/operator for sendTo()")
     max128Bytes(_note)
     {
-        uint t = now;
-        this.approveReceiver(_to, t, t + 1 minutes, _note);
+        uint t = now - 15;
+        require(address(_to) != address(0), "cannot send to null address");
+
+        transferOffer.validFrom = t;
+        transferOffer.validTill = t + 60;
+        transferOffer.senderNote = _note;
+        transferOffer.nextOwner = _to;
+
+        emit  ReceiverApproved(
+            address(theOwner),
+            address(_to),
+            t,
+            t + 60,
+            _note);
+
         _to.offer(this, _note);
 
     }
@@ -166,7 +179,7 @@ contract Tradable is NonTradable, ITradable {
     )
     external
     initialized
-    onlyOwnerOrOperator
+    ownerOrOperator("not owner/operator for sendToAsync()")
     max128Bytes(_note)
     {
 
@@ -213,7 +226,7 @@ contract Tradable is NonTradable, ITradable {
     external
     initialized
     notInTx
-    onlyOwnerOrOperator
+    ownerOrOperator("not owner/operator for sellFor()")
     {
         saleOffer.owner = theOwner;
         saleOffer.erc20 = erc20;
@@ -234,7 +247,7 @@ contract Tradable is NonTradable, ITradable {
 
     function cancelSaleOffer()
     public
-    onlyOwnerOrOperator
+    ownerOrOperator("not owner/operator for cancelSaleOffer()")
     {
         delete saleOffer;
         // should emit an event
@@ -248,7 +261,7 @@ contract Tradable is NonTradable, ITradable {
     )
     public
     initialized
-    onlyOwnerOrOperator
+    ownerOrOperator("not owner/operator for approveSwap()")
     notInTx
 //    max128Bytes(note)
     {
@@ -368,7 +381,7 @@ contract Tradable is NonTradable, ITradable {
 
     function reset()
     public
-    onlyOwnerOrOperator
+    ownerOrOperator("not owner for reset()")
     {
         delete saleOffer;
         delete swapOffer;
@@ -408,7 +421,7 @@ contract Tradable is NonTradable, ITradable {
         _;
     }
 
-    modifier onlyOwnerOrOperator() {
+    modifier ownerOrOperator(string s) {
         address caller = msg.sender;
         require(
             caller != address(0)
@@ -419,7 +432,8 @@ contract Tradable is NonTradable, ITradable {
                 || theOperator == caller
                 || executor == caller
             ),
-            "the msg.sender was not owner or operator"
+//            "the msg.sender was neither owner nor operator"
+            s
         );
         _;
     }

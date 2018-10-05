@@ -71,6 +71,13 @@ interface ISingularWallet {
     );
 
     /**
+    to get the last time when the asset portfolio was changed dur to addition or removal
+    */
+    function whenAssetsLastUpdates() external view returns (
+        uint
+    );
+
+    /**
      To receive an incoming transfer offer. The token has been assigned to this receiver as the next owner.
      The receiver SHOULD choose to take a synchronous action by calling `accept()`
      or `reject()` in the same transaction on the token in the method body,
@@ -150,19 +157,24 @@ interface ISingularWallet {
     view
     external
     returns (
-        ISingular[]          ///< all the tokens owned by this account
+        ISingular[],          ///< all the tokens owned by this account
+        uint whenLastUpdated    ///< when the asset portfolio was changed
     );
 
     /**
      get the number of owned tokens
      */
-    function numOfTokens() view external returns (uint256);
+    function numOfTokens() view external returns (
+        uint256 totalNumber,    ///< the total number of tokens
+        uint whenLastUpdated    ///< based on the lastly changed time
+    );
 
     /**
-     get the token at a specific index.
+     get the token at a specific index. revert if the timestamp is no the latest,
      */
     function getTokenAt(
-        uint256 idx          ///< the index of into the token array, must be in [0, numOfTokens())
+        uint256 idx,          ///< the index of into the token array, must be in [0, numOfTokens())
+        uint whenLastUpdated    ///< version number
     )
     view
     external
