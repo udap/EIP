@@ -191,38 +191,38 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
         revert("implement later");
     }
 
-
+    function owns(ISingular _singular)
+    public
+    view
+    returns(bool){
+        return ownedSingulars[_singular];
+    }
 
     //==============================internal==============================================
 
     function singularAdded(ISingular _added) internal{
-        require(!hasSingular(_added));
+        require(!owns(_added));
         ownedSingulars[_added] = true;
         ownedSingularsAmount = SafeMath.add(ownedSingularsAmount,uint256(1));
     }
 
     function singularRemoved(ISingular _added) internal{
-        require(hasSingular(_added));
+        require(owns(_added));
         ownedSingulars[_added] = false;
         ownedSingularsAmount = SafeMath.sub(ownedSingularsAmount,uint256(1));
     }
 
-    function hasSingular(ISingular _singular) public view returns(bool){
-        return ownedSingulars[_singular];
-    }
     //==============================internal==============================================
 
 
-    /*modifier ownsSingular(ISingular _singular){
-        require(hasSingular(_singular));
+    modifier ownsSingular(ISingular _singular){
+        require(owns(_singular));
         _;
-    }*/
+    }
 
     modifier onlyOwnerOrOperator(){
         require(msg.sender == walletOwner || msg.sender == walletOperator);
         _;
     }
-
-
 
 }

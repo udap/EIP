@@ -17,7 +17,7 @@ In the singular/src directory:
 Note: 
 
 1. I was using ganache GUI as the testing eth client, as reflected in the port setting in the truffle-config.json. 
-2. I was using truufle v5 beta 1 as the dev environment. see `https://github.com/trufflesuite/truffle/releases`
+2. I was using Truffle v5 beta 1 as the dev environment. see `https://github.com/trufflesuite/truffle/releases`
 3. The most interesting class is `Tradable`, which is a tradable singular that can do transfers, swaps, buy and sells with erc20 tokens wrapped in ERC20Debit. Check out the Tradable.test.js for the usage. 
 
 
