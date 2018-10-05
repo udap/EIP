@@ -10,7 +10,7 @@ Do the following steps to start hacking:
 `git clone git@github.com:udap/EIP.git`
 
 In the singular/src directory:
-1. `npm install`
+1. `npm install --save-exact openzeppelin-solidity`
 2. `truffle compile`
 3. `truffle test` 
 
