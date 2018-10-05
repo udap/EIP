@@ -7,9 +7,9 @@ import "./Upgradeable/Mini/MiniProxy.sol";
 import "./Singular.sol";
 
 /**
- * 
- * 
- * 
+ *
+ *
+ *
  */
 contract SingularFactory is Ownable{ // bran: why Ownable? Can we use ISingular instead?
     constructor(MiniRegistry _registry) public payable{
@@ -20,10 +20,12 @@ contract SingularFactory is Ownable{ // bran: why Ownable? Can we use ISingular 
 
     //singular address => true if published by this factory
     mapping(address => bool) registeredSingulars;
+/*
 
     function setMiniRegistry (MiniRegistry _registry) public onlyOwner{
         miniRegistry = _registry;
     }
+*/
 
     function getMiniRegistry () public view returns(MiniRegistry){
         return miniRegistry;
@@ -31,16 +33,16 @@ contract SingularFactory is Ownable{ // bran: why Ownable? Can we use ISingular 
 
     //please config MiniRegistry  before you create MiniProxy
     function createSingular(
-        string _name, 
-        string _symbol, 
-        string _description, 
-        string _tokenURI, 
+        string _name,
+        string _symbol,
+        string _description,
+        string _tokenURI,
         bytes32 _tokenURIDigest,
         address _wallet,
         address _creator
-        ) 
-        onlyOwner 
-        public 
+        )
+        onlyOwner
+        public
         returns (ISingular)
     {
         MiniProxy newSingular = new MiniProxy(address(miniRegistry),this);

@@ -42,6 +42,7 @@ contract MintableSingularGenerator is SingularWalletBase {
         ISingular created
     )
     {
+    function mint(string _name, string _symbol, string _description, string _tokenURI, bytes _tokenURIDigest, address _to) constructed onlyOwnerOrOperator public returns (uint256 singularNo, ISingular created){
         //created = new SingularImpl(_name, symbol, _description, _tokenURI,_tokenURIDigest, _to);
         singularFactory.createSingular(
             _name,

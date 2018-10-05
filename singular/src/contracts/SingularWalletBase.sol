@@ -44,6 +44,14 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
         }
     }
 
+    function isActionAuthorized(address _caller) view external returns(bool){
+        return (walletOwner == _caller || walletOperator == _caller);
+    }
+
+    function setOperator(address _operator) onlyOwnerOrOperator constructed public{
+        walletOperator = _operator;
+    }
+
     //=============================callback===============================================
     function sent(ITradable _singular, string _receiverNote)
     ownsSingular(_singular.toISingular())
@@ -205,10 +213,10 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
     //==============================internal==============================================
 
 
-    modifier ownsSingular(ISingular _singular){
+    /*modifier ownsSingular(ISingular _singular){
         require(hasSingular(_singular));
         _;
-    }
+    }*/
 
     modifier onlyOwnerOrOperator(){
         require(msg.sender == walletOwner || msg.sender == walletOperator);
