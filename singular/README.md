@@ -7,19 +7,18 @@
   
 Do the following steps to start hacking:
 
-git clone https://github.com/udap/EIP/tree/concern-separation
+`git clone git@github.com:udap/EIP.git`
 
 In the singular/src directory:
-1. npm install
-2. truffle compile
-3. truffle test 
+1. `npm install`
+2. `truffle compile`
+3. `truffle test` 
 
 Note: 
 
 1. I was using ganache GUI as the testing eth client, as reflected in the port setting in the truffle-config.json. 
-2. I was using truufle v5 beta 1 as the dev environment.
+2. I was using truufle v5 beta 1 as the dev environment. see `https://github.com/trufflesuite/truffle/releases`
 3. The most interesting class is `Tradable`, which is a tradable singular that can do transfers, swaps, buy and sells with erc20 tokens wrapped in ERC20Debit. Check out the Tradable.test.js for the usage. 
-4. the code is sitting in the concern-separation branch, not the master. 
 
 
 
