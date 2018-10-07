@@ -10,15 +10,20 @@ contract('NonTradable', function ([acct1, acct2]) {
     const DESCR = "Andrew is a good boy";
     const URI = "http://t.me/123123";
 
-    var wallet
-    w.new(
-        "alice wallet",
-        {from: acct1}
-    ).then((i) => {wallet = i; });
+    var wallet;
+    var nonTrada;
+    // w.new(
+    //     "alice wallet",
+    //     {from: acct1}
+    // ).then((i) => {wallet = i; });
 
+    beforeEach(async function () {
+        wallet = await w.new(
+            "alice wallet",
+            {from: acct1}
+        );
 
-    it("should probably set up", async () => {
-        let nonTrada = await NonTradableTest.new(
+        nonTrada = await NonTradableTest.new(
             {from: acct1}
         );
         await nonTrada.init(
@@ -29,7 +34,13 @@ contract('NonTradable', function ([acct1, acct2]) {
             BYTES32, // to bytes32
             acct2,  //
             wallet.address,
+            // {from: acct1}
         );
+
+    });
+
+    it("should probably set up", async () => {
+
         assert.equal(await nonTrada.contractName.call(), "NonTradable");
         assert.equal(await nonTrada.creator.call(), acct1);
         assert.equal(await nonTrada.owner.call(), wallet.address);
@@ -56,19 +67,9 @@ contract('NonTradable', function ([acct1, acct2]) {
     });
 
     it("should revert if the token creator is not the wallet owner", async () => {
-        wallet = await w.new(
-            "alice wallet",
-            {from: acct1}
-        );
 
         // var wallet = await w.at("0x3536Ca51D15f6fc0a76c1f42693F7949b5165F0D");
         // console.log("wallet address:" + wallet.address);
-        const BYTES32SRC = "0123456789abcdef0123456789abcdef";
-        const BYTES32 = web3.utils.fromAscii(BYTES32SRC)
-        const NAME = "Andrew";
-        const PERSON = "PERSON";
-        const DESCR = "Andrew is a good boy";
-        const URI = "http://t.me/123123";
         let nt = await NonTradableTest.new(
             {from: acct2}
         );

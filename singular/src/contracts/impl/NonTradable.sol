@@ -95,6 +95,23 @@ contract NonTradable is ISingular, SingularMeta, CommonModifiers {
         return tokenTypeAddr;
     }
 
+    function isEffectiveOwner(
+        address addr
+    )
+    public
+    view
+    returns (
+        bool
+    ) {
+        if (addr == address(this)
+        || addr == address(theOwner)
+        || addr == address(theOperator))
+            return true;
+        else
+            return theOwner.isEffectiveOwner(addr);
+
+    }
+
     modifier ownerOnly() {
         require(
             msg.sender == address(theOwner)
@@ -106,13 +123,7 @@ contract NonTradable is ISingular, SingularMeta, CommonModifiers {
     modifier onlyOwnerOrOperator() {
         address caller = msg.sender;
         require(
-            caller != address(0)
-            &&
-            (
-                address(theOwner) == caller
-                || theOwner.ownerAddress() == caller
-                || theOperator == caller
-            ),
+            isEffectiveOwner(caller),
             "the msg.sender was not owner or operator"
         );
         _;
@@ -121,13 +132,7 @@ contract NonTradable is ISingular, SingularMeta, CommonModifiers {
     modifier fromWallet(ISingularWallet wallet) {
         address caller = msg.sender;
         require(
-            caller != address(0)
-        &&
-        (
-            address(wallet) == caller
-            || wallet.ownerAddress() == caller
-    //        || theOperator == caller // wallet does not have operator yet, but it should really be a tradable!
-        ),
+            wallet.isEffectiveOwner(msg.sender),
             "the msg.sender was not the wallet or its owner"
         );
         _;

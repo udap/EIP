@@ -71,9 +71,25 @@ interface ISingularWallet {
     );
 
     /**
+    to test if an address is the effective owner, directly or indirectly, of this wallet. Implementations
+    can make decision by matching it with the current owner, or querying the owner recursively to determine the effective
+    ownership.
+
+    This function can be used for determining if a msg.sender is allow to call functions that require owner privilege.
+    */
+    function isEffectiveOwner(
+        address addr
+    )
+    external
+    view
+    returns (
+        bool
+    );
+
+    /**
     to get the last time when the asset portfolio was changed dur to addition or removal
     */
-    function whenAssetsLastUpdates() external view returns (
+    function whenAssetsLastUpdated() external view returns (
         uint
     );
 

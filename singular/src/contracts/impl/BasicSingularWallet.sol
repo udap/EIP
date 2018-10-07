@@ -61,7 +61,7 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
         return ownerOfThis;
     }
 
-    function whenAssetsLastUpdates() external view returns (
+    function whenAssetsLastUpdated() external view returns (
         uint
     ) {
         return assetTimestamp;
@@ -74,6 +74,18 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
     function setOwner(address _owner) external {
         require(msg.sender == theCreator);
         ownerOfThis = _owner;
+    }
+
+
+    function isEffectiveOwner(
+        address addr
+    )
+    external
+    view
+    returns (
+        bool
+    ) {
+        return (addr == address(this) || addr == ownerOfThis);
     }
 
     /**
@@ -248,7 +260,7 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
     ISingularWallet. The new container's owner is the the owner of this container
     */
     function slice(
-        ISingular[] /*elements*/    ///< the elements to move slice off from this container.
+        ISingular[] elements    ///< the elements to move slice off from this container.
     )
     external
     returns(
@@ -293,7 +305,7 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
      * skip those holes
      */
     function getAllTokens() view external returns (
-        ISingular[],
+        ISingular[] all,
         uint whenLastUpdated    ///< when the asset portfolio was changed)
     ){
         // TODO: privacy and permission control

@@ -78,4 +78,19 @@ interface ISingular {
         address                 ///< address that describes the type of the token.
     );
 
+    /**
+    to test if an address is the effective owner, directly or indirectly, of this ISingular. Implementations
+    can make decision by matching it with the current owner, or querying the owner recursively to determine the effective
+    ownership.
+
+    This function can be used for determining if a msg.sender is allow to call functions that require owner privilege.
+    */
+    function isEffectiveOwner(
+        address addr
+    )
+    external
+    view
+    returns (
+        bool
+    );
 }
