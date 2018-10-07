@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "./SingularBase.sol";
-import "./ISingular.sol";
+import "../ISingular.sol";
 import "./SingularWalletBase.sol";
 import "./SingularFactory.sol";
 

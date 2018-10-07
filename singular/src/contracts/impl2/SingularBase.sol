@@ -1,13 +1,13 @@
 pragma solidity ^0.4.24;
 
-import "./ITradable.sol";
-import "./ISingularWallet.sol";
-import "./utils/ReentrancyGuard.sol";
-import "./utils/AddressUtils.sol";
+import "../ITradable.sol";
+import "../ISingularWallet.sol";
+import "../utils/ReentrancyGuard.sol";
+import "../utils/AddressUtils.sol";
 import "./TransferHistory.sol";
-import "./IBurnable.sol";
+import "../IBurnable.sol";
 import "./TransferHistory.sol";
-import "./ISingular.sol";
+import "../ISingular.sol";
 
 /**
 *

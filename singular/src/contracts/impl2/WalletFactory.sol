@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
-import "./utils/Ownable.sol";
-import "./ISingularWallet.sol";
-import "./Upgradeable/Mini/MiniProxy.sol";
-import "./Upgradeable/Mini/MiniRegistry.sol";
+import "../utils/Ownable.sol";
+import "../ISingularWallet.sol";
+import "../Upgradeable/Mini/MiniProxy.sol";
+import "../Upgradeable/Mini/MiniRegistry.sol";
 import "./SingularWallet.sol";
 
 // MiniProxy1,2,3,4....n  =>  MiniRegistry => WalletLogic

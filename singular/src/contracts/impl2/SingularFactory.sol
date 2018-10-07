@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
-import "./utils/Ownable.sol";
-import "./Upgradeable/Mini/MiniRegistry.sol";
-import "./ISingular.sol";
-import "./Upgradeable/Mini/MiniProxy.sol";
+import "../utils/Ownable.sol";
+import "../Upgradeable/Mini/MiniRegistry.sol";
+import "../ISingular.sol";
+import "../Upgradeable/Mini/MiniProxy.sol";
 import "./Singular.sol";
 
 /**

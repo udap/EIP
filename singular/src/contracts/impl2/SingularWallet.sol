@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "./SingularWalletBase.sol";
-import "./ISingularWalletAll.sol";
+import "../ISingularWalletAll.sol";
 
 contract SingularWallet is SingularWalletBase, ISingularWalletAll{
 

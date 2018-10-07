@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import "./Comment.sol";
 import "./SingularBase.sol";
-import "./SingularMeta.sol";
+import "../SingularMeta.sol";
 import "./SingularWalletBase.sol";
 import "./TransferHistory.sol";
 import "./LimitedSingularGenerator.sol";

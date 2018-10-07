@@ -1,10 +1,10 @@
 pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "./utils/RLPEncode.sol";
-import "./ITransferHistory.sol";
+import "../utils/RLPEncode.sol";
+import "../ITransferHistory.sol";
 import "./SingularBase.sol";
-import "./utils/Initialized.sol";
+import "../utils/Initialized.sol";
 
 contract TransferHistory is ITransferHistory, Initialized {
     function contractName()

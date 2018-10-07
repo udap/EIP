@@ -1,9 +1,10 @@
 pragma solidity ^0.4.24;
 
-import "./ICommenting.sol";
-import "./utils/RLPEncode.sol";
-import "./utils/Initialized.sol";
+import "../ICommenting.sol";
+import "../utils/RLPEncode.sol";
+import "../utils/Initialized.sol";
 import "./SingularBase.sol";
+import "../utils/Initialized.sol";
 
 contract Comment is IComment, Initialized, SingularBase{
     function contractName()

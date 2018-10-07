@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "./Upgradeable/Mini/MiniRegistry.sol";
+import "../Upgradeable/Mini/MiniRegistry.sol";
 import "./LimitedSingularGenerator.sol";
 
 contract GeneratorFactory{

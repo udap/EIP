@@ -2,8 +2,8 @@ pragma solidity ^0.4.24;
 
 import "./SingularBase.sol";
 import "./Comment.sol";
-import "./SingularMeta.sol";
-import "./ISingularAll.sol";
+import "../SingularMeta.sol";
+import "../ISingularAll.sol";
 
 contract Singular is SingularBase, SingularMeta, Comment{
 

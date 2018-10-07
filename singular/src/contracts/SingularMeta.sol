@@ -1,8 +1,6 @@
 pragma solidity ^0.4.24;
 
 import "./ISingularMeta.sol";
-//import "./utils/Initialized.sol";
-import "./SingularBase.sol";
 import "./utils/MustInitialize.sol";
 
 contract SingularMeta is ISingularMeta, MustInitialize {
