@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "../contracts/ISingular.sol";
-import "../Implementation2/SingularWallet.sol";
+import "../ISingular.sol";
+import "../impl/BasicSingularWallet.sol";
 
 interface IStateChanelFactory {
     function newChannel();
@@ -14,7 +14,7 @@ A member of a state channel.
 interface IChannelMember{
 }
 
-contract ChannelMemeber is SingularWallet, IChannelMember {
+contract ChannelMemeber is BasicSingularWallet, IChannelMember {
     IStateChannel public theChannel;
     function attachToChannel(
         IStateChannel channel
@@ -31,7 +31,7 @@ interface ISignedStatement {
 }
 
 
-interface IStateChannel is IChannelMember{
+contract IStateChannel is IChannelMember{
 
     /**
     to add a member to the channel
@@ -44,7 +44,7 @@ interface IStateChannel is IChannelMember{
     To list all the members of this channel
     */
     function allMembers() view external returns(
-        ChannelMember[]
+        IChannelMember[]
     );
 
     function allAssets()
@@ -63,15 +63,15 @@ interface IStateChannel is IChannelMember{
     */
     function closeByAll (
         ISignedStatement statement,     ///< the state to submit, can be NULL state
-        ISignature[] allSignatures      ///< all signatures.
+        bytes32[] allSignatures      ///< all signatures.
     ) external;
 
 
     /**
     @dev channel will notify the other participants of the request and grant grace period. This
     may happen when some of the participant are not cooperative in settlement (e.g. intentionally
-    delaying settlement, or been offline for extended period of time), or some of the
-    participants wants to exit the state channel with a version of state that is not the latest
+    delaying settlement, or been offline for an extended period of time), or some of the
+    participants wants to exit the state channel with a state that is not of the latest
     version but is a favorable state to the proposers. The latter situation is an attack from some
     of the participants to the other participants. The channel MUST grant a chance in a grace period
     for the other parties to prevent the pre-mature exit by submitting a later version of state, which
@@ -80,7 +80,7 @@ interface IStateChannel is IChannelMember{
 
     function requestToCloseBySome (
         ISignedStatement statement,     ///< the state to submit, can be NULL state
-        ISignature[] someSignatures     ///< signatures from those who want to force close
+        bytes32[] someSignatures     ///< signatures from those who want to force close
     ) external;
 
     /**
@@ -139,7 +139,7 @@ interface IStateChannel is IChannelMember{
 
 
     /**
-    To accept a previously set offer.
+    To accept a previously set up offer.
     */
     function acceptOffer(
         uint offerId,           ///< the offer reference to a previous offer
@@ -151,8 +151,5 @@ interface IStateChannel is IChannelMember{
         bool success,           ///< true if success, false otherwise
         string reason           ///< additional info
     );
-
-
-
 }
 

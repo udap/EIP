@@ -1,5 +1,7 @@
 pragma solidity ^0.4.24;
 
+import "./IERC721.sol";
+
 
 /**
  * @title A simplified ERC721 for compatibility
@@ -7,6 +9,28 @@ pragma solidity ^0.4.24;
  *
  */
 interface IERC721Singular {
-    function ERC721Address() external view returns (address);
-    function tokenID() external view returns(uint);
+    event ERC721SingularUnbound (
+        IERC721 erc721,
+        uint theTokenId,
+        IERC721Singular singular
+    );
+
+    /**
+    the erc 721 contract address
+    */
+    function ERC721Address() external view returns (
+        address         ///< the erc 721 contract address
+    );
+
+    /**
+    the underlying token id
+    */
+    function tokenID() external view returns(
+        uint            ///< the underlying token id associated with ERC721
+    );
+
+    /**
+    transfer the ownership to the caller, which must be the the holding wallet or the owner of the wallet
+    */
+    function unbind() external;
 }

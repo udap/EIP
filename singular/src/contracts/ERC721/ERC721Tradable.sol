@@ -17,8 +17,10 @@ contract ERC721Tradable is IERC721Singular, Tradable {
 
     IERC721 erc721;
     uint theTokenId;
+
+
     /**
-    initializer to construct a Tradable backed by an ERC721 token.
+    initializer to construct a Tradable backed by an ERC721 token. Must be called by a wallet that bas been assigned as the owner of the token id.
     */
     function init(
         string _name,
@@ -51,6 +53,21 @@ contract ERC721Tradable is IERC721Singular, Tradable {
 
     function tokenID() external view returns(uint) {
         return theTokenId;
+    }
+
+    /**
+    transfer the ownership to the caller, which must be the the holding wallet or the owner of the wallet
+    */
+    function unbind() public {
+        ISingularWallet wal = theOwner;
+        require(msg.sender == address(wal) || msg.sender == wal.ownerAddress(), "msg.sender were not allowed to unbind this ERC721 singular");
+        erc721.transferFrom(this, msg.sender, theTokenId);
+        emit ERC721SingularUnbound (
+            erc721,
+            theTokenId,
+            this
+        );
+        selfdestruct(msg.sender);
     }
 }
 

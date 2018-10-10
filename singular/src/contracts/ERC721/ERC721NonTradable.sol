@@ -53,5 +53,19 @@ contract ERC721NonTradable is IERC721Singular, NonTradable {
     function tokenID() external view returns(uint) {
         return tokenNumber;
     }
+
+    function unbind() public {
+        ISingularWallet wal = theOwner;
+        require(msg.sender == address(wal) || msg.sender == wal.ownerAddress(), "msg.sender were not allowed to unbind this ERC721 singular");
+        erc721.transferFrom(this, msg.sender, tokenNumber);
+        emit ERC721SingularUnbound (
+            erc721,
+            tokenNumber,
+            this
+        );
+        selfdestruct(msg.sender);
+
+    }
+
 }
 

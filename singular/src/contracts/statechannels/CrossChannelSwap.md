@@ -93,7 +93,7 @@ The on-chin state is still:
 
 In regular state channel implementation, this is considered a collaborative channel closure and and be carried out instantly, resulting in a insolvent and in-settleable `channel(A, B)`. 
 
-*Consequence*: all the transaction from the step 1 in the previous sections will be rolled back. In the best scenario the attack would turn to a griefing attack and in the worst case the some asset is lost in the form of opportunity cost or volatility cost. 
+*Consequence*: all the transactions from the step 1 in the previous sections will be rolled back. In the best scenario the attack would turn to a griefing attack and in the worst case the some asset is lost in the form of opportunity cost or volatility cost. 
 
 *Mitigations*: 
 

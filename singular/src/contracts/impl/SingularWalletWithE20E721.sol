@@ -93,4 +93,12 @@ contract SingularWalletWithE20E721 is BasicSingularWallet{
         erc721.transferFrom(this, address(instance), tokenId);
     }
 
+    function deactivateERC721ISingular(
+        IERC721Singular instance    ///< an uninitialized contract
+    )
+    public
+    ownerOnly
+    {
+        instance.unbind();
+    }
 }

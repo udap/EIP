@@ -5,8 +5,10 @@ import "./ISingularWallet.sol";
 
 /**
  * @title A concrete asset token representing a single item of things. It should
- * be used together with ISingularMeta to fully specified the information about 
+ * be used together with ISingularMeta to fully specify the information about
  * this item.
+ *
+ * All Singulars must be owned by ISingularWallet, which contains a list of all ISingular owned by the same account.
  *
  * @author Bing Ran<bran@udap.io>
  * @author Guxiang Tang<gtang@udap.io>

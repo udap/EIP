@@ -51,14 +51,14 @@ contract('SingularWalletWithE20E721', function ([defaultEOA, aliceEOA, bobEOA, s
         assert.isTrue(await wal.owns.call(erc20Debit.address));
     });
 
-    it("can activate  erc721 Tradable", async () => {
+    it("can activate/deactivate erc721 Tradable ", async () => {
         let wal = await w.new("alice wallet", {from: aliceEOA});
         let e721 = await e721Contract.new({from: aliceEOA});
 
         // send a new token to the wallet
-        let TID = 101;
-        await e721.mint(wal.address, TID);
-        assert.equal(await e721.ownerOf.call(TID), wal.address);
+        let TOKENID = 101;
+        await e721.mint(wal.address, TOKENID);
+        assert.equal(await e721.ownerOf.call(TOKENID), wal.address);
 
         let FROM_ALICE = {from: aliceEOA};
         let e721Tradable = await e721TradableCon.new(FROM_ALICE);
@@ -72,14 +72,41 @@ contract('SingularWalletWithE20E721', function ([defaultEOA, aliceEOA, bobEOA, s
             "alice has it",
             "",
             BYTES32,
-            TID,
+            TOKENID,
             FROM_ALICE
         );
         // console.log(tx);
         assert.equal(await e721Tradable.owner.call(), wal.address);
-        assert.equal((await e721Tradable.tokenID.call()).toNumber(), TID);
-        assert.equal((await e721.ownerOf.call(TID)), e721Tradable.address);
+        assert.equal((await e721Tradable.tokenID.call()).toNumber(), TOKENID);
+        assert.equal((await e721.ownerOf.call(TOKENID)), e721Tradable.address);
         assert.isTrue(await wal.owns.call(e721Tradable.address));
+
+        // test the the deactivate
+        await wal.deactivateERC721ISingular(e721Tradable.address, FROM_ALICE);
+        // now the token should belong to the wallet
+        assert.equal(await e721.ownerOf.call(TOKENID), wal.address);
+
+        // create a new instance
+        e721Tradable = await e721TradableCon.new(FROM_ALICE);
+        await wal.activateTradable721(
+            e721Tradable.address,
+            e721.address,
+            "a car",
+            "alice has it",
+            "",
+            BYTES32,
+            TOKENID,
+            FROM_ALICE
+        );
+
+        assert.equal((await e721.ownerOf.call(TOKENID)), e721Tradable.address);
+
+        // test the the unbind on the token directly, another way to deactivate the token
+        await e721Tradable.unbind(FROM_ALICE); // return the token to aliceEOA
+
+        // now the token should belong to the wallet
+        assert.equal(await e721.ownerOf.call(TOKENID), aliceEOA);
+
     });
 
     it("can activate erc721 NonTradable", async () => {
