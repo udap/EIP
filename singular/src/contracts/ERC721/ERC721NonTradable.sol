@@ -54,18 +54,22 @@ contract ERC721NonTradable is IERC721Singular, NonTradable {
         return tokenNumber;
     }
 
-    function unbind() public {
+    /**
+     transfer the ownership to the caller, which must be the the holding wallet or whoever effectively owns the wallet
+     */
+    function unbind(address receiver)
+    public
+    initialized
+    {
         ISingularWallet wal = theOwner;
-        require(msg.sender == address(wal) || msg.sender == wal.ownerAddress(), "msg.sender were not allowed to unbind this ERC721 singular");
-        erc721.transferFrom(this, msg.sender, tokenNumber);
+        require(wal.isEffectiveOwner(msg.sender), "msg.sender were not allowed to unbind this ERC721 singular");
+        erc721.transferFrom(this, receiver, tokenNumber);
         emit ERC721SingularUnbound (
             erc721,
             tokenNumber,
             this
         );
-        selfdestruct(msg.sender);
-
+        selfdestruct(receiver);
     }
-
 }
 

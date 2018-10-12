@@ -66,6 +66,7 @@ contract SingularWalletWithE20E721 is BasicSingularWallet{
             tokenId
         );
         // transfer the ownership of the tokenID from the wallet to the singular
+        require(erc721.ownerOf(tokenId) == address(this), "the token id was not owned by this wallet");
         erc721.transferFrom(this, address(instance), tokenId);
     }
 
@@ -94,11 +95,12 @@ contract SingularWalletWithE20E721 is BasicSingularWallet{
     }
 
     function deactivateERC721ISingular(
-        IERC721Singular instance    ///< an uninitialized contract
+        IERC721Singular instance,    ///< an initialized contract
+        address receiver            ///< who to transfer the underlying token to
     )
     public
     ownerOnly
     {
-        instance.unbind();
+        instance.unbind(receiver);
     }
 }

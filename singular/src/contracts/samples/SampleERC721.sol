@@ -21,4 +21,5 @@ contract SampleERC721 is ERC721Token {
     function burn(uint256 _tokenId) public {
         super._burn(ownerOf(_tokenId), _tokenId);
     }
+
 }

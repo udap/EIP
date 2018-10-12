@@ -30,7 +30,8 @@ interface IERC721Singular {
     );
 
     /**
-    transfer the ownership to the caller, which must be the the holding wallet or the owner of the wallet
+    transfer the ownership to the receiver. The caller must be the the holding wallet or
+    the effective owner of the wallet.
     */
-    function unbind() external;
+    function unbind(address receiver) external;
 }

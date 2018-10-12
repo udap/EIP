@@ -62,7 +62,6 @@ contract('SingularWalletWithE20E721', function ([defaultEOA, aliceEOA, bobEOA, s
 
         let FROM_ALICE = {from: aliceEOA};
         let e721Tradable = await e721TradableCon.new(FROM_ALICE);
-        assert.notEmpty(e721Tradable);
         assert.isFalse(await wal.owns.call(e721Tradable.address));
 
         await wal.activateTradable721(
@@ -82,11 +81,14 @@ contract('SingularWalletWithE20E721', function ([defaultEOA, aliceEOA, bobEOA, s
         assert.isTrue(await wal.owns.call(e721Tradable.address));
 
         // test the the deactivate
-        await wal.deactivateERC721ISingular(e721Tradable.address, FROM_ALICE);
+        await wal.deactivateERC721ISingular(e721Tradable.address, someEOA, FROM_ALICE);
         // now the token should belong to the wallet
-        assert.equal(await e721.ownerOf.call(TOKENID), wal.address);
+        assert.equal(await e721.ownerOf.call(TOKENID), someEOA);
 
-        // create a new instance
+        // transfer the token to the alice wallet
+        await e721.transferFrom(someEOA, wal.address, TOKENID, {from: someEOA});
+
+        // to test unbind, create a new instance
         e721Tradable = await e721TradableCon.new(FROM_ALICE);
         await wal.activateTradable721(
             e721Tradable.address,
@@ -96,16 +98,14 @@ contract('SingularWalletWithE20E721', function ([defaultEOA, aliceEOA, bobEOA, s
             "",
             BYTES32,
             TOKENID,
-            FROM_ALICE
+            {from: aliceEOA}
         );
-
-        assert.equal((await e721.ownerOf.call(TOKENID)), e721Tradable.address);
-
+        //
         // test the the unbind on the token directly, another way to deactivate the token
-        await e721Tradable.unbind(FROM_ALICE); // return the token to aliceEOA
+        await e721Tradable.unbind(someEOA, FROM_ALICE); // return the token to aliceEOA
 
         // now the token should belong to the wallet
-        assert.equal(await e721.ownerOf.call(TOKENID), aliceEOA);
+        assert.equal(await e721.ownerOf.call(TOKENID), someEOA);
 
     });
 
