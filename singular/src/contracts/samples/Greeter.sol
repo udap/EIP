@@ -1,40 +1,47 @@
 pragma solidity ^0.4.24;
 
-contract greeter {
+// Modified Greeter contract. Based on example at https://www.ethereum.org/greeter.
 
-    /* Owner of this contract */
+contract mortal {
+    /* Define variable owner of the type address*/
     address owner;
 
-    /* Counter for deposits calls */
-    uint public deposits;
-
-    /* Configurable greeting */
-    string greeting;
-
-    /* Constructor runs when contract is deployed */
-    function greeter(string _greeting) public {
-        owner = msg.sender;
-        greeting = _greeting;
-        deposits = 0;
-    }
-
-    /*
-     * Default function.
-     * 'payable': Allows to move funds to contract.
-     * Changes state: Costs gas and needs contract transaction.
-     */
-    function() payable {
-        deposits += 1;
-    }
-
-    /* Main function */
-    function greet() constant returns (string) {
-        return greeting;
-    }
+    /* this function is executed at initialization and sets the owner of the contract */
+    constructor() { owner = msg.sender; }
 
     /* Function to recover the funds on the contract */
     function kill() {
         if (msg.sender == owner)
             selfdestruct(owner);
     }
+}
+
+contract greeter is mortal {
+    /* define variable greeting of the type string */
+    string greeting;
+
+    /* this runs when the contract is executed */
+    constructor(string _greeting) public {
+        greeting = _greeting;
+    }
+
+    function newGreeting(string _greeting) public {
+        Modified(greeting, _greeting, greeting, _greeting);
+        greeting = _greeting;
+    }
+
+    /* main function */
+    function greet() constant returns (string) {
+        return greeting;
+    }
+
+    /* we include indexed events to demonstrate the difference that can be
+    captured versus non-indexed
+    */
+    event Modified(
+        string indexed oldGreetingIdx,
+        string indexed newGreetingIdx,
+        string oldGreeting,
+        string newGreeting
+    );
 }
