@@ -9,6 +9,8 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.Transfer;
+import org.web3j.tx.gas.ContractGasProvider;
+import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
@@ -34,6 +36,7 @@ public class GanacheIT {
     public static final Credentials EMPTY = Credentials.create("0x48e568d9b255d3773619486cde02a10b40e5a8ace51d320f7f1ba20825703d00");
 
     public static Web3j web3j;
+    public static ContractGasProvider GAS_PROVIDER = new DefaultGasProvider();
 
     static {
         web3j = Web3j.build(new HttpService("http://localhost:8545/"));

@@ -24,6 +24,7 @@ public class BasicSingularWalletTests {
     BasicSingularWallet aliceWallet;
     BasicSingularWallet bobWallet;
     Tradable aliceToken;
+
     @Before
     public void setup() throws Exception {
         aliceWallet = BasicSingularWallet.deploy(
@@ -31,7 +32,7 @@ public class BasicSingularWalletTests {
                 ALICE,
                 GAS_PRICE,
                 GAS_LIMIT,
-                "alice wallet"
+                "alice aliceWallet"
         ).send();
 
         bobWallet = BasicSingularWallet.deploy(
@@ -39,7 +40,7 @@ public class BasicSingularWalletTests {
                 BOB,
                 GAS_PRICE,
                 GAS_LIMIT,
-                "Bob's wallet!"
+                "Bob's aliceWallet!"
         ).send();
 
     }
@@ -62,7 +63,7 @@ public class BasicSingularWalletTests {
                     web3j,
                     EMPTY,
                     new DefaultGasProvider(),
-                    "empty wallet!"
+                    "empty aliceWallet!"
             ).send();
             fail("should have thrown an exception");
         } catch (Exception e) {
@@ -85,9 +86,75 @@ public class BasicSingularWalletTests {
                 "uri",
                 new byte[32],
                 "0x00",
-                aliceWallet.getContractAddress()).send();
+                aliceWallet.getContractAddress()
+        ).send();
+
         assertEquals(aliceToken.owner().send(), aliceWallet.getContractAddress());
+
+        // it should revert
+        try {
+            a = aliceToken.init(
+                    "aliceToken",
+                    "sym",
+                    "descr",
+                    "uri",
+                    new byte[32],
+                    "0x00",
+                    aliceWallet.getContractAddress()
+            ).send();
+            fail("should have thrown an exception");
+        } catch (Exception e) {
+
+        }
+
+
     }
+
+    @Test
+    public void testWalletTokenInitWithWrongPerson() throws Exception {
+        aliceToken = Tradable.deploy(
+                web3j,
+                ALICE,
+                new DefaultGasProvider()
+        ).send();
+
+        // let's load the tradable with bob credentials
+        Tradable t = Tradable.load(aliceToken.getContractAddress(), web3j, BOB, new DefaultGasProvider());
+
+        try {
+            // it should revert here because the sender is Bob who does not have ther permission to init
+            TransactionReceipt a = t.init(
+                    "aliceToken",
+                    "sym",
+                    "descr",
+                    "uri",
+                    new byte[32],
+                    "0x00",
+                    aliceWallet.getContractAddress()
+            ).send();
+            fail("should never be here");
+        } catch (Exception e) {
+
+        }
+
+        // let's load the tradable again with alice credentials
+        t = Tradable.load(aliceToken.getContractAddress(), web3j, ALICE, new DefaultGasProvider());
+
+        TransactionReceipt a = t.init(
+                "aliceToken",
+                "sym",
+                "descr",
+                "uri",
+                new byte[32],
+                "0x00",
+                aliceWallet.getContractAddress()
+        ).send();
+
+        assertEquals(t.owner().send(), aliceWallet.getContractAddress());
+
+    }
+
+
 
 
 }
