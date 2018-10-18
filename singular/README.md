@@ -459,7 +459,7 @@ Once an ERC721 token is bound to a Singular contract, all the features of tradab
 
 The following diagram demonstrates the possible ways of Singular and Singular Wallet working together with an ERC721 contract. 
 
-![singular-erc721](media/singular-erc721.png) 
+![singularerc721](media/singular_erc721.png)
 
 A simple contract to wrap an ERC721 "token" in a Singular and make it tradable:
 
