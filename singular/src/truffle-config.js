@@ -23,13 +23,21 @@ module.exports = {
             network_id: "*", // * for Match any network id,
             // gas: 4500000,
             // gasPrice: 10000000000
+        },
+
+        dev_cli: {
+            host: "127.0.0.1",
+            port: 8545, // local ganache-cli runs on this port
+            network_id: "*", // * for Match any network id,
+            // gas: 4500000,
+            // gasPrice: 10000000000
         }
     },
 
     compilers: {
         solc: {
-            // version: "native",   // let's use the native for faster work. bran: slower for small project!!
-            version: "0.4.25",
+            version: "native",   // let's use the native for faster work. bran: slower for small project!!
+            // version: "0.4.25",
             settings: {
                 optimizer: {
                     enabled: true, // Default: false

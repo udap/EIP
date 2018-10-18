@@ -1,8 +1,10 @@
 pragma solidity ^0.4.24;
 
+import "./Logger.sol";
+
 // Modified Greeter contract. Based on example at https://www.ethereum.org/greeter.
 
-contract mortal {
+contract Mortal {
     /* Define variable owner of the type address*/
     address owner;
 
@@ -11,12 +13,13 @@ contract mortal {
 
     /* Function to recover the funds on the contract */
     function kill() {
-        if (msg.sender == owner)
-            selfdestruct(owner);
+        require(msg.sender == owner, "only owner can kill");
+        selfdestruct(owner);
     }
 }
 
-contract greeter is mortal {
+contract Echo is Mortal, Logger {
+
     /* define variable greeting of the type string */
     string greeting;
 
@@ -28,6 +31,14 @@ contract greeter is mortal {
     function newGreeting(string _greeting) public {
         Modified(greeting, _greeting, greeting, _greeting);
         greeting = _greeting;
+    }
+
+    function log() public {
+        logInt("an integer", 1001);
+        logBytes32("bytes32", 0x420042);
+        logAddress("msg.sender", msg.sender);
+        logString("hello", "abcd 你好再见");
+        logBool("yes/no", true);
     }
 
     /* main function */
