@@ -31,7 +31,7 @@ The Singular asset model implements a concept:
  
 1. It represents an unique being that has its own life cycle. 
 1. It possesses properties that describe the represented thing.
-1. Everythung must have an owner. It must be owned eventually and effectively by a definitive real person or an organizational entity; The owner can control the life cycle of this asset account and trade this identity for other identities or currencies.
+1. Everything must have an owner. It must be owned eventually and effectively by a definitive real person or an organizational entity; The owner can control the life cycle of this asset account and trade this identity for other identities or currencies.
 1. It's autonomous by itself in terms of behavior. It has built-in intelligence for dealing with other intelligent contracts. Conceptually it's similar to the *Software Agents* described in many literatures. 
 
 The Singular project is a natural development in the spirit of some of the earlier blockchain proponents who had envisioned what blockchain with smart contracts would achieve. 
@@ -53,7 +53,7 @@ Some perspectives of ERC721:
 In UDAP we are proposing a new account model specifically to represent a single unique asset in a very expressive way. We want to achieve the following goals when designing the model:
 
 1. It supports safe token transfers and swaps.
-1. It supports direct purchasing of a singular wih cryto-currencies.
+1. It supports direct purchasing of a singular with cryto-currencies.
 1. It supports decentralized trading.
 1. It is compatible with existing protocols such as ERC20 and ERC721.  
 1. The token should work with state channel mechanisms, which is very important for scalable applications.
@@ -70,7 +70,7 @@ We call our basic asset contract `Singular` and the design decisions are:
 1. The owner of the `Singular` token must be another smart contract account, named `ISingularWallet`. There is no direct way for EOAs to own `Singular` tokens. This design is largely in the same direction of Ethereum’s [account abstraction model](https://github.com/ethereum/EIPs/issues/859) ([discussion](https://ethresear.ch/t/tradeoffs-in-account-abstraction-proposals/263))that might be deployed in a future version of Ethereum. 
 1. It should support `push` ownership transfer and `pull` ownership transfer patterns. In so called one-step transfer, the current owner can pass an offer of the token ownership to the receiver account and the receiver account can choose to accept or reject the offer *in the same transaction*. In a two-step ownership transfer, however, the current owner reserves the token for the next owner in a transaction. The address of the token is passed to the receiver out-of-band. The receiver issues a separate transaction to accept the offer, once it determines that the offer is in its interest. 
 1. Operators. The `ISingularWallet` account can assign operators to help with ownership transfers. Having an operator to manage the asset token on the owner’s behalf is a pattern that has been accepted by some other proposals, such as ERC721 and ERC777.  People have found it convenient in handling token trading. The current token owner can appoint an operator for the *next* ownership change. But setting the operators on the token directly is polluting the token interface. 
-1. Timelock. When an owner make an offer of ownership to someone else by calling the `approveReceiver()` function, there is a required argument for expiry time, during which period the receiver can take the ownership at will by invoking `accept(...)`on the token, which will in turn send a notification to the previous owner for it to any state update it wants, or even chain to another action. A critical design is that the owner cannot change his mind during the offer period. This is essentially a time-lock for the transaction. In contrast, neither ERC20 nor ERC721 or any of their derivatives offers built-in time-locks for ownership trading. 
+1. Timelock. When an owner make an offer of ownership to someone else by calling the `approveReceiver()` function, there is a required argument for expiry time, during which period the receiver can take the ownership at will by invoking `accept(...)` on the token, which will in turn send a notification to the previous owner for it to any state update it wants, or even chain to another action. A critical design is that the owner cannot change his mind during the offer period. This is essentially a time-lock for the transaction. In contrast, neither ERC20 nor ERC721 or any of their derivatives offers built-in time-locks for ownership trading. 
 1. Token swapping and token sale is implemented with an intermediate `TradeExecutor`, which is a stateless contract that deployed at a well-known address and be trusted by Singulars for ownership management. 
 1. Adapters have been built to wrap tokens in ERC20 and ERC721 as tradable singulars. This enables building decentralized asset exchange in a very straightforward way. 
 
@@ -592,7 +592,7 @@ It goes further than physical devices and adds a layer of accountability to ever
 
 Singular is powerful and expressive in representing real-world objects such as people, collectibles, certificates, high-valued goods and products.
  
-By providing clever bridges toERC20 and ERC721 type of contract standards, Singular framework becomes a solid foundation for a truly decentralized asset exchange.
+By providing clever bridges to ERC20 and ERC721 type of contract standards, Singular framework becomes a solid foundation for a truly decentralized asset exchange.
 
 But....
 
@@ -600,6 +600,6 @@ Singular is not a light-weighted framework, however, since it binds properties w
 
 *State Channel* technology can work with Singular quites well. We're rolling out implementations in the future to make sure that proper arrangement of on-chain/off-chain architecture can achieve tremendous credibility and scalability with decent cost.     
 
-Singular proposes a new type of wallet that is a collection of asset tokens that are owned by the sam entity. These asset tokens may have been generated by different sources, such as different wallet or contracts that are generative such as ERC20, ERC721 or their derivatives.  
+Singular proposes a new type of wallet that is a collection of asset tokens that are owned by the same entity. These asset tokens may have been generated by different sources, such as different wallet or contracts that are generative such as ERC20, ERC721 or their derivatives.  
 
-One big issue that the Singular framework has not dealt with extensively is privacy. The current version does not provide built-in support for storing information on the chain privately. All the information in a smart contracts are considered in public domain. All data the the contract state variables is directly or indirectly open for everyone to check. This state of art actually lends the blockchains very well to supporting applications that focuses on sharing information with general public, but no so well to other applications that require discretion and confidentiality. Such applications need to build a layer of privacy preservation on top of Singular. State Channels can help with the privacy issue to some degree as long as the transactions are kept in the channels and not broadcast to the public chains. Other technologies such as ring signatures, proxy re-encryption(aka PRE), and zero-knowledge can help developers to build secure and private applications. PRE is probably the first technology we will integrate with Singular. 
+One big issue that the Singular framework has not dealt with extensively is privacy. The current version does not provide built-in support for storing information on the chain privately. All the information in a smart contracts are considered in public domain. All data the contract state variables is directly or indirectly open for everyone to check. This state of art actually lends the blockchains very well to supporting applications that focuses on sharing information with general public, but no so well to other applications that require discretion and confidentiality. Such applications need to build a layer of privacy preservation on top of Singular. State Channels can help with the privacy issue to some degree as long as the transactions are kept in the channels and not broadcast to the public chains. Other technologies such as ring signatures, proxy re-encryption(aka PRE), and zero-knowledge can help developers to build secure and private applications. PRE is probably the first technology we will integrate with Singular. 
