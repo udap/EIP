@@ -101,7 +101,7 @@ contract TradeExecutor is ITradeExecutor {
         if (debitCard.denomination() > price) {
             // return tokens back to
             uint256 change = debitCard.denomination()-price;
-            debit.withdraw(bOwner, change);
+            debitCard.withdraw(bOwner, change);
         }
         debit.swapInOwner(aOwner, "from executor.buy()");
 

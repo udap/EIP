@@ -104,7 +104,7 @@ contract ERC20Debit is IDebit, Tradable {
         ISingularWallet owner,
         uint256 change
     )
-    external
+    public
     forTradeExecutor
     {
         erc20_.transfer(owner, change);
