@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 import "../ISingular.sol";
 import "../ITradable.sol";
 import "./IERC20.sol";
+import "./ISingularWallet.sol";
 
 
 /**
@@ -67,6 +68,16 @@ contract IDebit is ISingular {
     returns(
         IDebit          ///< the spawned child account
     );
+
+    /**
+    *  to extract token from this debit
+    */
+    function withdraw(
+        ISingularWallet wallet,
+        uint256 amount
+    )
+    public;
+
 
     /// to make it ITradable compatible
     function toITradable() public returns(ITradable);

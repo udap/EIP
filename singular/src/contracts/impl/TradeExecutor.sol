@@ -97,6 +97,12 @@ contract TradeExecutor is ITradeExecutor {
 
         // all set.do the swap, assuming this executor is trusted by both parties
         token.swapInOwner(bOwner, "from executor.buy()");
+        // if sale price less than debit amount
+        if (debitCard.denomination() > price) {
+            // return tokens back to
+            uint256 change = debitCard.denomination()-price;
+            debit.withdraw(bOwner, change);
+        }
         debit.swapInOwner(aOwner, "from executor.buy()");
 
         emit Sold(
