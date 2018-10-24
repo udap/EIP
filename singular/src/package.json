@@ -9,11 +9,14 @@
   "dependencies": {
     "openzeppelin-solidity": "^1.12.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "sol-merger": "^0.1.2"
+  },
   "scripts": {
     "testtest": "node $NODE_DEBUG_OPTION /usr/local/lib/node_modules/truffle test",
     "test": "node $NODE_DEBUG_OPTION /usr/local/lib/node_modules/truffle/build/cli.bundled.js test",
-    "install": "truffle install bytes"
+    "install": "truffle install bytes",
+    "build-contracts": "sol-merger \"./contracts/**/*.sol\" ./build"
   },
   "author": "",
   "license": "ISC"

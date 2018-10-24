@@ -12,7 +12,7 @@ contract SingularMeta is ISingularMeta, MustInitialize {
     bytes32 theTokenURIDigest;
 
 
-    constructor() {}
+    constructor() public {}
 
     // for compatibility with proxy, which requires initialization out of constructor
     function init (string _name, string _symbol, string _description, string _tokenURI, bytes32 _tokenURIDigest)

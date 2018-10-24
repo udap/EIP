@@ -6,24 +6,88 @@
  * user guide available at https://docs.gradle.org/4.10.2/userguide/tutorial_java_projects.html
  */
 
+
+//
+//buildscript {
+//    repositories {
+//        mavenLocal()
+//        mavenCentral()
+//        gradlePluginPortal()
+//    }
+//    dependencies {
+//        classpath "org.web3j:console:3.6.0"
+//    }
+//}
+
 plugins {
     // Apply the java plugin to add support for Java
-    id 'java'
+//    id 'java'
 
     // Apply the application plugin to add support for building an application
 //    id 'application'
+//    id 'solidity' version '0.1.0'
+
+    id "com.gradle.plugin-publish" version "0.10.0"
+    id "java-gradle-plugin"
+    id 'com.jfrog.bintray' version '1.8.4'
+    id 'java'
+    id 'groovy'
+
+    // Required for JFrog Artifactory repository
+    id 'jacoco'
+    id 'maven-publish'
+
+    // Required for Maven Nexus repository
+    id 'maven'
+    id 'signing'
+    id 'idea'
 }
+
+apply plugin: org.example.greeting.GreetingPlugin
+apply plugin: org.web3j.solidity.gradle.plugin.SolcPlugin
+
+//apply plugin: 'solidity'
 
 // Define the main class for the application
 //mainClassName = 'App'
 
-//sourceSets {
-//    main {
-//        java {
-//            srcDir 'src-gen'
-//        }
-//    }
-//}
+// this is the plugin ID registered by the above GreetingPlugin
+
+solidity {
+    outputComponents = ['BIN', 'ABI', 'ASM_JSON']
+    optimizeRuns = 100
+    srcMaps = [
+            "src=/Users/bran/projects/udap/EIP/singular/src",
+            "openzeppelin-solidity=/Users/bran/projects/udap/EIP/singular/src/node_modules/openzeppelin-solidity"
+    ]
+    overwrite = true
+    optimize = true
+    prettyJson = true
+
+    /// wrapper
+    generatedJavaPackageName = "io.udap.web3j"
+    generatedFilesBaseDir = 'src/main/src-gen'
+    useNativeJavaTypes = true
+    excludedContracts = []
+}
+
+testy {
+    message = "你好"
+    recipient = "Gradle"
+}
+
+sourceSets {
+    main {
+        java {
+            java.srcDir 'src/main/web3j_wrappers' // append
+        }
+        solidity {
+            srcDirs = ['src/contracts']
+        }
+    }
+}
+
+
 
 ext {
     web3jVersion = '3.6.1-SNAPSHOT'
@@ -32,13 +96,15 @@ ext {
 }
 
 dependencies {
-    compile "org.web3j:core:$web3jVersion",
-            "org.web3j:geth:$web3jVersion",
-            "org.web3j:codegen:$web3jVersion",
-            "ch.qos.logback:logback-core:$logbackVersion",
-            "ch.qos.logback:logback-classic:$logbackVersion"
+    implementation gradleApi()
+//    implementation "org.web3j:core:$web3jVersion"
+//    implementation "org.web3j:geth:$web3jVersion"
+//    implementation "org.web3j:codegen:$web3jVersion"
+    implementation "org.web3j:console:$web3jVersion"
+//    implementation "ch.qos.logback:logback-core:$logbackVersion"
+//    implementation "ch.qos.logback:logback-classic:$logbackVersion"
     testCompile "junit:junit:$junitVersion"
-    compile ("org.ethereum:ethereumj-core:1.10.0-bran-SNAPSHOT") {
+    implementation ("org.ethereum:ethereumj-core:1.10.0-bran-SNAPSHOT") {
 //    compile ("org.ethereum:ethereumj-core:1.9.0-RELEASE") {
         changing = true
         exclude group: "log4j"
@@ -56,4 +122,5 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven { url "https://plugins.gradle.org/m2/" }
+    gradlePluginPortal()
 }

@@ -1,0 +1,29 @@
+
+ext {
+    web3jVersion = '3.6.1-SNAPSHOT'
+    logbackVersion = '1.2.3'
+    junitVersion = '4.12'
+}
+
+dependencies {
+    implementation gradleApi()
+//    implementation "org.web3j:core:$web3jVersion"
+//    implementation "org.web3j:geth:$web3jVersion"
+//    implementation "org.web3j:codegen:$web3jVersion"
+    implementation "org.web3j:console:$web3jVersion"
+//    implementation "ch.qos.logback:logback-core:$logbackVersion"
+//    implementation "ch.qos.logback:logback-classic:$logbackVersion"
+    testCompile "junit:junit:$junitVersion"
+}
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+    // Use jcenter for resolving your dependencies.
+    // You can declare any Maven/Ivy/file repository here.
+    jcenter()
+    mavenLocal()
+    mavenCentral()
+    maven { url "https://plugins.gradle.org/m2/" }
+    gradlePluginPortal()
+}
+
