@@ -29,7 +29,7 @@ contract Echo is Mortal, Logger {
     }
 
     function newGreeting(string _greeting) public {
-        Modified(greeting, _greeting, greeting, _greeting);
+        emit Modified(greeting, _greeting, greeting, _greeting);
         greeting = _greeting;
     }
 

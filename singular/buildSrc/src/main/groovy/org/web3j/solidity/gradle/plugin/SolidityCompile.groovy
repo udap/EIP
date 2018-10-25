@@ -1,14 +1,19 @@
 package org.web3j.solidity.gradle.plugin
 
+import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskAction
 import org.web3j.codegen.SolidityFunctionWrapper
 import org.web3j.utils.Files
 
+public class SolidityCompile extends DefaultTask {
 
-public class SolidityCompile extends SourceTask {
+    @Input
+    public String srcDir       ///< the contract source directory
+
+    @Input
+    public String abiDir       ///< where to hold the generated ABI and BIN files
 
     @Input
     @Optional
@@ -28,7 +33,7 @@ public class SolidityCompile extends SourceTask {
 
     @Input
     @Optional
-    public OutputComponent[] outputComponents
+    public OutputComponent[] outputArtifacts   ///< artifacts to generate
 
     @Input
     @Optional
@@ -37,10 +42,10 @@ public class SolidityCompile extends SourceTask {
     /// the following configs are for wrapper generation
     
     @Input
-    public String generatedJavaPackageName;
+    public String wrapperPackageName;
 
     @Input
-    public String generatedFilesBaseDir
+    public String wrapperBaseDir
 
     @Input
     @Optional
@@ -55,7 +60,7 @@ public class SolidityCompile extends SourceTask {
     void compileSolidity() {
         def options = []
 
-        for (output in outputComponents) {
+        for (output in outputArtifacts) {
             options.add("--$output")
         }
 
@@ -81,14 +86,26 @@ public class SolidityCompile extends SourceTask {
             options.add(srcMap)
         }
 
-        def outdir = outputs.files.singleFile.absolutePath
         options.add('-o')
-        options.add(outdir)
+        options.add(abiDir)
 
         println(options)
 
-        for (File contract in source) {
-            options.add(contract.absolutePath)
+//        for (File contract in source) {
+//            options.add(contract.absolutePath)
+//        }
+
+        File sd = new File(srcDir)
+        if (!sd.exists())
+            throw new RuntimeException(sd.absolutePath + " does not exisit")
+
+        new File(srcDir).eachFileRecurse {
+            if (it.name.endsWith(".sol")) {
+                String contractName = it.getName().replaceAll("\\.sol", "");
+                if (excludedContracts == null || !excludedContracts.contains(contractName)) {
+                    options.add(it.absolutePath)
+                }
+            }
         }
 
         project.exec {
@@ -98,12 +115,12 @@ public class SolidityCompile extends SourceTask {
 
         println("generating web3j wrapper")
 
-        new File(outdir).eachFile {
+        new File(abiDir).eachFile {
             if (it.name.endsWith(".abi") && !it.name.startsWith("_")) {
                 String contractName = it.getName().replaceAll("\\.abi", "");
                 if (excludedContracts == null || !excludedContracts.contains(contractName)) {
 //                    String packageName = MessageFormat.format(
-//                            generatedJavaPackageName,
+//                            wrapperPackageName,
 //                            contractName.toLowerCase()
 //                    );
                     File contractBin = new File(it.getParentFile(), contractName + ".bin");
@@ -115,8 +132,8 @@ public class SolidityCompile extends SourceTask {
                             contractName,
                             Files.readString(contractBin),
                             Files.readString(it),
-                            generatedFilesBaseDir,
-                            generatedJavaPackageName
+                            wrapperBaseDir,
+                            wrapperPackageName
                     );
                 }
             }

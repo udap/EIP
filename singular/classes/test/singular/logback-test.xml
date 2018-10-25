@@ -41,7 +41,7 @@
     There are a few ways you can change logging levels on the fly in a running app.
     This could be a better solution than over logging.
     -->
-    <root level="DEBUG">
+    <root level="WARN">
         <!--
         If you want async logging just use ref="ASYNC" instead.
         We will favor synchronous logging for simplicity. -->
@@ -62,5 +62,7 @@
     configuration file.
     -->
     <!--<logger name="com.stubbornjava.secrets.MySecretPasswordClass" level="WARN" />-->
+
+    <logger name="VM" level="WARN"/>
 
 </configuration>
