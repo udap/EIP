@@ -61,7 +61,7 @@ contract TradeExecutor is ITradeExecutor {
      */
     function buy(
         ITradable token,     ///<
-        IDebit debitCard   ///< the money
+        IDebit debitCard     ///< the money
     )
     external
     {
@@ -97,16 +97,24 @@ contract TradeExecutor is ITradeExecutor {
 
         // all set.do the swap, assuming this executor is trusted by both parties
         token.swapInOwner(bOwner, "from executor.buy()");
+        // if sale price less than debit amount
+        if (debitCard.denomination() > price) {
+            // return tokens back to
+            uint256 change = debitCard.denomination() - price;
+            debitCard.withdraw(change);
+            emit GiveChange(debitCard, debitCard.owner(), change, "from executor.buy()");
+        }
+
         debit.swapInOwner(aOwner, "from executor.buy()");
 
         emit Sold(
-            token,                       ///< the item for sell
-            aOwner,              ///< seller
-            bOwner,               ///< buyer
-            erc20,   ///< the currency type
-            price,            ///< price
-            t,                        ///< when the tx completes
-            "from executor.buy()"              ///< additional note);
+            token,                      ///< the item for sell
+            aOwner,                     ///< seller
+            bOwner,                     ///< buyer
+            erc20,                      ///< the currency type
+            price,                      ///< price
+            t,                          ///< when the tx completes
+            "from executor.buy()"       ///< additional note);
         );
     }
 

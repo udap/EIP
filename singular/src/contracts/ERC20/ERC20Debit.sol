@@ -10,9 +10,9 @@ import "../impl/Tradable.sol";
 
 /**
  * @title A holder of ERC20 token values owned by by some party
- * 
+ *
  * The value is the denomination of the coin.
- * 
+ *
  */
 contract ERC20Debit is IDebit, Tradable {
 
@@ -57,12 +57,12 @@ contract ERC20Debit is IDebit, Tradable {
     function denomination()
     public view
     returns(
-        uint256 value           ///< the amount of tokens in this packet   
-    ) 
+        uint256 value           ///< the amount of tokens in this packet
+    )
     {
         return erc20_.balanceOf(this);
     }
-    
+
     /**
      * To transfer some tokens to another coin of the same ERC20 type.
      * The owner of the coin can be different
@@ -100,6 +100,15 @@ contract ERC20Debit is IDebit, Tradable {
         reset();
     }
 
+    function withdraw(
+        uint256 amount
+    )
+    public
+    forTradeExecutor
+    {
+        erc20_.transfer(theOwner, amount);
+    }
+
 
     /**
      * To dump the all the coin value from the argument to this coin container.
@@ -125,7 +134,7 @@ contract ERC20Debit is IDebit, Tradable {
      */
     function split(
         uint256 amount      ///< the value in the new coin
-    ) 
+    )
     public
     returns(
         IDebit          ///< the spawned child coin
@@ -137,7 +146,7 @@ contract ERC20Debit is IDebit, Tradable {
 //        IDebit newCoin = _erc20Factory.newDebit(erc20_, amount);
 //        return newCoin;
     }
-    
+
     modifier sameTokenType(IDebit t) {
         require(ISingular(t).tokenType() == this.tokenType(), "The currency types are different");
         _;

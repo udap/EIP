@@ -19,7 +19,7 @@ contract ITradeExecutor {
         ITradable indexed item, ///< the item for sell
         ISingularWallet indexed seller, ///< seller
         ISingularWallet indexed buyer,  ///< buyer
-        address erc20,  ///< the currency type
+        address erc20,          ///< the currency type
         uint256 price,          ///< price
         uint256 when,           ///< when the tx completes
         string note             ///< additional note
@@ -31,11 +31,17 @@ contract ITradeExecutor {
      */
     event Swapped(
         ITradable indexed from, ///< the item for swap
-        ITradable indexed to,  ///< the desired item
+        ITradable indexed to,   ///< the desired item
         uint when,              ///< when this happened
         string note             ///< additional note
     );
 
+    event GiveChange(
+        IDebit indexed from,        ///< the origin debit
+        ISingularWallet indexed to, ///< the owner wallet of debit
+        uint256 changeAmount,       ///< the spread of the deal
+        string note                 ///< additional note
+    );
     /**
     owner facing API to swap the owners of the two items.
 
@@ -55,7 +61,7 @@ contract ITradeExecutor {
     The debit card MUST been set up with a proper SwapOffer with the denomination and swap target
      */
     function buy(
-        ITradable self,     ///<
+        ITradable self,    ///<
         IDebit debitCard   ///< the money
     )
     external;
