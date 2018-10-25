@@ -1,6 +1,6 @@
 package org.web3j.solidity.gradle.plugin
 
-enum OutputComponent {
+enum OutputArtifact {
 
     AST,
     AST_JSON,

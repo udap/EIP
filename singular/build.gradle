@@ -24,7 +24,7 @@ solc {
     outputArtifacts = ['BIN', 'ABI', 'AST_JSON']
     optimize = true
     optimizeRuns = 100
-    srcMaps = [
+    otherOptions = [
             "src=$projectDir/src",
             "openzeppelin-solidity=$projectDir/src/node_modules/openzeppelin-solidity"
     ]
@@ -33,7 +33,7 @@ solc {
 
     /// wrapper
     wrapperPackageName = "io.udap.web3j"
-    wrapperBaseDir = 'src/main/src-gen'
+    wrapperBaseDir = 'src/main/web3j_wrappers'
     useNativeJavaTypes = true
     excludedContracts = []
 }

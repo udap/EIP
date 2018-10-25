@@ -33,11 +33,11 @@ public class SolidityCompile extends DefaultTask {
 
     @Input
     @Optional
-    public OutputComponent[] outputArtifacts   ///< artifacts to generate
+    public OutputArtifact[] outputArtifacts   ///< artifacts to generate
 
     @Input
     @Optional
-    public String[] srcMaps
+    public String[] otherOptions
 
     /// the following configs are for wrapper generation
     
@@ -79,10 +79,10 @@ public class SolidityCompile extends DefaultTask {
 
         if (prettyJson) {
             options.add('--pretty-json')
-//                options.add(options.add("--$OutputComponent.ASM_JSON"))
+//                options.add(options.add("--$OutputArtifact.ASM_JSON"))
         }
 
-        for (srcMap in srcMaps) {
+        for (srcMap in otherOptions) {
             options.add(srcMap)
         }
 
@@ -113,20 +113,18 @@ public class SolidityCompile extends DefaultTask {
             args = options
         }
 
-        println("generating web3j wrapper")
+        println('-------------------------------------------------')
+        println("generating web3j wrappers in: " + wrapperBaseDir)
+        println('-------------------------------------------------')
 
         new File(abiDir).eachFile {
             if (it.name.endsWith(".abi") && !it.name.startsWith("_")) {
                 String contractName = it.getName().replaceAll("\\.abi", "");
                 if (excludedContracts == null || !excludedContracts.contains(contractName)) {
-//                    String packageName = MessageFormat.format(
-//                            wrapperPackageName,
-//                            contractName.toLowerCase()
-//                    );
                     File contractBin = new File(it.getParentFile(), contractName + ".bin");
                     def wrapper = new SolidityFunctionWrapper(useNativeJavaTypes);
 
-                    println("creating web3j wrapper for: " + contractName)
+                    println("-- creating web3j wrapper for: " + contractName)
 
                     wrapper.generateJavaFiles(
                             contractName,
