@@ -25,8 +25,8 @@ solc {
     optimize = true
     optimizeRuns = 100
     srcMaps = [
-            "src=/Users/bran/projects/udap/EIP/singular/src",
-            "openzeppelin-solidity=/Users/bran/projects/udap/EIP/singular/src/node_modules/openzeppelin-solidity"
+            "src=$projectDir/src",
+            "openzeppelin-solidity=$projectDir/src/node_modules/openzeppelin-solidity"
     ]
     overwrite = true
     prettyJson = true

@@ -1,6 +1,6 @@
 
 ext {
-    web3jVersion = '3.6.1-SNAPSHOT'
+    web3jVersion = '3.6.0'
     logbackVersion = '1.2.3'
     junitVersion = '4.12'
 }
