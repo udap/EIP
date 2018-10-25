@@ -259,6 +259,7 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
 
             erc20 = await E20Contract.new({from: bobEOA});
             let ttx = await erc20.transfer(bobWallet.address, ERC20_AMOUNT, {from: bobEOA});
+            let amount = await erc20.balanceOf.call(bobWallet.address)
 
             debit = await Erc20DebitContract.new({from: bobEOA});
 
@@ -326,9 +327,13 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
             assert.isTrue(await aliceToken.isForSale.call());
             assert.isTrue(await debit.isInSwap.call());
             // 3. let's do it
-            tx = await  exe.buy(aliceToken.address, debit.address, {from: bobEOA});
+            tx = await exe.buy(aliceToken.address, debit.address, {from: bobEOA});
             // logit(tx, "accept tx");
             expectEvent.inLogs(tx.logs, "Sold");
+            expectEvent.inLogs(tx.logs, "GiveChange");
+            // check change amount
+            let change = tx.logs[0].args.changeAmount.toNumber();
+            assert.equal(change, DEBIT_AMOUNT-PRICE, "change is not correct")
 
             assert.equal(await aliceToken.owner.call(), bobWallet.address, "aliceToken owner was not transferred to bob");
             assert.equal(await debit.owner.call(), aliceWallet.address, "bob's debit was not transferred to alice");

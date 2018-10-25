@@ -70,10 +70,9 @@ contract IDebit is ISingular {
     );
 
     /**
-    *  to extract token from this debit
+    *  to withdraw token from this debit
     */
     function withdraw(
-        ISingularWallet wallet,
         uint256 amount
     )
     public;

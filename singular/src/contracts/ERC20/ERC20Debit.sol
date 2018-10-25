@@ -101,13 +101,12 @@ contract ERC20Debit is IDebit, Tradable {
     }
 
     function withdraw(
-        ISingularWallet owner,
-        uint256 change
+        uint256 amount
     )
     public
     forTradeExecutor
     {
-        erc20_.transfer(owner, change);
+        erc20_.transfer(theOwner, amount);
     }
 
 
