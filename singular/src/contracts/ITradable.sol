@@ -14,8 +14,6 @@ import "./ISingular.sol";
  * 3. buy and sell
  * 4. auction (todo)
  *
- *
- *
  *  XXX: Ideally it should inherit from ISingular, but doing so causes remix IDE compiler to complain
  * about order of definitions. As a compromise, I added the toISingular() to bridge the two interface.
  *

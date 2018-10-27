@@ -12,8 +12,11 @@ import org.web3j.utils.Files
 
 public class SolidityCompile extends DefaultTask {
 
+
+    public static final String DATA = "src/tmp/dependencies.data"
+
     SolidityCompile() {
-        println("new instane of SoidityCompile created")
+//        println("new instane of SoidityCompile created")
     }
 
     @InputDirectory
@@ -62,7 +65,7 @@ public class SolidityCompile extends DefaultTask {
 
     @Input
     @Optional
-    def String dependencyFileName = "src/tmp/dependencies.data";
+    def String dependencyFileName = DATA;
 
     @Input
     @Optional
@@ -78,8 +81,13 @@ public class SolidityCompile extends DefaultTask {
 
         if (!inputs.incremental) {
             println('do full build')
-            project.delete(abiDir.listFiles())
-            project.delete(wrapperBaseDir.listFiles())
+            File[] abiFiles = abiDir.listFiles()
+            if (abiFiles)
+                project.delete(abiFiles)
+
+            File[] wrappers = wrapperBaseDir.listFiles()
+            if (wrappers)
+                project.delete(wrappers)
 
             if (!srcDir.exists())
                 throw new RuntimeException(srcDir.absolutePath + " does not exisit")
@@ -196,7 +204,7 @@ public class SolidityCompile extends DefaultTask {
                             contractName,
                             Files.readString(contractBin),
                             Files.readString(it),
-                            wrapperBaseDir.name,
+                            wrapperBaseDir.path,
                             wrapperPackageName
                     );
                 }

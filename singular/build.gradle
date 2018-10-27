@@ -1,6 +1,6 @@
 //import org.singular.IncrementalReverseTask
 
-import org.singular.IncrementalReverseTask
+import org.singular.SolidityClean
 import org.singular.SolidityCompile
 
 plugins {
@@ -19,34 +19,14 @@ plugins {
 //    id 'idea'
 }
 
-//apply plugin: SolcPlugin
-//
-//solc {
-//    srcDir = file('src/contracts')
-//    abiDir = file('build/solidity')
-//    outputArtifacts = ['BIN', 'ABI', 'AST_JSON']
-//    optimize = true
-//    optimizeRuns = 100
-//    otherOptions = [
-//            "src=$projectDir/src",
-//            "openzeppelin-solidity=$projectDir/src/node_modules/openzeppelin-solidity"
-//    ]
-//    overwrite = true
-//    prettyJson = true
-//
-//    /// wrapper
-//    wrapperPackageName = "io.udap.web3j"
-//    wrapperBaseDir = file('src/main/web3j_wrappers')
-//    useNativeJavaTypes = true
-//    excludedContracts = []
-//}
 def SOL_WRAPPER = 'src/main/web3j_wrappers'
+def SOL_BUILD = 'build/solidity'
 
 // this way defining a task is very straightforward
 task solc(type: SolidityCompile) {
     description 'Compile Solidity files with native solc'
     srcDir = file('src/contracts')
-    abiDir = file('build/solidity')
+    abiDir = file(SOL_BUILD)
     outputArtifacts = ['BIN', 'ABI', 'AST_JSON']
     optimize = true
     optimizeRuns = 100
@@ -66,10 +46,18 @@ task solc(type: SolidityCompile) {
 
 compileJava.dependsOn solc
 
-task incre(type: IncrementalReverseTask) {
-    inputDir = file("test/a")
-    outputDir = file("test/b")
+task solcClean (type: SolidityClean) {
+    description 'Clean the Compile Solidity artifacts'
+    abiDir = file(SOL_BUILD)
+    wrapperBaseDir = file(SOL_WRAPPER)
 }
+
+clean.dependsOn(solcClean)
+//
+//task incre(type: IncrementalReverseTask) {
+//    inputDir = file("test/a")
+//    outputDir = file("test/b")
+//}
 
 sourceSets {
     main {
