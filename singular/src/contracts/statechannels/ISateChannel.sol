@@ -5,14 +5,12 @@ import "../impl/BasicSingularWallet.sol";
 
 interface IStateChanelFactory {
     function newChannel();
-
 }
 
 /**
-A member of a state channel.
-*/
-interface IChannelMember{
-}
+ * A member of a state channel.
+ */
+interface IChannelMember{}
 
 contract ChannelMemeber is BasicSingularWallet, IChannelMember {
     IStateChannel public theChannel;
@@ -24,12 +22,7 @@ contract ChannelMemeber is BasicSingularWallet, IChannelMember {
     }
 }
 
-
-
-interface ISignedStatement {
-
-}
-
+interface ISignedStatement {}
 
 contract IStateChannel is IChannelMember{
 
@@ -77,7 +70,6 @@ contract IStateChannel is IChannelMember{
     for the other parties to prevent the pre-mature exit by submitting a later version of state, which
     may or may not be the final state, by way of invoking various update and close methods.
     */
-
     function requestToCloseBySome (
         ISignedStatement statement,     ///< the state to submit, can be NULL state
         bytes32[] someSignatures     ///< signatures from those who want to force close

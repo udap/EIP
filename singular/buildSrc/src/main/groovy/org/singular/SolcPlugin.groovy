@@ -1,4 +1,4 @@
-package org.web3j.solidity.gradle.plugin
+package org.singular
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project

@@ -5,11 +5,12 @@ import "../SingularMeta.sol";
 import "../ITradable.sol";
 
 /**
- * A contract that binds an address (EOA/SC) to a list of Singular tokens. The
- * owner account may not have the ability to handle the Singular tokens directly,
+ *
+ * A contract that binds an address (EOA/SC) to a list of Singular tokens.
+ * The owner account may not have the ability to handle the Singular tokens directly,
  * thus they can take advantage of this contract to achieve the effect.
  *
- * All the tokens MUST have this account as the owner of them. It's up to the implemntation
+ * All the tokens MUST have this account as the owner of them. It's up to the implementation
  * to ensure the synchronization.
  *
  * The majority of token ownership management takes place in the `Singular` token.
@@ -19,19 +20,12 @@ import "../ITradable.sol";
  */
 contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement Singular to make a composite pattern
 
-
     address theCreator;
 
     /// list as the token set, since mapping does not give the ket set
     ISingular[] internal tokens;
-//    uint256 internal totalTokens;
     uint assetTimestamp;
     bool internal autoReceive_ = true;        ///< policy in receiving incoming tokens
-
-    /// old verions of authorization is kept due to mapping's technical limitation
-    /// we use the tokenVersion to track the latest set of authorizations
-//    mapping(address => uint32) tokenVersion;
-
 
     address public ownerOfThis;
 

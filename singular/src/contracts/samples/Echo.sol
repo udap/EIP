@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "./Logger.sol";
 
 // Modified Greeter contract. Based on example at https://www.ethereum.org/greeter.
-
+// For experiments only...
 contract Mortal {
     /* Define variable owner of the type address*/
     address owner;
@@ -13,7 +13,7 @@ contract Mortal {
 
     /* Function to recover the funds on the contract */
     function kill() {
-        require(msg.sender == owner, "only owner can kill");
+        require(msg.sender == owner, "only the owner can kill the contract");
         selfdestruct(owner);
     }
 }

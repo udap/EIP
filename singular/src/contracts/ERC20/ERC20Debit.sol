@@ -92,10 +92,10 @@ contract ERC20Debit is IDebit, Tradable {
     forTradeExecutor
     max128Bytes(note)
     {
-        require(address(newOwner) != address(0), "the newOwner was null");
-        ownerPrevious = theOwner;
+    require(address(newOwner) != address(0), "the newOwner was null");
         theOwner = newOwner;
         ownerPrevious.sent(this, note);
+        ownerPrevious = theOwner;
         theOwner.received(this, note);
         reset();
     }

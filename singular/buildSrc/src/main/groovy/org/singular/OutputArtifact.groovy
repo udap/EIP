@@ -1,4 +1,4 @@
-package org.web3j.solidity.gradle.plugin
+package org.singular
 
 enum OutputArtifact {
 
