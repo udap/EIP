@@ -11,9 +11,9 @@ import "./ITradable.sol";
  * All the tokens MUST have this account as the owner of them. It's up to the implementation
  * to ensure the synchronization.
  *
-  XXX alternative name: ISingularOwner
-
-
+ *  XXX alternative name: ISingularOwner
+ *
+ *
  * @author Bing Ran<bran@udap.io>
  * @author Guxiang Tang<gtang@udap.io>
  *

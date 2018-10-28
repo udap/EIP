@@ -1,6 +1,6 @@
 package org.solidityj
 
-import org.antlr.v4.runtime.ANTLRInputStream
+import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import java.io.File
 
@@ -46,9 +46,8 @@ class ImportsBuilder() : SolidityBaseVisitor<ASTNode>() {
 
 }
 
-
 fun parseImports(code: String): ImportsBuilder {
-    val parser = SolidityParser(CommonTokenStream(SolidityLexer(ANTLRInputStream(code))))
+    val parser = SolidityParser(CommonTokenStream(SolidityLexer(CharStreams.fromString(code))))
     val builder = ImportsBuilder()
     builder.visit(parser.sourceUnit())
     return builder

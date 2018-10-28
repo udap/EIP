@@ -10,7 +10,7 @@ import "../ERC721/ERC721NonTradable.sol";
 
 
 /**
-   @title A surrogate to an ERC20 account, with additional factory method.
+ *  @title A surrogate to an ERC20 account, with additional factory method.
  */
 contract SingularWalletWithE20E721 is BasicSingularWallet{
 
@@ -27,7 +27,7 @@ contract SingularWalletWithE20E721 is BasicSingularWallet{
 
     /**
     to create a debit account held by the wallet with some cash in it, from the caller's holdings. The user must
-    have transfer some balance to the wallet address before issuing anything.
+    have transferred some balance to the wallet address before issuing anything.
     */
     function activateE20Debit(
         string name,
@@ -50,8 +50,8 @@ contract SingularWalletWithE20E721 is BasicSingularWallet{
         string _name,
         string _description,
         string _tokenURI,
-        bytes32 _tokenURIDigest,     ///< the hash of any tokenURI content
-        uint256 tokenId                 ///< the id of the token that is ownded by the caller.
+        bytes32 _tokenURIDigest,    ///< the hash of any tokenURI content
+        uint256 tokenId             ///< the id of the token that is ownded by the caller.
     )
     public
     ownerOnly

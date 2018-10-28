@@ -1,14 +1,8 @@
 package org.singular
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
-import org.web3j.codegen.SolidityFunctionWrapper
-import org.web3j.utils.Files
 
 public class SolidityCompile extends DefaultTask {
 
@@ -51,25 +45,14 @@ public class SolidityCompile extends DefaultTask {
     @Optional
     def String[] otherOptions
 
-    /// the following configs are for wrapper generation
-
-    @Input
-    def String wrapperPackageName;
-
-    @OutputDirectory
-    def File wrapperBaseDir
-
-    @Input
-    @Optional
-    def Boolean useNativeJavaTypes;
-
     @Input
     @Optional
     def String dependencyFileName = DATA;
 
+
     @Input
     @Optional
-    def List<String> excludedContracts;
+    def String[] excludedContracts
 
 
     void compileSolidity() {
@@ -85,15 +68,11 @@ public class SolidityCompile extends DefaultTask {
             if (abiFiles)
                 project.delete(abiFiles)
 
-            File[] wrappers = wrapperBaseDir.listFiles()
-            if (wrappers)
-                project.delete(wrappers)
-
             if (!srcDir.exists())
                 throw new RuntimeException(srcDir.absolutePath + " does not exisit")
 
             Set<String> files = allInputFiles()
-            ContractDependencies.restoreFrom(dependencyFileName).update(files);
+            ContractDependencies.fresh(dependencyFileName).update(files);
             rebuild(files);
             return;
         } else {
@@ -177,38 +156,9 @@ public class SolidityCompile extends DefaultTask {
 
         println(options)
 
-//        for (File contract in source) {
-//            options.add(contract.absolutePath)
-//        }
-
-
         project.exec {
             executable = 'solc'
             args = options
-        }
-
-        println('-------------------------------------------------')
-        println("generating web3j wrappers in: " + wrapperBaseDir)
-        println('-------------------------------------------------')
-
-        abiDir.eachFile {
-            if (it.name.endsWith(".abi") && !it.name.startsWith("_")) {
-                String contractName = it.getName().replaceAll("\\.abi", "");
-                if (excludedContracts == null || !excludedContracts.contains(contractName)) {
-                    File contractBin = new File(it.getParentFile(), contractName + ".bin");
-                    def wrapper = new SolidityFunctionWrapper(useNativeJavaTypes);
-
-                    println("-- creating web3j wrapper for: " + contractName)
-
-                    wrapper.generateJavaFiles(
-                            contractName,
-                            Files.readString(contractBin),
-                            Files.readString(it),
-                            wrapperBaseDir.path,
-                            wrapperPackageName
-                    );
-                }
-            }
         }
     }
 }

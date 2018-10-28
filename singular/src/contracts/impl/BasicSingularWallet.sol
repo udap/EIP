@@ -18,8 +18,7 @@ import "../ITradable.sol";
  * @author Bing Ran<bran@udap.io>
  *
  */
-contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement Singular to make a composite pattern
-
+contract BasicSingularWallet is ISingularWallet, SingularMeta {
     address theCreator;
 
     /// list as the token set, since mapping does not give the key set
@@ -31,15 +30,12 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
 
     constructor(
         string _name
-//        string _descr,
-//        string _tokenURI,
-//        bytes32 _tokenURIDigest
     )
     public
     {
         SingularMeta.init(
             _name,
-            "BasicSingularWallet",
+            "A BasicSingularWallet",
             "",
             "",
             0
@@ -254,7 +250,7 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
     ISingularWallet. The new container's owner is the the owner of this container
     */
     function slice(
-        ISingular[] elements    ///< the elements to move slice off from this container.
+        ISingular[] /*elements*/    ///< the elements to move slice off from this container.
     )
     external
     returns(
@@ -282,10 +278,10 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
     function addToTokenSet(ISingular token) internal {
         for (uint i = 0; i < tokens.length; i++) {
             if (token == tokens[i]) {
-                revert("duplicated when being inserted to token set in the wallet.");
+                revert("duplicated item when being inserted to token set in the wallet.");
             }
             else if (address(tokens[i]) == address(0)) {
-                revert("there was a hole in the asset array");
+                revert("there should not be a hole in the asset array");
             }
         }
         assetTimestamp = now;
@@ -334,5 +330,6 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
         require(msg.sender == ownerOfThis, "msg.sender was not the ownerOfThis");
         _;
     }
+
 }
 
