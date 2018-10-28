@@ -9,9 +9,10 @@ import "../ITradable.sol";
 
 
 /**
+
 @title A tradable Singular implementation
 
-A countract of this class can be used in trading.
+A contract of this class is an autonomous trading agent
 
 @author bing ran<bran@udap.io>
 

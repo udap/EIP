@@ -6,6 +6,7 @@ import "./ISingular.sol";
 
 
 /**
+ *
  * @title Interface of tradable ISingular
  *
  * It supports:
@@ -15,7 +16,7 @@ import "./ISingular.sol";
  * 4. auction (todo)
  *
  *  XXX: Ideally it should inherit from ISingular, but doing so causes remix IDE compiler to complain
- * about order of definitions. As a compromise, I added the toISingular() to bridge the two interface.
+ * about order of definitions. As a compromise, I added the toISingular() to bridge the two interfaces.
  *
  * @author Bing Ran<bran@udap.io>
  */

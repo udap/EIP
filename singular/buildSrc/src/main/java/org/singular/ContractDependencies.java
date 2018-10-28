@@ -102,19 +102,24 @@ public class ContractDependencies implements Serializable {
             throw new RuntimeException(i);
         }
 
+        Set<String> deps = new HashSet<>();
+
         // now all files are processed
         Set<String> result = new HashSet<>(updatedFileNames);
-        for (String f : updatedFileNames) {
-            result.addAll(getDependents(f));
-        }
-        for(String s : result) {
-            if (s.startsWith("/")) {
 
+        while(result.size() > 0) {
+            deps.addAll(result);
+//            result.clear();
+            Set<String> tmps = new HashSet<>();
+            for (String f : result) {
+                tmps.addAll(getDependents(f));
             }
-            else {
-                System.out.println("what: " + s);
-            }
+            result = tmps;
+            result.removeAll(deps); // the new ones
         }
-        return result;
+
+        System.out.println("compilation set: " + deps.size());
+        deps.forEach(System.out::println);
+        return deps;
     }
 }

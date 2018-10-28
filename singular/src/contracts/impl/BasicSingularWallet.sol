@@ -22,7 +22,7 @@ contract BasicSingularWallet is ISingularWallet, SingularMeta {/// can implement
 
     address theCreator;
 
-    /// list as the token set, since mapping does not give the ket set
+    /// list as the token set, since mapping does not give the key set
     ISingular[] internal tokens;
     uint assetTimestamp;
     bool internal autoReceive_ = true;        ///< policy in receiving incoming tokens
