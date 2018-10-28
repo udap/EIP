@@ -12,7 +12,8 @@ import "../ITradable.sol";
 
 @title A tradable Singular implementation
 
-A contract of this class is an autonomous trading agent
+A contract of this class is an autonomous trading agent with the help from
+`TradeExecutor`
 
 @author bing ran<bran@udap.io>
 
@@ -20,12 +21,9 @@ A contract of this class is an autonomous trading agent
 contract Tradable is NonTradable, ITradable {
     function contractName() external pure returns(string) {return "Tradable";}
 
-//    event Log(address who, string what);
-
     ISingularWallet internal ownerPrevious; /// next owner choice
 
     // let use the parent init function for the same purpose
-
     TradeExecutor public executor;
 
     function init(

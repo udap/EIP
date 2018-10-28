@@ -1,8 +1,7 @@
 package org.singular;
 
 import org.jetbrains.annotations.NotNull;
-import org.solidityj.ImportsBuilder;
-import org.solidityj.ImportsBuilderKt;
+import org.singular.antlr.SolImportsKt;
 
 import java.io.*;
 import java.util.*;
@@ -43,11 +42,21 @@ public class ContractDependencies implements Serializable {
         }
     }
 
+    public static ContractDependencies fresh(String p) {
+        File dataFile = new File(p);
+        if (dataFile.exists()) {
+            dataFile.delete();
+        }
+        ContractDependencies contractDependencies = new ContractDependencies();
+        contractDependencies.persistFile = p;
+        return contractDependencies;
+    }
+
     public void scan(File contract) throws IOException {
-        ImportsBuilder builder = ImportsBuilderKt.parseImports(contract);
-        List<String> imports = builder.getImports();
+//        ImportsBuilder builder = ImportsBuilderKt.parseImports(contract);
+        List<String> imports = Arrays.asList(SolImportsKt.parseImports(contract));
         String canonicalPath = contract.getCanonicalPath();
-        Set<String> oldSet = this.conImports.put(canonicalPath, new HashSet<>(imports));
+        Set<String> oldSet = this.conImports.put(canonicalPath, new HashSet<>((imports)));
         if (oldSet != null && oldSet.removeAll(imports)) {
             for (String i : oldSet) {
                 Set<String> strings = getDependents(i);
@@ -107,7 +116,7 @@ public class ContractDependencies implements Serializable {
         // now all files are processed
         Set<String> result = new HashSet<>(updatedFileNames);
 
-        while(result.size() > 0) {
+        while (result.size() > 0) {
             deps.addAll(result);
 //            result.clear();
             Set<String> tmps = new HashSet<>();

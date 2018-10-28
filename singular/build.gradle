@@ -2,6 +2,8 @@
 
 import org.singular.SolidityClean
 import org.singular.SolidityCompile
+import org.singular.Web3jGen
+
 
 plugins {
 //    id 'com.jfrog.bintray' version '1.8.4'
@@ -17,6 +19,7 @@ plugins {
 //    id 'maven'
 //    id 'signing'
 //    id 'idea'
+//    id "antlr"
 }
 
 def SOL_WRAPPER = 'src/main/web3j_wrappers'
@@ -24,7 +27,7 @@ def SOL_BUILD = 'build/solidity'
 
 // this way defining a task is very straightforward
 task solc(type: SolidityCompile) {
-    description 'Compile Solidity files with native solc'
+    description 'Compile Solidity fileNames with native solc'
     srcDir = file('src/contracts')
     abiDir = file(SOL_BUILD)
     outputArtifacts = ['BIN', 'ABI', 'AST_JSON']
@@ -36,15 +39,27 @@ task solc(type: SolidityCompile) {
     ]
     overwrite = true
     prettyJson = true
-
-    /// wrapper
-    wrapperPackageName = "io.udap.web3j"
-    wrapperBaseDir = file(SOL_WRAPPER)
-    useNativeJavaTypes = true
     excludedContracts = []
 }
 
-compileJava.dependsOn solc
+task web3jWrap(type: Web3jGen) {
+    dependsOn solc
+    description 'Compile abi to web3j wrapper'
+    abiDir = file(SOL_BUILD)
+    wrapperPackageName = "io.udap.web3j"
+    wrapperBaseDir = file(SOL_WRAPPER)
+    useNativeJavaTypes = true
+}
+
+//
+//configurations {
+//    compile {
+//        extendsFrom = extendsFrom.findAll { it != configurations.antlr }
+//    }
+//}
+
+
+compileJava.dependsOn web3jWrap
 
 task solcClean (type: SolidityClean) {
     description 'Clean the Compile Solidity artifacts'
@@ -58,6 +73,27 @@ clean.dependsOn(solcClean)
 //    inputDir = file("test/a")
 //    outputDir = file("test/b")
 //}
+
+//
+//task generateANTLR {
+//    //FileUtils.cleanDirectory(gen) //import org.apache.commons.io.FileUtils
+//    def gram = "projectDir/buildSrc/src/main/antlr"
+//    fileTree(dir: gram, include: '**/*.g4').each { g4File ->
+//        def g4DirPath = g4File.getParentFile().toPath()
+//        def g4FileSrcRoot = sourceSets.main.java.srcDirs.find({g4DirPath.startsWith(it.toPath())})
+//        def g4Path = g4FileSrcRoot.toPath().relativize(g4DirPath)
+//        def genOutput = new File(gen, g4Path.toFile().getPath())
+//        def package_name = g4Path.toString().replace('\\','.')
+//        doLast {
+//            javaexec {
+//                classpath += configurations.runtime
+//                main = 'org.antlr.v4.Tool'
+//                args = [g4File, "-package", package_name, "-o", genOutput]
+//            }
+//        }
+//    }
+//}
+//compileJava.dependsOn(generateANTLR)
 
 sourceSets {
     main {
@@ -94,6 +130,8 @@ dependencies {
         exclude group: "org.ethereum", module: "solcJ-all"
         exclude group: "org.ethereum", module: "rocksdbjni"
     }
+
+//    antlr "org.antlr:antlr4:4.7.1" // use ANTLR version 4'
 }
 
 // In this section you declare where to find the dependencies of your project

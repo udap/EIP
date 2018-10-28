@@ -6,7 +6,7 @@ import "./IERC20.sol";
 
 /**
 
-packet of some fungible tokens of the same type and of the same owner.
+A packet of some fungible tokens of the same type and of the same owner.
 
 Conceptually it's similar to a mini-wallet containing a single type of cash. The wallet can be used
 to buy other tokens; or it can be split to two wallets. Two wallets of the same type and ownership can be
@@ -19,8 +19,6 @@ IDebit makes some fungible tokens a single unit of value that can participate in
 
 */
 contract IDebit is ISingular {
-    /// to assign owner
-
     function currencyType()
     public view
     returns(

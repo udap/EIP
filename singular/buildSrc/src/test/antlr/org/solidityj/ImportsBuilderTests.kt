@@ -1,6 +1,16 @@
-pragma solidity ^0.4.24;
+package org.solidityj
+
+import kotlin.test.assertEquals
+
+class ImportsBuilderTests {
+
+    @kotlin.test.Test
+    fun testImportsGen(){
+        val code:String = """
+            pragma solidity ^0.4.24;
 
 import "./Logger.sol";
+// import "somthingese.sol"
 
 // Modified Greeter contract. Based on example at https://www.ethereum.org/greeter.
 // For experiments only...
@@ -18,7 +28,11 @@ contract Mortal {
     }
 }
 
-import "../ISingular.sol";
+import '../ISingular.sol' as sig;
+
+import * as symbolName from 'hi.sol';
+
+import {symbol1 as alias, symbol2} from "stuff.sol";
 
 contract Echo is Mortal, Logger {
 
@@ -57,4 +71,12 @@ contract Echo is Mortal, Logger {
         string oldGreeting,
         string newGreeting
     );
+}
+
+        """.trimIndent()
+
+        val v = parseImports(code)
+        assertEquals(4, v.imports.size)
+        v.imports.forEach { println(it) }
+    }
 }

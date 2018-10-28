@@ -1,11 +1,15 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.2.71'
+    id 'antlr'
 }
+
 ext {
     web3jVersion = '3.6.0'
     logbackVersion = '1.2.3'
     junitVersion = '4.12'
 }
+
+//apply plugin: 'antlr'
 
 dependencies {
     implementation gradleApi()
@@ -15,7 +19,10 @@ dependencies {
     implementation "org.web3j:console:$web3jVersion"
 //    implementation "ch.qos.logback:logback-core:$logbackVersion"
 //    implementation "ch.qos.logback:logback-classic:$logbackVersion"
-    implementation 'org.antlr:antlr4-runtime:4.6'
+    implementation 'org.antlr:antlr4-runtime:4.7.1'
+    antlr "org.antlr:antlr4:4.7.1" // use ANTLR version 4'. Critical!!
+//    antlr  group: "org.antlr", name: "antlr4", version: "4.7.1"
+//    compile group: "org.antlr", name: "antlr4-runtime", version: "4.7.1"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
     
@@ -34,7 +41,10 @@ repositories {
     maven { url "https://plugins.gradle.org/m2/" }
     gradlePluginPortal()
 }
+
+
 compileKotlin {
+    dependsOn generateGrammarSource
     kotlinOptions {
         jvmTarget = "1.8"
     }
