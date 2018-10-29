@@ -7,11 +7,8 @@ import org.web3j.codegen.SolidityFunctionWrapper
 import org.web3j.utils.Files
 
 public class Web3jGen extends DefaultTask {
+    public static final String DATA = ContractDependencies.DefaultDependencyFileName
 
-
-    public static final String DATA = "src/tmp/dependencies.data"
-
-    // should this be both InputDirectory and OutputDirectory?
     @InputDirectory
     def File abiDir       ///< where to hold the generated ABI and BIN fileNames
 
@@ -34,7 +31,7 @@ public class Web3jGen extends DefaultTask {
     void execute(IncrementalTaskInputs inputs) {
 
         if (!inputs.incremental) {
-            println('do full build of thr wrappers')
+            println('no incremental. do full build of thr wrappers')
             File[] wrappers = wrapperBaseDir.listFiles()
             if (wrappers)
                 project.delete(wrappers)

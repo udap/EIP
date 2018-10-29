@@ -1,25 +1,20 @@
 package io.udap.singular;
 
+import io.udap.web3j.BasicSingularWallet;
+import io.udap.web3j.Echo;
+import io.udap.web3j.Tradable;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
-import org.ethereum.core.Genesis;
 import org.ethereum.crypto.ECKey;
 import org.ethereum.util.blockchain.SolidityCallResult;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.tuples.generated.Tuple2;
-import org.web3j.tx.gas.DefaultGasProvider;
-import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Created by bran on 2018/10/14.

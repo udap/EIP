@@ -20,9 +20,12 @@ class IncrementalReverseTask extends DefaultTask {
               project.delete(outputDir.listFiles())
 
           inputs.outOfDate { change ->
-              println("file outOfDate: " + change.file)
-              def targetFile = project.file("$outputDir/${change.file.name}")
-              targetFile.text = change.file.text.reverse()
+              def f = change.file
+              println("file outOfDate: " + f)
+              if (f.file) {
+                  def targetFile = project.file("$outputDir/${f.name}")
+                  targetFile.text = f.text.reverse()
+              }
           }
 
           inputs.removed { change ->

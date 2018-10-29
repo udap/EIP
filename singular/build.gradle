@@ -1,9 +1,7 @@
 //import org.singular.IncrementalReverseTask
 
-import org.singular.SolidityClean
-import org.singular.SolidityCompile
-import org.singular.Web3jGen
 
+import org.singular.*
 
 plugins {
 //    id 'com.jfrog.bintray' version '1.8.4'
@@ -42,7 +40,7 @@ task solc(type: SolidityCompile) {
     excludedContracts = []
 }
 
-task web3jWrap(type: Web3jGen) {
+task solcWithWeb3j(type: Web3jGen) {
     dependsOn solc
     description 'Compile abi to web3j wrapper'
     abiDir = file(SOL_BUILD)
@@ -51,15 +49,7 @@ task web3jWrap(type: Web3jGen) {
     useNativeJavaTypes = true
 }
 
-//
-//configurations {
-//    compile {
-//        extendsFrom = extendsFrom.findAll { it != configurations.antlr }
-//    }
-//}
-
-
-compileJava.dependsOn web3jWrap
+compileJava.dependsOn solcWithWeb3j
 
 task solcClean (type: SolidityClean) {
     description 'Clean the Compile Solidity artifacts'
@@ -69,10 +59,6 @@ task solcClean (type: SolidityClean) {
 
 clean.dependsOn(solcClean)
 //
-//task incre(type: IncrementalReverseTask) {
-//    inputDir = file("test/a")
-//    outputDir = file("test/b")
-//}
 
 //
 //task generateANTLR {

@@ -7,11 +7,8 @@ import "../ISingular.sol";
 import "../impl/Tradable.sol";
 
 
-
 /**
  * @title A holder of ERC20 token values owned by by some party
- * 
- *
  * 
  */
 contract ERC20Debit is IDebit, Tradable {

@@ -9,19 +9,18 @@ import "../ITradable.sol";
 
 
 /**
-
-@title A tradable Singular implementation
-
-A contract of this class is an autonomous trading agent with the help from
-`TradeExecutor`
-
-@author bing ran<bran@udap.io>
-
-*/
+ *
+ * @title A tradable Singular implementation
+ *
+ * A contract of this class is an autonomous trading agent with the help from `TradeExecutor`
+ *
+ * @author bing ran<bran@udap.io>
+ *
+ */
 contract Tradable is NonTradable, ITradable {
     function contractName() external pure returns(string) {return "Tradable";}
 
-    ISingularWallet internal ownerPrevious; /// next owner choice
+    ISingularWallet internal ownerPrevious; /// previous owner
 
     // let use the parent init function for the same purpose
     TradeExecutor public executor;
@@ -48,13 +47,13 @@ contract Tradable is NonTradable, ITradable {
         );
     }
 
-    /**
-     * get the current owner as type of SingularOwner
-     */
     function previousOwner() external view initialized returns (ISingularWallet) {return ownerPrevious;}
 
-    function nextOwner() external view initialized returns (ISingularWallet){return transferOffer.nextOwner;}
 
+    /**
+     * To get the approved owner-to-be in a trading. It will be reset if the transfer offer this cancelled.
+     */
+    function nextOwner() external view initialized returns (ISingularWallet){return transferOffer.nextOwner;}
 
     /**
      * There can only be one approved receiver at a given time. This receiver cannot
@@ -64,7 +63,6 @@ contract Tradable is NonTradable, ITradable {
      * Note: the approved receiver can only accept() or reject() the offer. His power is limited
      * before he becomes the owner. This is in contract to the the transferFrom() of ERC20 or
      * ERC721.
-     *
      */
     function approveReceiver(
         ISingularWallet _to,
@@ -78,9 +76,8 @@ contract Tradable is NonTradable, ITradable {
     notInTx
     max128Bytes(_note)
     {
-
-        require(address(_to) != address(0), "cannot send to null address");
-        require(_validTill >= now && now >= _validFrom, "expiry must be later than now and from");
+        require(address(_to) != address(0), "receiver was set to 0x0 and was not valid");
+        require(_validTill >= now && now >= _validFrom, "expiry must be later than now and validFrom");
 
         transferOffer.validFrom = _validFrom;
         transferOffer.validTill = _validTill;

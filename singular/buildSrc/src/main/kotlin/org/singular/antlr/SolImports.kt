@@ -13,7 +13,12 @@ fun parseImports(code: String): Array<String> {
             .toTypedArray();
 }
 
+/**
+ * return the imported files in the contract, as they are exactly appear in the contract. No
+ * path mapping is applied.
+ */
 fun parseImports(contract: File): Array<String> {
     val code = contract.readText()
-    return parseImports(code)
+    val imports = parseImports(code)
+    return imports
 }

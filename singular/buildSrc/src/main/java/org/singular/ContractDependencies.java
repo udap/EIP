@@ -5,6 +5,7 @@ import org.singular.antlr.SolImportsKt;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 //import static org.solidityj.ImportsBuilderKt.parseImports;
 
@@ -14,6 +15,7 @@ public class ContractDependencies implements Serializable {
 
     transient String persistFile;
 
+    public static final String DefaultDependencyFileName = "src/tmp/dependencies.data";
     /**
      * the files that depend on a file. If the file is changed, all the conDirectDependents
      * must be updated too.
@@ -32,6 +34,8 @@ public class ContractDependencies implements Serializable {
         ) {
             ContractDependencies depends = (ContractDependencies) in.readObject();
             depends.persistFile = p;
+            System.out.println("From drive - imports database size: " + depends.conImports.keySet().size());
+            System.out.println("From drive - dependency database size: " + depends.conDirectDependents.keySet().size());
             return depends;
         } catch (IOException i) {
             i.printStackTrace();
@@ -52,26 +56,49 @@ public class ContractDependencies implements Serializable {
         return contractDependencies;
     }
 
+    /**
+     * scan the source code of a contract and update the dependency database
+     * @param contract
+     * @throws IOException
+     */
     public void scan(File contract) throws IOException {
-//        ImportsBuilder builder = ImportsBuilderKt.parseImports(contract);
         List<String> imports = Arrays.asList(SolImportsKt.parseImports(contract));
-        String canonicalPath = contract.getCanonicalPath();
-        Set<String> oldSet = this.conImports.put(canonicalPath, new HashSet<>((imports)));
+
+        imports = makeCanonical(contract, imports);
+
+        String thisContract = contract.getCanonicalPath();
+        Set<String> oldSet = this.conImports.put(thisContract, new HashSet<>((imports)));
         if (oldSet != null && oldSet.removeAll(imports)) {
+            // break the dependencies for reflect the latest imports
             for (String i : oldSet) {
                 Set<String> strings = getDependents(i);
-                strings.remove(canonicalPath);
+                strings.remove(thisContract);
             }
         }
         // update the conDirectDependents
-        // need to find out the deleted dependencies
         for (String imp : imports) {
             Set<String> strings = getDependents(imp);
-//            if(!canonicalPath.startsWith("/")) {
-//                System.out.println("add: " + canonicalPath);
-//            }
-            strings.add(canonicalPath);
+            strings.add(thisContract);
         }
+    }
+
+    private List<String> makeCanonical(File contract, List<String> imports) {
+        return imports.stream()
+                .filter(it ->
+                        // all relative paths to the current file
+                        // absolute paths are ignored for now.
+                        // we may consider path mapping later
+                        it.startsWith(".")
+                )
+                .map(it -> {
+                    try {
+                        return new File(contract.getParentFile(), it).getCanonicalPath();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return it;
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     @NotNull
@@ -111,24 +138,23 @@ public class ContractDependencies implements Serializable {
             throw new RuntimeException(i);
         }
 
-        Set<String> deps = new HashSet<>();
+        Set<String> sourceSet = new HashSet<>();
 
-        // now all files are processed
-        Set<String> result = new HashSet<>(updatedFileNames);
+        // now all files are processed, let deduce the source set to be compiled
+        Set<String> depends = new HashSet<>(updatedFileNames);
 
-        while (result.size() > 0) {
-            deps.addAll(result);
-//            result.clear();
+        while (depends.size() > 0) {
+            sourceSet.addAll(depends);
             Set<String> tmps = new HashSet<>();
-            for (String f : result) {
+            for (String f : depends) {
                 tmps.addAll(getDependents(f));
             }
-            result = tmps;
-            result.removeAll(deps); // the new ones
+            depends = tmps;
+            depends.removeAll(sourceSet); // the new ones
         }
 
-        System.out.println("compilation set: " + deps.size());
-        deps.forEach(System.out::println);
-        return deps;
+        System.out.println("compilation set size: " + sourceSet.size());
+        sourceSet.forEach(System.out::println);
+        return sourceSet;
     }
 }

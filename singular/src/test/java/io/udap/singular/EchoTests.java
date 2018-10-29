@@ -1,15 +1,17 @@
 package io.udap.singular;
 
+import io.udap.web3j.Echo;
 import org.bouncycastle.util.encoders.Hex;
 import org.ethereum.crypto.ECKey;
 import org.ethereum.util.blockchain.SolidityCallResult;
-import org.ethereum.util.blockchain.StandaloneBlockchain;
 import org.junit.Test;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class EchoTests {
 
@@ -26,8 +28,8 @@ public class EchoTests {
     }
 
     @Test
-    public void testLogging(){
-        SolidityCallResult log = echo.log();
+    public void testLogging() throws Exception {
+        TransactionReceipt log = echo.log().send();
         assertNotNull(log);
         System.out.println(log.toString());
     }

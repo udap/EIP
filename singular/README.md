@@ -14,6 +14,15 @@ In the singular/src directory:
 2. `truffle compile`
 3. `truffle test` 
 
+*New since 2018/10/29*: This version also introduced full testing support with web3j wrappers. The project is managed by gradle and the specific tasks are `solcWithWeb3j` and the artifacts are specified in the build.gradle file. It is intended to be a full replacement for the truffle dependency as the compiling and testing environment, for better performance and robustness.
+
+The steps are
+
+1. install nativce solc
+2. install gradle
+3. clone the repository
+4. 
+
 Note: 
 
 1. I was using ganache GUI as the testing eth client, as reflected in the port setting in the truffle-config.json. 

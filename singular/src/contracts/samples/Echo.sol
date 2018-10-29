@@ -12,13 +12,12 @@ contract Mortal {
     constructor() public { owner = msg.sender; }
 
     /* Function to recover the funds on the contract */
-    function kill() {
+    function kill() public {
         require(msg.sender == owner, "only the owner can kill the contract");
         selfdestruct(owner);
     }
 }
 
-import "../ISingular.sol";
 
 contract Echo is Mortal, Logger {
 
@@ -44,9 +43,13 @@ contract Echo is Mortal, Logger {
     }
 
     /* main function */
-    function greet() constant returns (string) {
+    function greet() public constant returns (string) {
         return greeting;
     }
+
+//    function greet2() constant returns (string) {
+//        return greeting;
+//    }
 
     /* we include indexed events to demonstrate the difference that can be
     captured versus non-indexed

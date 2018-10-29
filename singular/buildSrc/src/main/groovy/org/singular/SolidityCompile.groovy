@@ -5,19 +5,12 @@ import org.gradle.api.tasks.*
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 
 public class SolidityCompile extends DefaultTask {
-
-
-    public static final String DATA = "src/tmp/dependencies.data"
-
-    SolidityCompile() {
-//        println("new instane of SoidityCompile created")
-    }
+    public static final String DATA = ContractDependencies.DefaultDependencyFileName
 
     @InputDirectory
     def File srcDir       ///< the contract source directory
 
-    // should this be both InputDirectory and OutputDirectory?
-    @Input
+//    @Input  //!! MUST NOT use this with the OutpurDirectory, or it will overwrite it.
     @OutputDirectory
     def File abiDir       ///< where to hold the generated ABI and BIN files
 
@@ -69,11 +62,9 @@ public class SolidityCompile extends DefaultTask {
                 project.delete(abiFiles)
 
             if (!srcDir.exists())
-                throw new RuntimeException(srcDir.absolutePath + " does not exisit")
+                throw new RuntimeException(srcDir.absolutePath + " does not exist")
 
-            Set<String> files = allInputFiles()
-            ContractDependencies.fresh(dependencyFileName).update(files);
-            rebuild(files);
+            fullRebuild()
             return;
         } else {
             println('incremental...')
@@ -94,9 +85,7 @@ public class SolidityCompile extends DefaultTask {
 
         if (removed) {
             // do a full rebuild
-            def allFiles = allInputFiles();
-            ContractDependencies.restoreFrom(dependencyFileName).update(allFiles);
-            rebuild(allFiles)
+            fullRebuild()
         } else {
             if (changedFiles.size() > 0) {
                 changedFiles = ContractDependencies.restoreFrom(dependencyFileName).update(changedFiles);
@@ -105,13 +94,19 @@ public class SolidityCompile extends DefaultTask {
         }
     }
 
+    private void fullRebuild() {
+        def allFiles = allInputFiles();
+        ContractDependencies.fresh(dependencyFileName).update(allFiles);
+        rebuild(allFiles)
+    }
+
     private HashSet<String> allInputFiles() {
         Set<String> files = new HashSet<>();
 
         srcDir.eachFileRecurse {
             def fname = it.name;
             if (it.file && fname.endsWith(".sol")) {
-                String contractName = it.getName().replaceAll("\\.sol", "");
+                String contractName = fname.substring(0, fname.length() - 4);
                 if (excludedContracts == null || !excludedContracts.contains(contractName)) {
                     files.add(it.canonicalPath)
                 }
