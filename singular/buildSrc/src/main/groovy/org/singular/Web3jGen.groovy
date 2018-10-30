@@ -3,7 +3,7 @@ package org.singular
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
-import org.web3j.codegen.SolidityFunctionWrapper
+import org.web3j.codegen.ContractWrapperGenerator
 import org.web3j.utils.Files
 
 public class Web3jGen extends DefaultTask {
@@ -92,7 +92,7 @@ public class Web3jGen extends DefaultTask {
             String contractName = it //it.substring(0, it.lastIndexOf("."));
             File contractBin = new File(contractName + ".bin");
             File contractAbi = new File(contractName + ".abi");
-            def wrapper = new SolidityFunctionWrapper(useNativeJavaTypes);
+            def wrapper = new ContractWrapperGenerator(useNativeJavaTypes);
             contractName = contractName.substring(contractName.lastIndexOf(System.getProperty("file.separator")) + 1)
             if (!contractName.startsWith("_")) {
                 if (excludedContracts == null || !excludedContracts.contains(contractName)) {
