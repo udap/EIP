@@ -3,8 +3,12 @@ package org.singular
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 public class SolidityCompile extends DefaultTask {
+    private static final Logger logger = LoggerFactory.getLogger(SolidityCompile)
+
     public static final String DATA = ContractDependencies.DefaultDependencyFileName
 
     @InputDirectory
@@ -56,7 +60,7 @@ public class SolidityCompile extends DefaultTask {
     void execute(IncrementalTaskInputs inputs) {
 
         if (!inputs.incremental) {
-            println('do full build')
+            logger.debug('do full build')
             File[] abiFiles = abiDir.listFiles()
             if (abiFiles)
                 project.delete(abiFiles)
@@ -67,19 +71,19 @@ public class SolidityCompile extends DefaultTask {
             fullRebuild()
             return;
         } else {
-            println('incremental...')
+            logger.debug('incremental...')
         }
 
 
         def Set<String> changedFiles = new HashSet<>()
         inputs.outOfDate { change ->
-            println("file outOfDate: " + change.file)
+            logger.debug("file outOfDate: " + change.file)
             changedFiles.add(change.file.canonicalPath)
         }
 
         boolean removed = false;
         inputs.removed { change ->
-            println("file removed: " + change.file)
+            logger.debug("file removed: " + change.file)
             removed = true;
         }
 
@@ -149,7 +153,7 @@ public class SolidityCompile extends DefaultTask {
 
         options.addAll(files);
 
-        println(options)
+        logger.debug(options.join(' '))
 
         project.exec {
             executable = 'solc'

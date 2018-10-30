@@ -61,7 +61,7 @@ public class ContractWrapperGenerator extends Generator {
     private static final String FUNC_NAME_PREFIX = "FUNC_";
 
     private static final ClassName LOG = ClassName.get(Log.class);
-    private static final Logger LOGGER = LoggerFactory.getLogger(org.web3j.codegen.SolidityFunctionWrapper.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContractWrapperGenerator.class);
 
     private static final String CODEGEN_WARNING = "<p>Auto generated code, with UDAP enhancement.\n"
             + "<p><strong>Do not modify!</strong>\n"

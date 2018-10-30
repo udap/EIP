@@ -3,11 +3,14 @@ package org.singular
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.web3j.codegen.ContractWrapperGenerator
 import org.web3j.utils.Files
 
 public class Web3jGen extends DefaultTask {
     public static final String DATA = ContractDependencies.DefaultDependencyFileName
+    private static final Logger logger = LoggerFactory.getLogger(Web3jGen)
 
     @InputDirectory
     def File abiDir       ///< where to hold the generated ABI and BIN fileNames
@@ -31,7 +34,7 @@ public class Web3jGen extends DefaultTask {
     void execute(IncrementalTaskInputs inputs) {
 
         if (!inputs.incremental) {
-            println('no incremental. do full build of thr wrappers')
+            logger.debug('no incremental. do full build of thr wrappers')
             File[] wrappers = wrapperBaseDir.listFiles()
             if (wrappers)
                 project.delete(wrappers)
@@ -40,7 +43,7 @@ public class Web3jGen extends DefaultTask {
             gen(files);
             return;
         } else {
-            println('incremental...')
+            logger.debug('incremental...')
         }
 
 
@@ -48,7 +51,7 @@ public class Web3jGen extends DefaultTask {
         inputs.outOfDate { change ->
             def fname = change.file.canonicalPath
             if (fname.endsWith(".abi") || fname.endsWith(".bin")) {
-                println("file changed: " + fname)
+                logger.debug("file changed: " + fname)
                 fname = fname.substring(0, fname.length() - 4)
                 changedFiles.add(fname)
             }
@@ -60,7 +63,7 @@ public class Web3jGen extends DefaultTask {
         inputs.removed { change ->
             def f = change.file.
             if (f.name.endsWith(".abi")) {
-                println("file removed: " + f)
+                logger.debug("file removed: " + f)
                 def jname = f.name.replace("\\.abi", ".java")
                 new File(wrapperBaseDir, jname).delete()
             }
@@ -84,9 +87,9 @@ public class Web3jGen extends DefaultTask {
     }
 
     private void gen(Set<String> fileNames) {
-        println('-------------------------------------------------')
-        println("generating web3j wrappers in: " + wrapperBaseDir)
-        println('-------------------------------------------------')
+        logger.debug('-------------------------------------------------')
+        logger.debug("generating web3j wrappers in: " + wrapperBaseDir)
+        logger.debug('-------------------------------------------------')
 
         fileNames.each {
             String contractName = it //it.substring(0, it.lastIndexOf("."));
@@ -97,7 +100,7 @@ public class Web3jGen extends DefaultTask {
             if (!contractName.startsWith("_")) {
                 if (excludedContracts == null || !excludedContracts.contains(contractName)) {
 
-                    println("-- creating web3j wrapper for: " + contractName)
+                    logger.debug("-- creating web3j wrapper for: " + contractName)
                     wrapper.generateJavaFiles(
                             contractName,
                             Files.readString(contractBin),
