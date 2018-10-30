@@ -117,13 +117,11 @@ public class BasicSingularWalletTests {
                 new DefaultGasProvider()
         );
 
-        // let's load the tradable with bob credentials
-        Tradable t = aliceToken.loadFor(BOB);
-//        Tradable t = Tradable.load(aliceToken.getContractAddress(), web3j, BOB, new DefaultGasProvider());
 
         try {
+            // let's load the tradable with bob credentials
             // it should revert here because the sender is Bob who does not have ther permission to init
-            TransactionReceipt a = t.init(
+            TransactionReceipt a = aliceToken.loadFor(BOB).init(
                     "aliceToken",
                     "sym",
                     "descr",
@@ -138,9 +136,7 @@ public class BasicSingularWalletTests {
         }
 
         // let's load the tradable again with alice credentials
-        t = Tradable.load(aliceToken.getContractAddress(), web3j, ALICE, new DefaultGasProvider());
-
-        TransactionReceipt a = t.init(
+        TransactionReceipt a = aliceToken.loadFor(ALICE).init(
                 "aliceToken",
                 "sym",
                 "descr",
@@ -149,8 +145,6 @@ public class BasicSingularWalletTests {
                 "0x00",
                 aliceWallet.getContractAddress()
         );
-
-        assertEquals(t.owner(), aliceWallet.getContractAddress());
 
     }
 }

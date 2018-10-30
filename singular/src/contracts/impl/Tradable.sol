@@ -51,7 +51,7 @@ contract Tradable is NonTradable, ITradable {
 
 
     /**
-     * To get the approved owner-to-be in a trading. It will be reset if the transfer offer this cancelled.
+     * To get the approved owner-to-be in a trading. It will be reset if the transfer offer is cancelled.
      */
     function nextOwner() external view initialized returns (ISingularWallet){return transferOffer.nextOwner;}
 
