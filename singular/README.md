@@ -18,10 +18,17 @@ In the singular/src directory:
 
 The steps are
 
-1. install nativce solc
-2. install gradle
-3. clone the repository
-4. 
+1. install native solc, the Solidity compiler
+1. install gradle build tool
+1. clone the repository (the web3 integration is currently in the `web3j` branch)
+1. to compile the contracts and rebuild the web3j wrappers: `./gradlew solcWithWeb3j`
+1. start the test blockchain: `ganache-cli -d`
+1. run the tests `./gradlew test`
+ 
+Check out the `build.gradle` for path configuration in the `solc` task.
+
+The tests are in `src/test/java/org/singular/web3j`
+ 
 
 Note: 
 
