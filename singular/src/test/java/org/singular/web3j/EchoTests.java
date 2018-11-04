@@ -2,8 +2,8 @@ package org.singular.web3j;
 
 
 import io.udap.web3j.Echo;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.abi.FunctionEncoder;
@@ -30,22 +30,23 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.singular.web3j.GanacheIT.*;
 
 /**
  * see {@link GanacheIT} for setting up Ganache-cli
  */
 public class EchoTests {
+    public static final String WELL_HELLO_AGAIN = "Well hello again";
     private static final Logger log = LoggerFactory.getLogger(EchoTests.class);
     public static final String GREETING = "ABC";
     public static final String HI_AGAIN = "hi again";
 
-    io.udap.web3j.Echo Echo;
-    String contractAddress;
+    static io.udap.web3j.Echo Echo;
+    static String contractAddress;
 
-    @Before
-    public void setup() throws Exception {
+    @BeforeAll
+    public static void setup() throws Exception {
         Echo = Echo.deploy(
                 web3j,
                 ALICE,
@@ -85,9 +86,9 @@ public class EchoTests {
         log.info("Value stored in remote smart contract: " + Echo.greet());
 
         // Lets modify the value in our smart contract
-        TransactionReceipt transactionReceipt = Echo.newGreeting("Well hello again");
+        TransactionReceipt transactionReceipt = Echo.newGreeting(WELL_HELLO_AGAIN);
 
-        log.info("New value stored in remote smart contract: " + Echo.greet());
+        assertEquals(WELL_HELLO_AGAIN, Echo.greet());
 
         // Events enable us to log specific events happening during the execution of our smart
         // contract to the blockchain. Index events cannot be logged in their entirety.
@@ -125,9 +126,10 @@ public class EchoTests {
         assertTrue(!transactionResponse.hasError());
         String transactionHash = transactionResponse.getTransactionHash();
     }
-   @Test
 
+    @Test
     public void testLowLevelTxSignedRaw() throws Exception {
+
         final Function function = new Function(
                 "newGreeting",
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(HI_AGAIN)),

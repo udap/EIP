@@ -2,19 +2,20 @@ package org.singular.web3j;
 
 import io.udap.web3j.BasicSingularWallet;
 import io.udap.web3j.Tradable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tx.gas.DefaultGasProvider;
 
 import java.math.BigInteger;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.singular.web3j.GanacheIT.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * Created by bran on 2018/10/14.
@@ -22,12 +23,12 @@ import static org.junit.Assert.fail;
 public class BasicSingularWalletTests {
     private static final Logger log = LoggerFactory.getLogger(BasicSingularWalletTests.class);
 
-    BasicSingularWallet aliceWallet;
-    BasicSingularWallet bobWallet;
+    static BasicSingularWallet aliceWallet;
+    static BasicSingularWallet bobWallet;
     Tradable aliceToken;
 
-    @Before
-    public void setup() throws Exception {
+    @BeforeAll
+    public static void setup() throws Exception {
         aliceWallet = BasicSingularWallet.deploy(
                 web3j,
                 ALICE,
@@ -45,29 +46,28 @@ public class BasicSingularWalletTests {
     }
 
     @Test
+    @DisplayName("verify the creator address")
     public void testDeploy() throws Exception {
         String contractAddress = aliceWallet.getContractAddress();
         log.info("Wallet deployed to address " + contractAddress);
-        assertEquals(aliceWallet.ownerAddress(), ALICE.getAddress());
+        assertEquals(ALICE.getAddress(), aliceWallet.ownerAddress().toString());
         Tuple2<BigInteger, BigInteger> numOfTokens = aliceWallet.numOfTokens();
-        assertEquals(numOfTokens.getValue1().intValue(), 0);
-        assertEquals(numOfTokens.getValue2().intValue(), 0);
+//        assertEquals(0, numOfTokens.getValue1().intValue());
+//        assertEquals(0, numOfTokens.getValue2().intValue());
     }
 
     @Test
+    @DisplayName("Cannot deploy from empty account")
     public void testDeployFromInvalidAcct() {
-        BasicSingularWallet wallet = null;
-        try {
-            wallet = BasicSingularWallet.deploy(
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            BasicSingularWallet wallet = BasicSingularWallet.deploy(
                     web3j,
                     EMPTY,
                     GAS_PROVIDER,
                     "empty aliceWallet!"
             );
-            fail("should have thrown an exception due to lack of token in the empty account");
-        } catch (Exception e) {
-//            e.printStackTrace();
-        }
+        });
+        assertTrue(exception.getMessage().contains("sender doesn't have enough funds"));
     }
 
     @Test
@@ -75,36 +75,35 @@ public class BasicSingularWalletTests {
         aliceToken = Tradable.deploy(
                 web3j,
                 ALICE,
-                new DefaultGasProvider()
+                GAS_PROVIDER
         );
 
+        Address aliceAddr = aliceWallet.asAddress();
         TransactionReceipt a = aliceToken.init(
                 "aliceToken",
                 "sym",
                 "descr",
                 "uri",
                 new byte[32],
-                "0x00",
-                aliceWallet.getContractAddress()
+                aliceAddr,
+                aliceAddr
         );
 
-        assertEquals(aliceToken.owner(), aliceWallet.getContractAddress());
+        assertEquals(aliceAddr, aliceToken.owner());
 
         // it should revert
-        try {
-            a = aliceToken.init(
+        assertThrows(RuntimeException.class, () -> {
+
+            aliceToken.init(
                     "aliceToken",
                     "sym",
                     "descr",
                     "uri",
                     new byte[32],
-                    "0x00",
-                    aliceWallet.getContractAddress()
+                    aliceAddr,
+                    aliceAddr
             );
-            fail("should have thrown an exception");
-        } catch (Exception e) {
-
-        }
+        });
 
 
     }
@@ -117,8 +116,9 @@ public class BasicSingularWalletTests {
                 new DefaultGasProvider()
         );
 
+        Address aliceWalletAddr = aliceWallet.asAddress();
 
-        try {
+        assertThrows(RuntimeException.class, () -> {
             // let's load the tradable with bob credentials
             // it should revert here because the sender is Bob who does not have ther permission to init
             TransactionReceipt a = aliceToken.loadFor(BOB).init(
@@ -127,13 +127,10 @@ public class BasicSingularWalletTests {
                     "descr",
                     "uri",
                     new byte[32],
-                    "0x00",
-                    aliceWallet.getContractAddress()
+                    aliceWalletAddr,
+                    aliceWalletAddr
             );
-            fail("should never be here");
-        } catch (Exception e) {
-
-        }
+        });
 
         // let's load the tradable again with alice credentials
         TransactionReceipt a = aliceToken.loadFor(ALICE).init(
@@ -142,9 +139,8 @@ public class BasicSingularWalletTests {
                 "descr",
                 "uri",
                 new byte[32],
-                "0x00",
-                aliceWallet.getContractAddress()
+                aliceWalletAddr,
+                aliceWalletAddr
         );
-
     }
 }

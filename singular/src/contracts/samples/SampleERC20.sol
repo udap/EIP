@@ -8,7 +8,7 @@ contract SampleERC20 is StandardToken {
     string public name = "SampleERC20";
     string public symbol = "SampleERC20";
     uint public decimals = 2;
-    uint public INITIAL_SUPPLY = 10000000;
+    uint public INITIAL_SUPPLY = 100000000;
 
     constructor() public {
         totalSupply_ = INITIAL_SUPPLY;

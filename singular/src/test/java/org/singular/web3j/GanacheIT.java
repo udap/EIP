@@ -2,17 +2,19 @@ package org.singular.web3j;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.web3j.abi.datatypes.Address;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.DefaultGasProvider;
+import org.web3j.tx.gas.StaticGasProvider;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 /**
@@ -34,6 +36,7 @@ public class GanacheIT {
 
     public static Web3j web3j;
     public static ContractGasProvider GAS_PROVIDER = new DefaultGasProvider();
+    public static ContractGasProvider GAS_PROVIDER2 = new StaticGasProvider(bigInt(22_000_000_000L), bigInt(5_000_000));
 
     // anti-pattern. should avoid using static
     static {
@@ -41,12 +44,19 @@ public class GanacheIT {
         try {
             log.info("Connected to Ethereum client version: " + web3j.web3ClientVersion().send().getWeb3ClientVersion());
             List<String> accounts = web3j.ethAccounts().send().getAccounts();
-            assertEquals( "alice account not matched", ALICE.getAddress(), accounts.get(0));
-            assertEquals("alice account not matched", BOB.getAddress(), accounts.get(1));
-            assertEquals("alice account not matched", SOMEONE.getAddress(), accounts.get(2));
+            assertEquals(ALICE.getAddress(), accounts.get(0));
+            assertEquals(BOB.getAddress(), accounts.get(1));
+            assertEquals(SOMEONE.getAddress(), accounts.get(2));
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static BigInteger bigInt(long i) {
+        return BigInteger.valueOf(i);
+    }
+    public static Address address(Credentials someone) {
+        return new Address(someone.getAddress());
     }
 
 //    @Before

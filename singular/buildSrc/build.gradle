@@ -6,7 +6,6 @@ plugins {
 ext {
     web3jVersion = '3.6.0'
     logbackVersion = '1.2.3'
-    junitVersion = '4.12'
 }
 
 //apply plugin: 'antlr'
@@ -25,10 +24,12 @@ dependencies {
 //    compile group: "org.antlr", name: "antlr4-runtime", version: "4.7.1"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
-    
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit"
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+
+//    testImplementation "org.jetbrains.kotlin:kotlin-test"
+//    testImplementation "org.jetbrains.kotlin:kotlin-test-junit"
 }
 
 // In this section you declare where to find the dependencies of your project

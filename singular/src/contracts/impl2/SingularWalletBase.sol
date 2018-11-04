@@ -10,9 +10,8 @@ import "../ITradable.sol";
 import "../IBurnable.sol";
 
 /*
-
+ By Tang Guxiang
 */
-
 contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
 
     //owner could be an EOA address or SmartContract address which must implements
@@ -59,7 +58,7 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
         return whenAssetsLastUpdates_;
     }
 
-    //=============================callback===============================================
+    //==========================callback====================================
     function sent(ITradable _singular, string _receiverNote)
     ownsSingular(_singular.toISingular())
     constructed
@@ -73,14 +72,17 @@ contract SingularWalletBase is ISingularWallet, ReentrancyGuard, Initialized{
         singularRemoved(_singular.toISingular());
     }
 
-    function received(ISingular _singular, string _receiverNote) constructed external{
+    function received(ISingular _singular, string /*_receiverNote*/) constructed external{
         require(_singular.owner() == this);
 //        emit SingularTransferred(_singular.previousOwner(),this,_singular,now,_receiverNote);
         singularAdded(_singular);
     }
 
     // called when get an offer
-    function offer(ITradable _singular, string _senderNote) constructed external{
+    function offer(ITradable _singular, string _senderNote)
+    external
+    constructed
+    {
         require(_singular.nextOwner() == this);
         emit SingularOffered(_singular.toISingular().owner(),_singular, now, _senderNote);
         //customized later

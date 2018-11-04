@@ -2,12 +2,14 @@ package org.singular.web3j;
 
 import io.udap.web3j.BasicSingularWallet;
 import io.udap.web3j.NonTradable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.singular.web3j.GanacheIT.*;
 
 /**
@@ -20,11 +22,11 @@ public class NonTradableTests {
     public static final String DESCR = "descr";
     public static final String URI = "uri";
 
-    BasicSingularWallet aliceWallet;
-    NonTradable nonTrada;
+    static BasicSingularWallet aliceWallet;
+    static NonTradable nonTrada;
 
-    @Before
-    public void setup() throws Exception {
+    @BeforeAll
+    public static void setup() throws Exception {
         aliceWallet = BasicSingularWallet.deploy(
                 web3j,
                 ALICE,
@@ -39,25 +41,25 @@ public class NonTradableTests {
                 DESCR,
                 URI,
                 new byte[32],
-                aliceWallet.getContractAddress(),
-                aliceWallet.getContractAddress()
+                aliceWallet.asAddress(),
+                aliceWallet.asAddress()
         );
     }
 
     @Test
     public void testInitialization() throws Exception {
-        assertEquals( nonTrada.contractName(), "NonTradable");
-        assertEquals( ALICE.getAddress(), nonTrada.creator());
-        assertEquals( nonTrada.owner(), aliceWallet.getContractAddress());
-        assertEquals( nonTrada.tokenType(), aliceWallet.getContractAddress());
+        assertEquals( "NonTradable", nonTrada.contractName());
+        assertEquals( ALICE.getAddress(), nonTrada.creator().toString());
+        assertEquals( aliceWallet.asAddress(), nonTrada.owner());
+        assertEquals( aliceWallet.asAddress(), nonTrada.tokenType());
         // the metadata part
-        assertEquals( nonTrada.name(), ALICE_TOKEN);
-        assertEquals( nonTrada.symbol(), PERSON_TOKEN);
-        assertEquals( nonTrada.description(), DESCR);
-        assertEquals( nonTrada.tokenURI(), URI);
+        assertEquals( ALICE_TOKEN, nonTrada.name());
+        assertEquals( PERSON_TOKEN, nonTrada.symbol());
+        assertEquals( DESCR, nonTrada.description());
+        assertEquals( URI, nonTrada.tokenURI());
 
         // ownership interlocked with the aliceWallet
-        assertTrue( aliceWallet.owns(nonTrada.getContractAddress()));
+        assertTrue( aliceWallet.owns(nonTrada.asAddress()));
 
     }
 
@@ -71,8 +73,8 @@ public class NonTradableTests {
                     DESCR,
                     URI,
                     new byte[32],
-                    aliceWallet.getContractAddress(),
-                    aliceWallet.getContractAddress()
+                    aliceWallet.asAddress(),
+                    aliceWallet.asAddress()
             );
             fail("Alice should not able to init the bob's instance");
         } catch (Exception e) {

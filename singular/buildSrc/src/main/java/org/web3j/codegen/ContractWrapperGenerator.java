@@ -37,6 +37,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 
+//import org.web3j.abi.datatypes.*;
+
 /**
  * Generate Java Classes based on generated Solidity bin and abi files.
  * <p>
@@ -128,9 +130,60 @@ public class ContractWrapperGenerator extends Generator {
         // bran
         classBuilder.addMethod(zipper());
 
+        classBuilder.addMethod(returnSingleValue());
+
+        classBuilder.addMethod(MethodSpec.methodBuilder("at") // at the address
+                .addModifiers(Modifier.PUBLIC)
+                .addJavadoc("returns the address string of this contract")
+                .returns(TypeVariableName.get("String"))
+                .addCode("return getContractAddress();\n").build());
+
+        // bran convenient method to Address
+        classBuilder.addMethod(MethodSpec.methodBuilder("asAddress")
+                .addModifiers(Modifier.PUBLIC)
+                .addJavadoc("returns the address in Address type of this contract")
+                .returns(TypeName.get(Address.class))
+                .addCode("return new " + Address.class.getCanonicalName() + "(getContractAddress());\n").build());
+
         addAddressesSupport(classBuilder, addresses);
 
         write(basePackageName, classBuilder.build(), destinationDir);
+    }
+
+    private MethodSpec returnSingleValue() {
+        TypeVariableName t = TypeVariableName.get("T", org.web3j.abi.datatypes.Type.class);
+        TypeVariableName r = TypeVariableName.get("R");
+
+        MethodSpec spec = MethodSpec.methodBuilder("executeCallSingleValueReturn")
+                .addModifiers(Modifier.PROTECTED)
+                .addTypeVariable(t)
+                .addTypeVariable(r)
+                .returns(r)
+                .addParameter(TypeName.get(org.web3j.abi.datatypes.Function.class), "function")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Class.class), r), "returnType")
+                .addException(IOException.class)
+                .addAnnotation(Override.class)
+                .addCode("                T result = executeCallSingleValueReturn(function);\n" +
+                        "                if (result == null) {\n" +
+                        "                    throw new org.web3j.tx.exceptions.ContractCallException(\"Empty value (0x) returned from contract\");\n" +
+                        "                }\n" +
+                        "\n" +
+                        "                Object value = result.getValue();\n" +
+                        "                if (returnType.isAssignableFrom(value.getClass())) {\n" +
+                        "                    return (R) value;\n" +
+                        "                } \n" +
+                        "                else if(returnType.isAssignableFrom(result.getClass())){\n" +
+                        "                    return (R)result;\n" +
+                        "                }\n" +
+                        "                else if (result.getClass().equals(Address.class) && returnType.equals(String.class)) {\n" +
+                        "                    return (R) result.toString();  // cast isn't necessary\n" +
+                        "                } else {\n" +
+                        "                    throw new org.web3j.tx.exceptions.ContractCallException(\n" +
+                        "                            \"Unable to convert response: \" + value\n" +
+                        "                                    + \" to expected type: \" + returnType.getSimpleName());\n" +
+                        "                }")
+                .build();
+        return spec;
     }
 
     private void addAddressesSupport(TypeSpec.Builder classBuilder,
@@ -564,12 +617,24 @@ public class ContractWrapperGenerator extends Generator {
                     typeMapInput = ((ParameterizedTypeName) typeName).rawType + ".class, "
                             + innerTypeName + ".class";
                 }
-                return "new " + parameterSpecType + "(\n"
+                // bran, special treatment for Address and no mapping required
+                if (typeName.toString().equals(Address.class.getCanonicalName())) {
+                    return "new " + parameterSpecType + "(" + parameterSpec.name + ")";
+                }
+                else
+                    return "new " + parameterSpecType + "(\n"
                         + "        org.web3j.abi.Utils.typeMap("
                         + parameterSpec.name + ", " + typeMapInput + "))";
             }
         } else {
-            return "new " + parameterSpec.type + "(" + parameterSpec.name + ")";
+            // bran: use Address regardless of using native type or not
+            String type = parameterSpec.type.toString();
+            String name = parameterSpec.name;
+            if (Address.class.getCanonicalName().equals(type)) {
+                return name;
+            }
+            else
+                return "new " + type + "(" + name + ")";
         }
     }
 
@@ -607,9 +672,10 @@ public class ContractWrapperGenerator extends Generator {
         }
 
         String simpleName = ((ClassName) typeName).simpleName();
-
         if (simpleName.equals(Address.class.getSimpleName())) {
-            return TypeName.get(String.class);
+//            return TypeName.get(String.class);
+            return typeName; // use wrapper anyway // bran
+//            return TypeName.get(Object.class); // bran
         } else if (simpleName.startsWith("Uint")) {
             return TypeName.get(BigInteger.class);
         } else if (simpleName.startsWith("Int")) {

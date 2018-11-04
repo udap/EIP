@@ -23,7 +23,11 @@ contract SingularWalletWithE20E721 is BasicSingularWallet{
 
     }
 
-    event DebitInitialized(IDebit indexed debit, ISingularWallet indexed wallet, uint256 value);
+    event DebitInitialized(
+        IDebit indexed debit,
+        ISingularWallet indexed wallet,
+        uint256 value
+    );
 
     /**
     to create a debit account held by the wallet with some cash in it, from the caller's holdings. The user must
@@ -31,7 +35,7 @@ contract SingularWalletWithE20E721 is BasicSingularWallet{
     */
     function activateE20Debit(
         string name,
-        ERC20Debit debit,                    ///< an uninitialized copy
+        ERC20Debit debit,                ///< an uninitialized copy
         IERC20 erc20,                    ///< the erc20 that must be owned by the wallet
         uint256 denomination             ///< how much to put in the debit card
     )
