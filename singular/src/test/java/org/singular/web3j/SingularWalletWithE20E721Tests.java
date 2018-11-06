@@ -60,7 +60,7 @@ public class SingularWalletWithE20E721Tests extends GanacheIT {
         public void testActivateDeactivate721() throws Exception {
             SampleERC721 e721 = SampleERC721.deploy(web3j, ALICE, GAS_PROVIDER);
 
-            // send a new token to the wallet
+            // send a new aliceToken to the wallet
             BigInteger TOKENID = bigInt(101);
             Address aliceWalAddr = aliceWal.asAddress();
             e721.mint(aliceWalAddr, TOKENID);
@@ -88,11 +88,11 @@ public class SingularWalletWithE20E721Tests extends GanacheIT {
 
             // test the the deactivate
             aliceWal.deactivateERC721ISingular(e721Tradable.asAddress(), address(SOMEONE));
-            // now the token should belong to the wallet
+            // now the aliceToken should belong to the wallet
             assertEquals(e721.ownerOf(TOKENID), address(SOMEONE));
 
-            // transfer the token to the alice wallet
-            e721.loadFor(SOMEONE).transferFrom(address(SOMEONE), aliceWal.asAddress(), TOKENID);
+            // transfer the aliceToken to the alice wallet
+            e721.from(SOMEONE).transferFrom(address(SOMEONE), aliceWal.asAddress(), TOKENID);
 
             // to test unbind, create a new instance
             e721Tradable = ERC721Tradable.deploy(web3j, ALICE, GAS_PROVIDER2);
@@ -106,10 +106,10 @@ public class SingularWalletWithE20E721Tests extends GanacheIT {
                     TOKENID
             );
             //
-            // test the the unbind on the token directly, another way to deactivate the token
-            e721Tradable.unbind(address(SOMEONE)); // return the token to aliceEOA
+            // test the the unbind on the aliceToken directly, another way to deactivate the aliceToken
+            e721Tradable.unbind(address(SOMEONE)); // return the aliceToken to aliceEOA
 
-            // now the token should belong to the wallet
+            // now the aliceToken should belong to the wallet
             assertEquals(e721.ownerOf(TOKENID), address(SOMEONE));
 
         }

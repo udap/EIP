@@ -119,9 +119,9 @@ public class BasicSingularWalletTests {
         Address aliceWalletAddr = aliceWallet.asAddress();
 
         assertThrows(RuntimeException.class, () -> {
-            // let's load the tradable with bob credentials
+            // let's load the aliceToken with bob credentials
             // it should revert here because the sender is Bob who does not have ther permission to init
-            TransactionReceipt a = aliceToken.loadFor(BOB).init(
+            TransactionReceipt a = aliceToken.from(BOB).init(
                     "aliceToken",
                     "sym",
                     "descr",
@@ -132,8 +132,8 @@ public class BasicSingularWalletTests {
             );
         });
 
-        // let's load the tradable again with alice credentials
-        TransactionReceipt a = aliceToken.loadFor(ALICE).init(
+        // let's load the aliceToken again with alice credentials
+        TransactionReceipt a = aliceToken.from(ALICE).init(
                 "aliceToken",
                 "sym",
                 "descr",

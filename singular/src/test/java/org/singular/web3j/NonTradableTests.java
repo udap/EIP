@@ -17,7 +17,7 @@ import static org.singular.web3j.GanacheIT.*;
  */
 public class NonTradableTests {
     private static final Logger log = LoggerFactory.getLogger(NonTradableTests.class);
-    public static final String ALICE_TOKEN = "alice token";
+    public static final String ALICE_TOKEN = "alice aliceToken";
     public static final String PERSON_TOKEN = "person_token";
     public static final String DESCR = "descr";
     public static final String URI = "uri";

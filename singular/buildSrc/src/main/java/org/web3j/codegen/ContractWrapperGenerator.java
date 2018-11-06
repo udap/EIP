@@ -515,7 +515,7 @@ public class ContractWrapperGenerator extends Generator {
             Class authType,
             String authName
     ) {
-        MethodSpec.Builder toReturn = MethodSpec.methodBuilder("loadFor")
+        MethodSpec.Builder toReturn = MethodSpec.methodBuilder("from")
                 .addJavadoc("bran: new feature from my local enhancement to the "
                         + "codegen module for easily changing the credential context.")
                 .addModifiers(Modifier.PUBLIC)
@@ -1115,23 +1115,39 @@ public class ContractWrapperGenerator extends Generator {
                     objectName);
         }
         for (int i = 0; i < indexedParameters.size(); i++) {
+            // bran special treatment of Adress
+            NamedTypeName namedTypeName = indexedParameters.get(i);
+            TypeName typeName = namedTypeName.getTypeName();
+
             builder.addStatement(
-                    "$L.$L = ($T) eventValues.getIndexedValues().get($L)" + nativeConversion,
+                    "$L.$L = ($T) eventValues.getIndexedValues().get($L)" + (isAddress(typeName) ? "" : nativeConversion),
                     objectName,
-                    indexedParameters.get(i).getName(),
-                    getIndexedEventWrapperType(indexedParameters.get(i).getTypeName()),
+                    namedTypeName.getName(),
+                    getIndexedEventWrapperType(typeName),
                     i);
         }
 
         for (int i = 0; i < nonIndexedParameters.size(); i++) {
+            // bran
+            NamedTypeName namedTypeName = nonIndexedParameters.get(i);
+            TypeName typeName = namedTypeName.getTypeName();
             builder.addStatement(
-                    "$L.$L = ($T) eventValues.getNonIndexedValues().get($L)" + nativeConversion,
+                    "$L.$L = ($T) eventValues.getNonIndexedValues().get($L)" + (isAddress(typeName) ? "" : nativeConversion),
                     objectName,
-                    nonIndexedParameters.get(i).getName(),
-                    getWrapperType(nonIndexedParameters.get(i).getTypeName()),
+                    namedTypeName.getName(),
+                    getWrapperType(typeName),
                     i);
         }
         return builder.build();
+    }
+
+    private boolean isAddress(TypeName typeName) {
+        boolean isAddress = false;
+        if (typeName instanceof ClassName) {
+            if (((ClassName)typeName).simpleName().equals(Address.class.getSimpleName()))
+                isAddress = true;
+        }
+        return isAddress;
     }
 
     static TypeName buildTypeName(String typeDeclaration) {
@@ -1237,9 +1253,9 @@ public class ContractWrapperGenerator extends Generator {
                 .add("$>$>");
 
         String resultStringSimple = "\n($T) results.get($L)";
-        if (useNativeJavaTypes) {
-            resultStringSimple += ".getValue()";
-        }
+//        if (useNativeJavaTypes) {
+//            resultStringSimple += ".getValue()";
+//        }
 
         String resultStringNativeList =
                 "\nconvertToNative(($T) results.get($L).getValue())";
@@ -1252,6 +1268,9 @@ public class ContractWrapperGenerator extends Generator {
             TypeName convertTo = typeArguments.get(i);
 
             String resultString = resultStringSimple;
+            if(useNativeJavaTypes && !isAddress(convertTo)){ //bran
+                resultString += ".getValue()";
+            }
 
             // If we use native java types we need to convert
             // elements of arrays to native java types too
@@ -1266,9 +1285,10 @@ public class ContractWrapperGenerator extends Generator {
                 }
             }
 
+
             tupleConstructor
-                    .add(resultString, convertTo, i);
-            tupleConstructor.add(i < size - 1 ? ", " : ");\n");
+                    .add(resultString, convertTo, i)
+                    .add(i < size - 1 ? ", " : ");\n");
         }
         tupleConstructor.add("$<$<");
 

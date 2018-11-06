@@ -53,7 +53,7 @@ contract('Tradable', function ([defaultEOA, aliceEOA, bobEOA, someEOA]) {
             await token.setExecutor(exe.address, {from: aliceEOA})
         });
 
-        it("should probably set up in the constructor", async () => {
+        it("should properly set up in the constructor", async () => {
             assert.equal(await token.contractName.call(), "Tradable");
             assert.equal(await token.creator.call(), aliceEOA);
             assert.equal(await token.tokenType.call(), aliceEOA);

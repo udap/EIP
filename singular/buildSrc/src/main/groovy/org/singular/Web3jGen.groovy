@@ -61,7 +61,7 @@ public class Web3jGen extends DefaultTask {
         }
 
         inputs.removed { change ->
-            def f = change.file.
+            def f = change.file
             if (f.name.endsWith(".abi")) {
                 logger.debug("file removed: " + f)
                 def jname = f.name.replace("\\.abi", ".java")
