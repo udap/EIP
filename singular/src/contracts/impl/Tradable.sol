@@ -195,6 +195,7 @@ contract Tradable is NonTradable, ITradable {
     forTradeExecutor
     max128Bytes(note)
     {
+        require(address(newOwner) != address(0), "the newOwner was null");
         ownerPrevious = theOwner;
         theOwner = newOwner;
         ownerPrevious.sent(this, note);
@@ -356,6 +357,10 @@ contract Tradable is NonTradable, ITradable {
     }
 
     modifier forTradeExecutor(){
+        require(
+            address(executor) != address (0x0),
+            "executor was not set on this tradable"
+        );
         require(
             msg.sender == address(executor),
             "function was not called by the swap executor"
