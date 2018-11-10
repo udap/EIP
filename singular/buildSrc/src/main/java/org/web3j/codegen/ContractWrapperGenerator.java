@@ -139,7 +139,7 @@ public class ContractWrapperGenerator extends Generator {
                 .addCode("return getContractAddress();\n").build());
 
         // bran convenient method to Address
-        classBuilder.addMethod(MethodSpec.methodBuilder("asAddress")
+        classBuilder.addMethod(MethodSpec.methodBuilder("address")
                 .addModifiers(Modifier.PUBLIC)
                 .addJavadoc("returns the address in Address type of this contract")
                 .returns(TypeName.get(Address.class))

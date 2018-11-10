@@ -32,6 +32,7 @@ public class GanacheIT {
     public static Credentials ALICE = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d");
     public static Credentials BOB = Credentials.create("0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1");
     public static Credentials SOMEONE = Credentials.create("0x6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c");
+    public static Credentials OPERATOR = Credentials.create("0xb0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773");
     public static final Credentials EMPTY = Credentials.create("0x48e568d9b255d3773619486cde02a10b40e5a8ace51d320f7f1ba20825703d00");
 
     public static Web3j web3j;

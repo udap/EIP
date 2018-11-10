@@ -78,7 +78,7 @@ public class BasicSingularWalletTests {
                 GAS_PROVIDER
         );
 
-        Address aliceAddr = aliceWallet.asAddress();
+        Address aliceAddr = aliceWallet.address();
         TransactionReceipt a = aliceToken.init(
                 "aliceToken",
                 "sym",
@@ -116,7 +116,7 @@ public class BasicSingularWalletTests {
                 new DefaultGasProvider()
         );
 
-        Address aliceWalletAddr = aliceWallet.asAddress();
+        Address aliceWalletAddr = aliceWallet.address();
 
         assertThrows(RuntimeException.class, () -> {
             // let's load the aliceToken with bob credentials

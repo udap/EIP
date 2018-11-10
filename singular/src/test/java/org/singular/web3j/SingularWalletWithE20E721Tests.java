@@ -42,7 +42,7 @@ public class SingularWalletWithE20E721Tests extends GanacheIT {
         @Test
         public void canActivateDebitCard() throws Exception {
             BigInteger INIT_AMOUNT = bigInt(2000);
-            TransactionReceipt re = erc20.transfer(aliceWallet.asAddress(), INIT_AMOUNT);
+            TransactionReceipt re = erc20.transfer(aliceWallet.address(), INIT_AMOUNT);
             assertEquals("0x1", re.getStatus());
 
             // this call requires big gas
@@ -52,16 +52,16 @@ public class SingularWalletWithE20E721Tests extends GanacheIT {
             BigInteger AMOUNT = bigInt(1000);
             TransactionReceipt tx = aliceWallet.activateE20Debit(
                     "alice debit",
-                    erc20Debit.asAddress(),
-                    erc20.asAddress(),
+                    erc20Debit.address(),
+                    erc20.address(),
                     AMOUNT
             );
 
-            assertEquals(aliceWallet.asAddress(), erc20Debit.owner());
+            assertEquals(aliceWallet.address(), erc20Debit.owner());
             assertEquals(AMOUNT, erc20Debit.denomination());
-            assertEquals(INIT_AMOUNT.subtract(AMOUNT), erc20.balanceOf(aliceWallet.asAddress()));
+            assertEquals(INIT_AMOUNT.subtract(AMOUNT), erc20.balanceOf(aliceWallet.address()));
 
-            assertTrue(aliceWallet.owns(erc20Debit.asAddress()));
+            assertTrue(aliceWallet.owns(erc20Debit.address()));
 
         }
 
@@ -71,18 +71,18 @@ public class SingularWalletWithE20E721Tests extends GanacheIT {
 
             // send a new aliceToken to the wallet
             BigInteger TOKENID = bigInt(101);
-            Address aliceWalAddr = aliceWallet.asAddress();
+            Address aliceWalAddr = aliceWallet.address();
             e721.mint(aliceWalAddr, TOKENID);
             assertEquals(aliceWalAddr, e721.ownerOf(TOKENID));
 
 
             ERC721Tradable e721Tradable = ERC721Tradable.deploy(web3j, ALICE, bigInt(22_000_000_000L), bigInt(5_000_000));
 
-            assertFalse(aliceWallet.owns(e721Tradable.asAddress()));
+            assertFalse(aliceWallet.owns(e721Tradable.address()));
 
             aliceWallet.activateTradable721(
-                    e721Tradable.asAddress(),
-                    e721.asAddress(),
+                    e721Tradable.address(),
+                    e721.address(),
                     "a car",
                     "alice has it",
                     "",
@@ -90,24 +90,24 @@ public class SingularWalletWithE20E721Tests extends GanacheIT {
                     TOKENID
             );
             // console.log(tx);
-            assertEquals(aliceWallet.asAddress(), e721Tradable.owner());
+            assertEquals(aliceWallet.address(), e721Tradable.owner());
             assertEquals((e721Tradable.tokenID()), TOKENID);
-            assertEquals(e721Tradable.asAddress(), e721.ownerOf(TOKENID));
-            assertTrue(aliceWallet.owns(e721Tradable.asAddress()));
+            assertEquals(e721Tradable.address(), e721.ownerOf(TOKENID));
+            assertTrue(aliceWallet.owns(e721Tradable.address()));
 
             // test the the deactivate
-            aliceWallet.deactivateERC721ISingular(e721Tradable.asAddress(), address(SOMEONE));
+            aliceWallet.deactivateERC721ISingular(e721Tradable.address(), address(SOMEONE));
             // now the aliceToken should belong to the wallet
             assertEquals(e721.ownerOf(TOKENID), address(SOMEONE));
 
             // transfer the aliceToken to the alice wallet
-            e721.from(SOMEONE).transferFrom(address(SOMEONE), aliceWallet.asAddress(), TOKENID);
+            e721.from(SOMEONE).transferFrom(address(SOMEONE), aliceWallet.address(), TOKENID);
 
             // to test unbind, create a new instance
             e721Tradable = ERC721Tradable.deploy(web3j, ALICE, GAS_PROVIDER2);
             aliceWallet.activateTradable721(
-                    e721Tradable.asAddress(),
-                    e721.asAddress(),
+                    e721Tradable.address(),
+                    e721.address(),
                     "a car",
                     "alice has it",
                     "",
@@ -133,14 +133,14 @@ public class SingularWalletWithE20E721Tests extends GanacheIT {
         public void setupCash() throws Exception {
             BigInteger ERC20_AMOUNT = BigInteger.valueOf(2000);
             BigInteger DEBIT_AMOUNT = BigInteger.valueOf(1000);
-            TransactionReceipt tx = erc20.transfer(bobWallet.asAddress(), ERC20_AMOUNT);
+            TransactionReceipt tx = erc20.transfer(bobWallet.address(), ERC20_AMOUNT);
             ERC20Debit debit = ERC20Debit.deploy(web3j, BOB, GAS_PROVIDER2);
             // let's activate it by a walwhich will transfer some fund to the debit card
 
             tx = bobWallet.activateE20Debit(
                     "bob's debit card",
-                    debit.asAddress(),
-                    erc20.asAddress(),
+                    debit.address(),
+                    erc20.address(),
                     DEBIT_AMOUNT
             );
             // now bob's debit card is ready to buy something
@@ -152,8 +152,8 @@ public class SingularWalletWithE20E721Tests extends GanacheIT {
                     "",
                     "",
                     new byte[32],
-                    aliceWallet.asAddress(),
-                    aliceWallet.asAddress()
+                    aliceWallet.address(),
+                    aliceWallet.address()
             );
 
         }
@@ -166,7 +166,7 @@ public class SingularWalletWithE20E721Tests extends GanacheIT {
             
             BigInteger PRICE = BigInteger.valueOf(900);
             TransactionReceipt tx = aliceToken.sellFor(
-                    erc20.asAddress(),
+                    erc20.address(),
                     PRICE,
                     validFrom,
                     validTill,
@@ -174,8 +174,8 @@ public class SingularWalletWithE20E721Tests extends GanacheIT {
             );
 
             Tuple5<Address, Address, BigInteger, BigInteger, BigInteger> saleOffer = aliceToken.saleOffer();
-            assertEquals(saleOffer.getValue1(), aliceWallet.asAddress());
-            assertEquals(saleOffer.getValue2(), erc20.asAddress());
+            assertEquals(saleOffer.getValue1(), aliceWallet.address());
+            assertEquals(saleOffer.getValue2(), erc20.address());
             assertEquals(saleOffer.getValue3(), PRICE);
             assertEquals(saleOffer.getValue4(), validFrom);
             assertEquals(saleOffer.getValue5(), validTill);
@@ -194,23 +194,23 @@ public class SingularWalletWithE20E721Tests extends GanacheIT {
             BigInteger AMOUNT = bigInt(1000);
 
             // give bob wallet some money
-            erc20.transfer(bobWallet.asAddress(), AMOUNT);
+            erc20.transfer(bobWallet.address(), AMOUNT);
             // transfer the money to the debit card
             tx = bobWallet.activateE20Debit(
                     "bob debit",
-                    debit.asAddress(),
-                    erc20.asAddress(),
+                    debit.address(),
+                    erc20.address(),
                     AMOUNT
             );
 
             TradeExecutor tradeExecutor = TradeExecutor.deploy(web3j, ALICE, GAS_PROVIDER);
 
             // both must trust the executor
-            tx = debit.setExecutor(tradeExecutor.asAddress());
-            aliceToken.setExecutor(tradeExecutor.asAddress());
+            debit.setExecutor(tradeExecutor.address());
+            aliceToken.setExecutor(tradeExecutor.address());
 
             tx = debit.approveSwap(
-                    aliceToken.asAddress(),
+                    aliceToken.address(),
                     validFrom,
                     validTill,
                     "why not"
@@ -218,15 +218,19 @@ public class SingularWalletWithE20E721Tests extends GanacheIT {
 
             // verify the offer
             Tuple4<Address, Address, BigInteger, BigInteger> swapOffer = debit.swapOffer();
-            assertEquals(aliceToken.asAddress(), swapOffer.getValue2());
+            assertEquals(aliceToken.address(), swapOffer.getValue2());
             assertEquals(validFrom, swapOffer.getValue3());
             assertEquals(validTill, swapOffer.getValue4());
             // assertEquals(swapOffer.note, "why not");
             // 3. let's do it
-            tx =  tradeExecutor.buy(aliceToken.asAddress(), debit.asAddress());
+            tx =  tradeExecutor.buy(aliceToken.address(), debit.address());
+            List<TradeExecutor.SoldEventResponse> soldEvents = tradeExecutor.getSoldEvents(tx);
+            assertEquals(1, soldEvents.size());
+            TradeExecutor.SoldEventResponse evnt = soldEvents.get(0);
+            assertEquals(aliceToken.address(), evnt.item);
 
-            assertEquals(bobWallet.asAddress(), aliceToken.owner(), "aliceToken owner was not transferred to bob");
-            assertEquals(aliceWallet.asAddress(), debit.owner(), "bob's debit was not transferred to alice");
+            assertEquals(bobWallet.address(), aliceToken.owner(), "aliceToken owner was not transferred to bob");
+            assertEquals(aliceWallet.address(), debit.owner(), "bob's debit was not transferred to alice");
         }
     }
 }

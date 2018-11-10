@@ -3,7 +3,7 @@ package org.singular.web3j;
 import io.udap.web3j.BasicSingularWallet;
 import io.udap.web3j.Tradable;
 import io.udap.web3j.TradeExecutor;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -20,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Created by bran on 2018/10/14.
  */
+
+
 public class TradableTests extends GanacheIT {
     private static final Logger log = LoggerFactory.getLogger(TradableTests.class);
     public static final String ALICE_TOKEN = "alice aliceToken";
@@ -33,8 +35,8 @@ public class TradableTests extends GanacheIT {
     static Tradable bobToken;
 
     static TradeExecutor tradeExecutor;
-    @BeforeAll
-    public static void setup() throws Exception {
+    @BeforeEach
+    public void setup() throws Exception {
         aliceWallet = BasicSingularWallet.deploy(
                 web3j,
                 ALICE,
@@ -58,11 +60,14 @@ public class TradableTests extends GanacheIT {
                 DESCR,
                 URI,
                 new byte[32],
-                aliceWallet.asAddress(),
-                aliceWallet.asAddress()
+                aliceWallet.address(),
+                aliceWallet.address()
         );
         
-        aliceToken.setExecutor(tradeExecutor.asAddress());
+        aliceToken.setExecutor(tradeExecutor.address());
+
+        aliceToken.setOperator(address(OPERATOR));
+        assertEquals(address(OPERATOR), aliceToken.operator());
 
         bobToken = Tradable.deploy(web3j, BOB, GAS_PROVIDER2);
         bobToken.init(
@@ -71,21 +76,23 @@ public class TradableTests extends GanacheIT {
                 DESCR,
                 URI,
                 new byte[32],
-                bobWallet.asAddress(),
-                bobWallet.asAddress()
+                bobWallet.address(),
+                bobWallet.address()
         );
 
-        bobToken.setExecutor(tradeExecutor.asAddress());
-
+        bobToken.setExecutor(tradeExecutor.address());
+        bobToken.setOperator(address(OPERATOR));
+//        testInitialization();
     }
+
 
     @Test
     @DisplayName("should properly set up in the constructor")
     public void testInitialization() throws Exception {
         assertEquals( "Tradable", aliceToken.contractName());
         assertEquals( ALICE.getAddress(), aliceToken.creator().toString());
-        assertEquals( aliceWallet.asAddress(), aliceToken.owner());
-        assertEquals( aliceWallet.asAddress(), aliceToken.tokenType());
+        assertEquals( aliceWallet.address(), aliceToken.owner());
+        assertEquals( aliceWallet.address(), aliceToken.tokenType());
         // the metadata part
         assertEquals( ALICE_TOKEN, aliceToken.name());
         assertEquals( PERSON_TOKEN, aliceToken.symbol());
@@ -94,12 +101,12 @@ public class TradableTests extends GanacheIT {
         assertArrayEquals(new byte[32], aliceToken.tokenURIDigest());
 
         // ownership interlocked with the aliceWallet
-        assertTrue( aliceWallet.owns(aliceToken.asAddress()));
+        assertTrue( aliceWallet.owns(aliceToken.address()));
 
         assertEquals(aliceWallet.getContractAddress(), aliceToken.owner().toString());
         assertEquals(new Address(bigInt(0)), aliceToken.previousOwner());
         assertEquals(new Address(bigInt(0)), aliceToken.nextOwner());
-        assertTrue(aliceWallet.owns(aliceToken.asAddress()));
+        assertTrue(aliceWallet.owns(aliceToken.address()));
     }
 
     @Test
@@ -109,7 +116,7 @@ public class TradableTests extends GanacheIT {
         BigInteger validFrom = bigInt(t);
         BigInteger validTill = bigInt(t + 10);
         TransactionReceipt tx = aliceToken.approveReceiver(
-                bobWallet.asAddress(),
+                bobWallet.address(),
                 validFrom,
                 validTill,
                 "for fun"
@@ -118,8 +125,8 @@ public class TradableTests extends GanacheIT {
         List<Tradable.ReceiverApprovedEventResponse> receiverApprovedEvents = aliceToken.getReceiverApprovedEvents(tx);
         assertEquals(1, receiverApprovedEvents.size());
         Tradable.ReceiverApprovedEventResponse ev = receiverApprovedEvents.get(0);
-        assertEquals(aliceWallet.asAddress(), ev.from);
-        assertEquals(bobWallet.asAddress(), ev.to);
+        assertEquals(aliceWallet.address(), ev.from);
+        assertEquals(bobWallet.address(), ev.to);
         assertEquals(validFrom, ev.validFrom);
         assertEquals(validTill, ev.validTill);
     }
@@ -132,7 +139,7 @@ public class TradableTests extends GanacheIT {
         BigInteger validTill = bigInt(t + 10);
         assertThrows(Exception.class, () -> {
             aliceToken.from(BOB).approveReceiver(
-                    bobWallet.asAddress(),
+                    bobWallet.address(),
                     validFrom,
                     validTill,
                     "for fun"
@@ -148,7 +155,7 @@ public class TradableTests extends GanacheIT {
         BigInteger validFrom = bigInt(t - 1);
         BigInteger validTill = bigInt(t + 10);
         TransactionReceipt tx = aliceToken.approveSwap(
-                bobToken.asAddress(),
+                bobToken.address(),
                 validFrom,
                 validTill,
                 "cool"
@@ -156,29 +163,29 @@ public class TradableTests extends GanacheIT {
 
         Tuple4<Address, Address, BigInteger, BigInteger> swapOffer = aliceToken.swapOffer();
         // logit(swapOffer);
-        assertEquals(swapOffer.getValue2(), bobToken.asAddress());
+        assertEquals(swapOffer.getValue2(), bobToken.address());
         assertEquals(swapOffer.getValue3(), validFrom);
         assertEquals(swapOffer.getValue4(), validTill);
         // assertEquals(swapOffer.note, "cool");
         // let's do the swap
         // 1. propose a reverse swap
         tx = (bobToken.approveSwap(
-                aliceToken.asAddress(),
+                aliceToken.address(),
                 validFrom,
                 validTill,
                 "why not"
             ));
         swapOffer = (bobToken.swapOffer());
         // logit(swapOffer, "swp offer on bob");
-        assertEquals(swapOffer.getValue2(), aliceToken.asAddress());
+        assertEquals(swapOffer.getValue2(), aliceToken.address());
         assertEquals(swapOffer.getValue3(), validFrom);
         assertEquals(swapOffer.getValue4(), validTill);
         // assertEquals(swapOffer.note, "why not");
         // 3. let's do it
-        tx = ( tradeExecutor.from(ALICE).swap(aliceToken.asAddress(), bobToken.asAddress()));
+        tx = ( tradeExecutor.from(ALICE).swap(aliceToken.address(), bobToken.address()));
 
-        assertEquals(bobWallet.asAddress(), (aliceToken.owner()), "aliceToken owner was not swapped to bob");
-        assertEquals(aliceWallet.asAddress(), (bobToken.owner()), "bobToken owner was not swapped to alice");
+        assertEquals(bobWallet.address(), (aliceToken.owner()), "aliceToken owner was not swapped to bob");
+        assertEquals(aliceWallet.address(), (bobToken.owner()), "bobToken owner was not swapped to alice");
 
     }
 

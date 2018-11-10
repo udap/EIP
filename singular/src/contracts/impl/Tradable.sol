@@ -184,8 +184,8 @@ contract Tradable is NonTradable, ITradable {
     }
 
     /**
-    called by swap executor to set the new owner, as the last step in swapping
-    */
+     * called by swap executor to set the new owner, as the last step in swapping
+     */
     function swapInOwner(
         ISingularWallet newOwner,
         string note
@@ -387,7 +387,7 @@ contract Tradable is NonTradable, ITradable {
         delete saleOffer;
         delete swapOffer;
         delete transferOffer;
-        delete theOperator;
+        delete theOperator; // shall we do this?
     }
 
     function saleOfferValid() internal view returns(bool){

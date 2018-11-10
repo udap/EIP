@@ -41,8 +41,8 @@ public class NonTradableTests {
                 DESCR,
                 URI,
                 new byte[32],
-                aliceWallet.asAddress(),
-                aliceWallet.asAddress()
+                aliceWallet.address(),
+                aliceWallet.address()
         );
     }
 
@@ -50,8 +50,8 @@ public class NonTradableTests {
     public void testInitialization() throws Exception {
         assertEquals( "NonTradable", nonTrada.contractName());
         assertEquals( ALICE.getAddress(), nonTrada.creator().toString());
-        assertEquals( aliceWallet.asAddress(), nonTrada.owner());
-        assertEquals( aliceWallet.asAddress(), nonTrada.tokenType());
+        assertEquals( aliceWallet.address(), nonTrada.owner());
+        assertEquals( aliceWallet.address(), nonTrada.tokenType());
         // the metadata part
         assertEquals( ALICE_TOKEN, nonTrada.name());
         assertEquals( PERSON_TOKEN, nonTrada.symbol());
@@ -59,7 +59,7 @@ public class NonTradableTests {
         assertEquals( URI, nonTrada.tokenURI());
 
         // ownership interlocked with the aliceWallet
-        assertTrue( aliceWallet.owns(nonTrada.asAddress()));
+        assertTrue( aliceWallet.owns(nonTrada.address()));
 
     }
 
@@ -73,8 +73,8 @@ public class NonTradableTests {
                     DESCR,
                     URI,
                     new byte[32],
-                    aliceWallet.asAddress(),
-                    aliceWallet.asAddress()
+                    aliceWallet.address(),
+                    aliceWallet.address()
             );
             fail("Alice should not able to init the bob's instance");
         } catch (Exception e) {
